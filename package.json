@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.30",
+    "@ai-sdk/azure": "^0.0.12",
     "@ai-sdk/openai": "^0.0.36",
     "ai": "^3.2.29",
     "next": "14.2.5",
