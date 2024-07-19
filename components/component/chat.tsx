@@ -168,7 +168,11 @@ export function Chat({
                         );
                     }
                 case "text/markdown":
-                    <Markdown>{artifact.content}</Markdown>;
+                    return (
+                        <Markdown className="h-full px-4 pb-20 overflow-y-auto">
+                            {artifact.content || ""}
+                        </Markdown>
+                    );
                 default:
                     return (
                         <div>Unsupported artifact type: {artifact.type}</div>
@@ -507,7 +511,7 @@ function AIResponse({
                         variant="outline"
                         size="sm"
                         onClick={() => onArtifactClick(artifact.identifier)}
-                        className="ml-2 mr-2 mb-2"
+                        className="my-2"
                     >
                         {artifact.title}
                     </Button>
