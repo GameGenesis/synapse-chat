@@ -165,9 +165,73 @@ export function Chat({
     );
 
     const cleanMessage = useCallback((content: string) => {
-        const tagRegex =
-            /<(assistantArtifact|assistantThinking)[^>]*>[\s\S]*?<\/\1>/g;
-        return content.replace(tagRegex, "").trim();
+        let cleanedContent = content;
+        let artifact: Artifact | null = null;
+
+        // Handle thinking tag
+        const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
+        const thinkingTagEndRegex = /<\/assistantThinking>/;
+        const thinkingTagStartMatch = content.match(thinkingTagStartRegex);
+        const thinkingTagEndMatch = content.match(thinkingTagEndRegex);
+
+        if (
+            thinkingTagStartMatch &&
+            thinkingTagEndMatch &&
+            thinkingTagEndMatch.index
+        ) {
+            cleanedContent =
+                content.substring(0, thinkingTagStartMatch.index) +
+                content.substring(
+                    thinkingTagEndMatch.index + thinkingTagEndMatch[0].length
+                );
+        } else if (thinkingTagStartMatch) {
+            cleanedContent = content.substring(0, thinkingTagStartMatch.index);
+        }
+
+        // Handle artifact tag
+        const artifactStartRegex = /<assistantArtifact([^>]*)>/;
+        const artifactEndRegex = /<\/assistantArtifact>/;
+        const artifactStartMatch = cleanedContent.match(artifactStartRegex);
+        const artifactEndMatch = cleanedContent.match(artifactEndRegex);
+
+        if (artifactStartMatch && artifactStartMatch.index) {
+            const attributes = artifactStartMatch[1];
+            const title =
+                getAttributeValue(attributes, "title") || "Untitled Artifact";
+            const identifier =
+                getAttributeValue(attributes, "identifier") || "0";
+            const type = getAttributeValue(attributes, "type");
+            const language = getAttributeValue(attributes, "language");
+
+            if (artifactEndMatch && artifactEndMatch.index) {
+                const artifactContent = cleanedContent.slice(
+                    artifactStartMatch.index + artifactStartMatch[0].length,
+                    artifactEndMatch.index
+                );
+
+                artifact = {
+                    identifier,
+                    title,
+                    type,
+                    language,
+                    content: artifactContent
+                };
+
+                cleanedContent =
+                    cleanedContent.substring(0, artifactStartMatch.index) +
+                    `[ARTIFACT:${identifier}]` +
+                    cleanedContent.substring(
+                        artifactEndMatch.index + artifactEndMatch[0].length
+                    );
+            } else {
+                cleanedContent = cleanedContent.substring(
+                    0,
+                    artifactStartMatch.index
+                );
+            }
+        }
+
+        return { cleanedContent: cleanedContent.trim(), artifact };
     }, []);
 
     const handlePreviousArtifact = () => {
@@ -176,7 +240,12 @@ export function Chat({
 
     const handleNextArtifact = () => {
         setCurrentArtifactIndex((prev) =>
-            Math.min(prev + 1, artifacts.length - 1)
+            Math.min(
+                prev + 1,
+                isStreamingArtifactRef.current
+                    ? artifacts.length + 1
+                    : artifacts.length
+            )
         );
     };
 
@@ -196,11 +265,27 @@ export function Chat({
                         {messages
                             .filter((m) => m.content !== "")
                             .map((m) => (
-                                <Response key={m.id} role={m.role}>
-                                    {m.role === "assistant"
-                                        ? cleanMessage(m.content)
-                                        : m.content}
-                                </Response>
+                                <Response
+                                    key={m.id}
+                                    role={m.role}
+                                    artifact={
+                                        cleanMessage(m.content).artifact ||
+                                        undefined
+                                    }
+                                    content={
+                                        cleanMessage(m.content).cleanedContent
+                                    }
+                                    onArtifactClick={(current) =>
+                                        setCurrentArtifactIndex(
+                                            artifacts.indexOf(
+                                                artifacts.filter(
+                                                    (artifact) =>
+                                                        artifact === current
+                                                )[0]
+                                            )
+                                        )
+                                    }
+                                />
                             ))}
                     </div>
                     <div className="w-full bg-background py-2 px-4 border-t">
@@ -240,18 +325,23 @@ export function Chat({
                                 <ChevronLeftIcon className="w-4 h-4" />
                             </Button>
                             <span className="mx-2">
-                                {currentArtifactIndex + 1} /{" "}
-                                {Math.max(
-                                    artifacts.length,
-                                    currentArtifactIndex + 1
-                                )}
+                                {isStreamingArtifactRef.current
+                                    ? currentArtifactIndex
+                                    : currentArtifactIndex + 1}{" "}
+                                /{" "}
+                                {isStreamingArtifactRef.current
+                                    ? artifacts.length + 1
+                                    : artifacts.length}
                             </span>
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={handleNextArtifact}
                                 disabled={
-                                    currentArtifactIndex >= artifacts.length - 1
+                                    currentArtifactIndex >=
+                                    (isStreamingArtifactRef.current
+                                        ? artifacts.length
+                                        : artifacts.length - 1)
                                 }
                             >
                                 <ChevronRightIcon className="w-4 h-4" />
@@ -350,24 +440,77 @@ function XIcon(props: any) {
 }
 
 function Response({
-    children,
-    role
+    content,
+    role,
+    artifact,
+    onArtifactClick
 }: {
-    children: React.ReactNode;
+    content: string;
     role: string;
+    artifact?: Artifact;
+    onArtifactClick: (artifact: Artifact) => void;
 }) {
     return (
         <div>
             {role === "user" ? (
-                <UserResponse>{children}</UserResponse>
+                <UserResponse>{content}</UserResponse>
             ) : (
-                <AIResponse>{children}</AIResponse>
+                <AIResponse
+                    content={content}
+                    artifact={artifact}
+                    onArtifactClick={onArtifactClick}
+                ></AIResponse>
             )}
         </div>
     );
 }
 
-function AIResponse({ children }: { children: React.ReactNode }) {
+function AIResponse({
+    content,
+    artifact,
+    onArtifactClick
+}: {
+    content: string;
+    artifact?: Artifact;
+    onArtifactClick?: (artifact: Artifact) => void;
+}) {
+    const processedContent = React.useMemo(() => {
+        if (!artifact || !onArtifactClick) {
+            return <Markdown>{content}</Markdown>;
+        }
+
+        const parts = content.split(/(\[ARTIFACT:[^\]]+\])/);
+        const elements = parts.map((part, index) => {
+            const match = part.match(/\[ARTIFACT:([^\]]+)\]/);
+            if (match && match[1] === artifact.identifier) {
+                return (
+                    <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onArtifactClick(artifact)}
+                        className="ml-2 mr-2 mb-2"
+                    >
+                        {artifact.title}
+                    </Button>
+                );
+            }
+            return part;
+        });
+
+        return (
+            <>
+                {elements.map((element, index) =>
+                    typeof element === "string" ? (
+                        <Markdown key={index}>{element}</Markdown>
+                    ) : (
+                        element
+                    )
+                )}
+            </>
+        );
+    }, [content, artifact, onArtifactClick]);
+
     return (
         <div className="flex items-start gap-4">
             <Avatar className="w-8 h-8 border flex-shrink-0">
@@ -377,7 +520,7 @@ function AIResponse({ children }: { children: React.ReactNode }) {
             <div className="grid gap-1 break-words">
                 <div className="font-bold">Assistant</div>
                 <div className="prose text-muted-foreground max-w-full">
-                    <Markdown>{children?.toString()}</Markdown>
+                    {processedContent}
                 </div>
             </div>
         </div>
