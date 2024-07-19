@@ -9,7 +9,15 @@ import React, {
     useContext
 } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -26,6 +34,7 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
     ArrowUpIcon,
+    ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
@@ -303,9 +312,68 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
 
     return (
         <div className="flex flex-col h-screen w-full">
-            <header className="bg-primary text-primary-foreground py-3 px-4 md:px-6">
+            <header className="bg-background text-foreground py-3 px-4 md:px-6 border-b">
                 <div className="container mx-auto flex items-center justify-between">
-                    <h1 className="text-lg font-medium">Chatbot</h1>
+                    <div className="flex items-center gap-4">
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                >
+                                    <MenuIcon className="w-6 h-6" />
+                                    <span className="sr-only">
+                                        Toggle navigation
+                                    </span>
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="left">
+                                <div className="grid gap-2 py-6" />
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="gap-1 rounded-xl px-3 h-10 data-[state=open]:bg-muted text-lg"
+                                >
+                                    ChatGPT{" "}
+                                    <span className="text-muted-foreground">
+                                        3.5
+                                    </span>
+                                    <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                align="end"
+                                className="max-w-[300px]"
+                            >
+                                <DropdownMenuItem className="items-start gap-2">
+                                    <SparkleIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
+                                    <div>
+                                        <div className="font-medium">GPT-4</div>
+                                        <div className="text-muted-foreground/80">
+                                            With DALL-E, browing and analysis.
+                                            Limit 40 messages / 3 hours
+                                        </div>
+                                    </div>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="items-start gap-2">
+                                    <ZapIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
+                                    <div>
+                                        <div className="font-medium">GPT-3</div>
+                                        <div className="text-muted-foreground/80">
+                                            Great for everyday tasks
+                                        </div>
+                                    </div>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             </header>
             <div className="flex flex-grow overflow-hidden">
@@ -362,33 +430,107 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                 </div>
                 <div className="w-2/5 bg-background border-l flex flex-col h-full">
                     <div className="flex items-center justify-between px-4 py-2 border-b">
-                        <div className="font-medium">
+                        <h3 className="text-md font-medium">
                             {currentArtifact?.title || "Artifacts"}
-                        </div>
-                        <div className="flex items-center">
+                        </h3>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-3 py-1 rounded-full ${
+                                        activeTab === "preview"
+                                            ? "bg-background text-foreground"
+                                            : "text-muted-foreground"
+                                    }`}
+                                    onClick={() => setActiveTab("preview")}
+                                >
+                                    Preview
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-3 py-1 rounded-full ${
+                                        activeTab === "code"
+                                            ? "bg-background text-foreground"
+                                            : "text-muted-foreground"
+                                    }`}
+                                    onClick={() => setActiveTab("code")}
+                                >
+                                    Code
+                                </Button>
+                            </div>
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                className="rounded-full"
+                            >
+                                <XIcon className="w-5 h-5" />
+                                <span className="sr-only">Close</span>
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="flex-grow overflow-hidden">
+                        {activeTab === "preview" && (
+                            <div className="h-full overflow-y-auto">
+                                {renderArtifactPreview(currentArtifact)}
+                            </div>
+                        )}
+                        {activeTab === "code" && currentArtifact && (
+                            <SyntaxHighlighter
+                                language={
+                                    currentArtifact.language || "javascript"
+                                }
+                                style={xonokai}
+                                customStyle={{
+                                    margin: 0,
+                                    height: "100%",
+                                    overflow: "auto"
+                                }}
+                                showLineNumbers={true}
+                                lineNumberContainerStyle={{
+                                    paddingRight: "5px"
+                                }}
+                                className="h-full bg-gray-900"
+                            >
+                                {currentArtifact.content || ""}
+                            </SyntaxHighlighter>
+                        )}
+                    </div>
+                    <div className="border-t flex items-center justify-between px-4 py-3">
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                            >
+                                <CopyIcon className="w-5 h-5" />
+                                <span className="sr-only">Copy</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                            >
+                                <DownloadIcon className="w-5 h-5" />
+                                <span className="sr-only">Download</span>
+                            </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
                                 onClick={handlePreviousArtifact}
                                 disabled={currentArtifactIndex <= 0}
                             >
-                                <ChevronLeftIcon className="w-4 h-4" />
+                                <ChevronLeftIcon className="w-5 h-5" />
+                                <span className="sr-only">Previous</span>
                             </Button>
-                            <span className="mx-2 text-nowrap">
-                                {Math.min(
-                                    currentArtifactIndex + 1,
-                                    isStreamingArtifactRef.current
-                                        ? artifacts.length + 1
-                                        : artifacts.length
-                                )}{" "}
-                                /{" "}
-                                {isStreamingArtifactRef.current
-                                    ? artifacts.length + 1
-                                    : artifacts.length}
-                            </span>
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                className="rounded-full"
                                 onClick={handleNextArtifact}
                                 disabled={
                                     currentArtifactIndex >=
@@ -397,61 +539,95 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                         : artifacts.length - 1)
                                 }
                             >
-                                <ChevronRightIcon className="w-4 h-4" />
+                                <ChevronRightIcon className="w-5 h-5" />
+                                <span className="sr-only">Next</span>
                             </Button>
                         </div>
                     </div>
-                    <Tabs
-                        value={activeTab}
-                        onValueChange={setActiveTab}
-                        className="h-full flex flex-col"
-                    >
-                        <TabsList className="border-b grid grid-cols-2">
-                            <TabsTrigger value="preview" className="w-full">
-                                Preview
-                            </TabsTrigger>
-                            <TabsTrigger value="code" className="w-full">
-                                Code
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent
-                            value="preview"
-                            className="flex-grow overflow-hidden flex flex-col"
-                        >
-                            <div className="flex-grow-0 overflow-y-auto text-wrap">
-                                {renderArtifactPreview(currentArtifact)}
-                            </div>
-                        </TabsContent>
-                        <TabsContent
-                            value="code"
-                            className="h-full overflow-hidden"
-                        >
-                            {currentArtifact && (
-                                <SyntaxHighlighter
-                                    language={
-                                        currentArtifact.language || "javascript"
-                                    }
-                                    style={xonokai}
-                                    customStyle={{
-                                        paddingLeft: 0,
-                                        margin: 0,
-                                        minHeight: "90%",
-                                        maxHeight: "90%"
-                                    }}
-                                    showLineNumbers={true}
-                                    lineNumberContainerStyle={{
-                                        paddingRight: "5px"
-                                    }}
-                                    className="h-full overflow-y-auto text-wrap bg-gray-900"
-                                >
-                                    {currentArtifact.content || ""}
-                                </SyntaxHighlighter>
-                            )}
-                        </TabsContent>
-                    </Tabs>
                 </div>
             </div>
         </div>
+    );
+}
+
+function CopyIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+        </svg>
+    );
+}
+
+function DownloadIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" x2="12" y1="15" y2="3" />
+        </svg>
+    );
+}
+
+function MenuIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <line x1="4" x2="20" y1="12" y2="12" />
+            <line x1="4" x2="20" y1="6" y2="6" />
+            <line x1="4" x2="20" y1="18" y2="18" />
+        </svg>
+    );
+}
+
+function SparkleIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+        </svg>
     );
 }
 
@@ -471,6 +647,25 @@ function XIcon(props: any) {
         >
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
+        </svg>
+    );
+}
+
+function ZapIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
         </svg>
     );
 }
