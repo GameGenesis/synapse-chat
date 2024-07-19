@@ -124,12 +124,24 @@ export function Chat({
 
             switch (artifact.type) {
                 case "svg":
-                case "text/html":
                     return (
                         <div
                             dangerouslySetInnerHTML={{
                                 __html: artifact.content || ""
                             }}
+                        />
+                    );
+                case "text/html":
+                    return (
+                        <iframe
+                            srcDoc={artifact.content}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none"
+                            }}
+                            title={artifact.title || "Preview"}
+                            sandbox="allow-scripts"
                         />
                     );
                 case "application/vnd.ant.react":
@@ -216,7 +228,9 @@ export function Chat({
                 </div>
                 <div className="w-2/5 bg-background border-l flex flex-col h-full">
                     <div className="flex items-center justify-between px-4 py-2 border-b">
-                        <div className="font-medium">Artifacts</div>
+                        <div className="font-medium">
+                            {currentArtifact?.title || "Artifacts"}
+                        </div>
                         <div className="flex items-center">
                             <Button
                                 variant="ghost"
