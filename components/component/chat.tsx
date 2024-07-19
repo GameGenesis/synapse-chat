@@ -1,6 +1,13 @@
 "use client;";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    useMemo,
+    useContext
+} from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -8,6 +15,7 @@ import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 
 interface Props {
     messages: { id: string; role: string; content: string }[];
@@ -144,14 +152,20 @@ export function Chat({
                             sandbox="allow-scripts"
                         />
                     );
-                case "application/vnd.ant.react":
+                case "application/react":
                     try {
-                        const Component = new Function(
-                            `return (${artifact.content})`
-                        )();
-                        return <Component />;
+                        return (
+                            <DynamicReactComponent
+                                code={artifact.content || ""}
+                            />
+                        );
                     } catch (error) {
-                        return <div>Error rendering React component.</div>;
+                        return (
+                            <div>
+                                Encountered an error while trying to display the
+                                React component
+                            </div>
+                        );
                     }
                 case "text/markdown":
                     <Markdown>{artifact.content}</Markdown>;
@@ -325,10 +339,13 @@ export function Chat({
                             >
                                 <ChevronLeftIcon className="w-4 h-4" />
                             </Button>
-                            <span className="mx-2">
-                                {isStreamingArtifactRef.current
-                                    ? currentArtifactIndex
-                                    : currentArtifactIndex + 1}{" "}
+                            <span className="mx-2 text-nowrap">
+                                {Math.min(
+                                    currentArtifactIndex + 1,
+                                    isStreamingArtifactRef.current
+                                        ? artifacts.length + 1
+                                        : artifacts.length
+                                )}{" "}
                                 /{" "}
                                 {isStreamingArtifactRef.current
                                     ? artifacts.length + 1
@@ -544,3 +561,53 @@ function UserResponse({ children }: { children: React.ReactNode }) {
         </div>
     );
 }
+
+const DynamicReactComponent: React.FC<{ code: string }> = ({ code }) => {
+    // Remove backticks and language tag if present
+    let processedCode = code.replace(/^```[\w-]*\n|```$/g, "").trim();
+
+    // Remove import statements
+    processedCode = processedCode.replace(/import.*?;?\n/g, "").trim();
+
+    // Convert arrow function components to regular function declarations
+    processedCode = processedCode.replace(
+        /const\s+(\w+)\s*=\s*\(([^)]*)\)\s*=>\s*{/g,
+        "function $1($2) {"
+    );
+
+    // Remove export statements
+    processedCode = processedCode.replace(/export\s+default\s+\w+;?/g, "");
+
+    // Wrap the entire code in a main function
+    processedCode = `
+      function MainComponent() {
+        ${processedCode}
+        
+        // Return the last defined component
+        const components = [${processedCode
+            .match(/function (\w+)/g)
+            ?.map((match) => match.split(" ")[1])
+            .join(", ")}];
+        const LastComponent = components[components.length - 1];
+        return <LastComponent />;
+      }
+    `;
+
+    return (
+        <LiveProvider
+            code={processedCode}
+            scope={{
+                React,
+                useState,
+                useEffect,
+                useRef,
+                useCallback,
+                useMemo,
+                useContext
+            }}
+        >
+            <LivePreview />
+            <LiveError />
+        </LiveProvider>
+    );
+};
