@@ -221,6 +221,14 @@ export function Chat({
             const type = getAttributeValue(attributes, "type");
             const language = getAttributeValue(attributes, "language");
 
+            artifact = {
+                identifier,
+                title,
+                type,
+                language,
+                content: ""
+            };
+
             if (artifactEndMatch && artifactEndMatch.index) {
                 const artifactContent = cleanedContent.slice(
                     artifactStartMatch.index + artifactStartMatch[0].length,
@@ -228,10 +236,7 @@ export function Chat({
                 );
 
                 artifact = {
-                    identifier,
-                    title,
-                    type,
-                    language,
+                    ...artifact,
                     content: artifactContent
                 };
 
@@ -242,10 +247,10 @@ export function Chat({
                         artifactEndMatch.index + artifactEndMatch[0].length
                     );
             } else {
-                cleanedContent = cleanedContent.substring(
-                    0,
-                    artifactStartMatch.index
-                );
+                cleanedContent = `
+${cleanedContent.substring(0, artifactStartMatch.index)}
+[ARTIFACT:${identifier}]
+`;
             }
         }
 
@@ -301,7 +306,7 @@ export function Chat({
                                                         artifact.identifier ===
                                                         identifier
                                                 )[0]
-                                            )
+                                            ) || currentArtifactIndex
                                         )
                                     }
                                 />
@@ -611,7 +616,7 @@ const DynamicReactComponent: React.FC<{ code: string }> = ({ code }) => {
             }}
         >
             <LivePreview />
-            <LiveError />
+            <LiveError className="text-wrap overflow-y-auto mx-2 mb-20" />
         </LiveProvider>
     );
 };
