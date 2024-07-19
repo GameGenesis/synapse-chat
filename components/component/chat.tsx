@@ -275,12 +275,13 @@ export function Chat({
                                     content={
                                         cleanMessage(m.content).cleanedContent
                                     }
-                                    onArtifactClick={(current) =>
+                                    onArtifactClick={(identifier) =>
                                         setCurrentArtifactIndex(
                                             artifacts.indexOf(
                                                 artifacts.filter(
                                                     (artifact) =>
-                                                        artifact === current
+                                                        artifact.identifier ===
+                                                        identifier
                                                 )[0]
                                             )
                                         )
@@ -448,7 +449,7 @@ function Response({
     content: string;
     role: string;
     artifact?: Artifact;
-    onArtifactClick: (artifact: Artifact) => void;
+    onArtifactClick: (identifier: string) => void;
 }) {
     return (
         <div>
@@ -472,7 +473,7 @@ function AIResponse({
 }: {
     content: string;
     artifact?: Artifact;
-    onArtifactClick?: (artifact: Artifact) => void;
+    onArtifactClick?: (identifier: string) => void;
 }) {
     const processedContent = React.useMemo(() => {
         if (!artifact || !onArtifactClick) {
@@ -488,7 +489,7 @@ function AIResponse({
                         key={index}
                         variant="outline"
                         size="sm"
-                        onClick={() => onArtifactClick(artifact)}
+                        onClick={() => onArtifactClick(artifact.identifier)}
                         className="ml-2 mr-2 mb-2"
                     >
                         {artifact.title}
