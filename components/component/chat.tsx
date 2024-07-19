@@ -29,8 +29,8 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
-import { LiveProvider, LiveError, LivePreview } from "react-live";
 import mermaid from "mermaid";
+import { Runner } from "react-runner";
 
 interface Props {
     messages: { id: string; role: string; content: string }[];
@@ -418,7 +418,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             value="preview"
                             className="flex-grow overflow-hidden flex flex-col"
                         >
-                            <div className="h-full overflow-y-auto text-wrap pb-20">
+                            <div className="flex-grow-0 overflow-y-auto text-wrap">
                                 {renderArtifactPreview(currentArtifact)}
                             </div>
                         </TabsContent>
@@ -580,53 +580,53 @@ function UserResponse({ children }: { children: React.ReactNode }) {
     );
 }
 
-const DynamicReactComponent: React.FC<{ code: string }> = ({ code }) => {
-    // Remove backticks and language tag if present
-    let processedCode = code.replace(/^```[\w-]*\n|```$/g, "").trim();
+import * as Recharts from "recharts";
+import * as LucideIcons from "lucide-react";
+import * as RadixIcons from "@radix-ui/react-icons";
+import * as ShadcnComponents from "@/components/ui";
 
-    // Remove import statements
-    processedCode = processedCode.replace(/import.*?;?\n/g, "").trim();
+type ShadcnComponentType = keyof typeof ShadcnComponents;
 
-    // Convert arrow function components to regular function declarations
-    processedCode = processedCode.replace(
-        /const\s+(\w+)\s*=\s*\(([^)]*)\)\s*=>\s*{/g,
-        "function $1($2) {"
-    );
+const DynamicReactComponent = ({ code }: { code: string }) => {
+    const [error, setError] = useState<string | undefined>("");
 
-    // Remove export statements
-    processedCode = processedCode.replace(/export\s+default\s+\w+;?/g, "");
+    const scope = {
+        React,
+        ...React,
+        ...Recharts,
+        ...LucideIcons,
+        ...RadixIcons,
+        ...ShadcnComponents,
+        import: {
+            react: React,
+            recharts: Recharts,
+            "lucide-react": LucideIcons,
+            "@radix-ui/react-icons": RadixIcons,
+            "@/components/ui": ShadcnComponents,
+            "@/components/ui/avatar": ShadcnComponents,
+            "@/components/ui/button": ShadcnComponents,
+            "@/components/ui/card": ShadcnComponents,
+            "@/components/ui/tabs": ShadcnComponents,
+            "@/components/ui/textarea": ShadcnComponents
+        }
+    };
 
-    // Wrap the entire code in a main function
-    processedCode = `
-      function MainComponent() {
-        ${processedCode}
-        
-        // Return the last defined component
-        const components = [${processedCode
-            .match(/function (\w+)/g)
-            ?.map((match) => match.split(" ")[1])
-            .join(", ")}];
-        const LastComponent = components[components.length - 1];
-        return <LastComponent />;
-      }
-    `;
+    // Remove backticks and language tag only if they're at the start or end of the code
+    let processedCode = code.replace(/^```[\w-]*\n|\n```$/g, "").trim();
 
     return (
-        <LiveProvider
-            code={processedCode}
-            scope={{
-                React,
-                useState,
-                useEffect,
-                useRef,
-                useCallback,
-                useMemo,
-                useContext
-            }}
-        >
-            <LivePreview />
-            <LiveError className="text-wrap overflow-y-auto mx-2 mb-20" />
-        </LiveProvider>
+        <div>
+            <Runner
+                code={processedCode}
+                scope={scope}
+                onRendered={(e) => setError(e?.message)}
+            />
+            {error && (
+                <div className="text-red-500 text-wrap overflow-y-auto mx-2">
+                    Error: {error}
+                </div>
+            )}
+        </div>
     );
 };
 
