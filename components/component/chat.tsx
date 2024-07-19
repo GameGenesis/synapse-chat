@@ -75,63 +75,66 @@ export function Chat({
     const lastProcessedMessageRef = useRef<string | null>(null);
     const artifactAddedRef = useRef(false);
 
-    const processMessage = useCallback((content: string) => {
-        const artifactStartRegex = /<assistantArtifact([^>]*)>/;
-        const artifactEndRegex = /<\/assistantArtifact>/;
-        const startMatch = content.match(artifactStartRegex);
-        const endMatch = content.match(artifactEndRegex);
+    const processMessage = useCallback(
+        (content: string) => {
+            const artifactStartRegex = /<assistantArtifact([^>]*)>/;
+            const artifactEndRegex = /<\/assistantArtifact>/;
+            const startMatch = content.match(artifactStartRegex);
+            const endMatch = content.match(artifactEndRegex);
 
-        if (startMatch && !isStreamingArtifactRef.current && !endMatch) {
-            isStreamingArtifactRef.current = true;
-            artifactAddedRef.current = false;
-            setActiveTab("code");
-            setCurrentArtifactIndex(artifacts.length + 1);
-            const attributes = startMatch[1];
-            currentArtifactRef.current = {
-                identifier: getAttributeValue(attributes, "identifier"),
-                type: getAttributeValue(attributes, "type"),
-                language: getAttributeValue(attributes, "language"),
-                title: getAttributeValue(attributes, "title"),
-                content: ""
-            };
-        }
-
-        if (isStreamingArtifactRef.current && currentArtifactRef.current) {
-            let artifactContent = content;
-
-            if (startMatch && startMatch.index) {
-                if (endMatch && endMatch.index) {
-                    artifactContent = content
-                        .substring(
-                            startMatch.index + startMatch[0].length,
-                            endMatch.index
-                        )
-                        .trim();
-                } else {
-                    artifactContent = content
-                        .substring(startMatch.index + startMatch[0].length)
-                        .trim();
-                }
-            }
-
-            if (currentArtifactRef.current.content !== artifactContent) {
+            if (startMatch && !isStreamingArtifactRef.current && !endMatch) {
+                isStreamingArtifactRef.current = true;
+                artifactAddedRef.current = false;
+                setActiveTab("code");
+                setCurrentArtifactIndex((prevIndex) => artifacts.length);
+                const attributes = startMatch[1];
                 currentArtifactRef.current = {
-                    ...currentArtifactRef.current,
-                    content: artifactContent
+                    identifier: getAttributeValue(attributes, "identifier"),
+                    type: getAttributeValue(attributes, "type"),
+                    language: getAttributeValue(attributes, "language"),
+                    title: getAttributeValue(attributes, "title"),
+                    content: ""
                 };
+            }
 
-                if (endMatch && !artifactAddedRef.current) {
-                    isStreamingArtifactRef.current = false;
-                    artifactAddedRef.current = true;
-                    setArtifacts((prev) => [
-                        ...prev,
-                        currentArtifactRef.current as Artifact
-                    ]);
-                    setActiveTab("preview");
+            if (isStreamingArtifactRef.current && currentArtifactRef.current) {
+                let artifactContent = content;
+
+                if (startMatch && startMatch.index) {
+                    if (endMatch && endMatch.index) {
+                        artifactContent = content
+                            .substring(
+                                startMatch.index + startMatch[0].length,
+                                endMatch.index
+                            )
+                            .trim();
+                    } else {
+                        artifactContent = content
+                            .substring(startMatch.index + startMatch[0].length)
+                            .trim();
+                    }
+                }
+
+                if (currentArtifactRef.current.content !== artifactContent) {
+                    currentArtifactRef.current = {
+                        ...currentArtifactRef.current,
+                        content: artifactContent
+                    };
+
+                    if (endMatch && !artifactAddedRef.current) {
+                        isStreamingArtifactRef.current = false;
+                        artifactAddedRef.current = true;
+                        setArtifacts((prevArtifacts) => [
+                            ...prevArtifacts,
+                            currentArtifactRef.current as Artifact
+                        ]);
+                        setActiveTab("preview");
+                    }
                 }
             }
-        }
-    }, []);
+        },
+        [artifacts.length]
+    );
 
     useEffect(() => {
         const latestMessage = messages[messages.length - 1];
@@ -310,74 +313,84 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
     const currentArtifact =
         artifacts[currentArtifactIndex] || currentArtifactRef.current;
 
+    const currentArtifactIndexRef = useRef(currentArtifactIndex);
+    useEffect(() => {
+        currentArtifactIndexRef.current = currentArtifactIndex;
+    }, [currentArtifactIndex]);
+
     return (
         <div className="flex flex-col h-screen w-full">
-            <header className="bg-background text-foreground py-3 px-4 md:px-6 border-b">
-                <div className="container mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full"
-                                >
-                                    <MenuIcon className="w-6 h-6" />
-                                    <span className="sr-only">
-                                        Toggle navigation
-                                    </span>
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left">
-                                <div className="grid gap-2 py-6" />
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="gap-1 rounded-xl px-3 h-10 data-[state=open]:bg-muted text-lg"
-                                >
-                                    ChatGPT{" "}
-                                    <span className="text-muted-foreground">
-                                        3.5
-                                    </span>
-                                    <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                align="end"
-                                className="max-w-[300px]"
-                            >
-                                <DropdownMenuItem className="items-start gap-2">
-                                    <SparkleIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
-                                    <div>
-                                        <div className="font-medium">GPT-4</div>
-                                        <div className="text-muted-foreground/80">
-                                            With DALL-E, browing and analysis.
-                                            Limit 40 messages / 3 hours
-                                        </div>
-                                    </div>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="items-start gap-2">
-                                    <ZapIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
-                                    <div>
-                                        <div className="font-medium">GPT-3</div>
-                                        <div className="text-muted-foreground/80">
-                                            Great for everyday tasks
-                                        </div>
-                                    </div>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
-            </header>
             <div className="flex flex-grow overflow-hidden">
                 <div className="flex flex-col w-3/5 h-full bg-background">
+                    <header className="bg-background text-foreground py-3 px-4 md:px-6 border-b">
+                        <div className="container mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <Sheet>
+                                    <SheetTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="rounded-full"
+                                        >
+                                            <MenuIcon className="w-6 h-6" />
+                                            <span className="sr-only">
+                                                Toggle navigation
+                                            </span>
+                                        </Button>
+                                    </SheetTrigger>
+                                    <SheetContent side="left">
+                                        <div className="grid gap-2 py-6" />
+                                    </SheetContent>
+                                </Sheet>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="gap-1 rounded-xl px-3 h-10 data-[state=open]:bg-muted text-lg"
+                                        >
+                                            ChatGPT{" "}
+                                            <span className="text-muted-foreground">
+                                                3.5
+                                            </span>
+                                            <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="max-w-[300px]"
+                                    >
+                                        <DropdownMenuItem className="items-start gap-2">
+                                            <SparkleIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
+                                            <div>
+                                                <div className="font-medium">
+                                                    GPT-4
+                                                </div>
+                                                <div className="text-muted-foreground/80">
+                                                    With DALL-E, browing and
+                                                    analysis. Limit 40 messages
+                                                    / 3 hours
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="items-start gap-2">
+                                            <ZapIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
+                                            <div>
+                                                <div className="font-medium">
+                                                    GPT-3
+                                                </div>
+                                                <div className="text-muted-foreground/80">
+                                                    Great for everyday tasks
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </div>
+                    </header>
                     <div className="flex-grow overflow-y-auto p-4 space-y-4">
                         {messages
                             .filter((m) => m.content !== "")
@@ -412,7 +425,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 placeholder="Type your message..."
                                 name="message"
                                 id="message"
-                                className="min-h-[48px] rounded-2xl resize-none p-4 border border-neutral-400 shadow-sm pr-16 w-full"
+                                className="rounded-full resize-none p-4 border border-neutral-400 shadow-sm pr-16 w-full bg-grey-100"
                                 value={input}
                                 onChange={handleInputChange}
                             />
@@ -420,9 +433,9 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 type="submit"
                                 size="icon"
                                 disabled={isLoading || input.length === 0}
-                                className="absolute w-8 h-8 top-3 right-3"
+                                className="absolute w-8 h-8 top-3 right-3 rounded-full items-center justify-center"
                             >
-                                <ArrowUpIcon className="w-4 h-4" />
+                                <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
                                 <span className="sr-only">Send</span>
                             </Button>
                         </form>
@@ -440,7 +453,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                     size="sm"
                                     className={`px-3 py-1 rounded-full ${
                                         activeTab === "preview"
-                                            ? "bg-background text-foreground"
+                                            ? "bg-background text-foreground hover:bg-white"
                                             : "text-muted-foreground"
                                     }`}
                                     onClick={() => setActiveTab("preview")}
@@ -452,7 +465,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                     size="sm"
                                     className={`px-3 py-1 rounded-full ${
                                         activeTab === "code"
-                                            ? "bg-background text-foreground"
+                                            ? "bg-background text-foreground hover:bg-white"
                                             : "text-muted-foreground"
                                     }`}
                                     onClick={() => setActiveTab("code")}
