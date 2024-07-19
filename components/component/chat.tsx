@@ -12,9 +12,23 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import {
+    prism,
+    darcula,
+    oneDark,
+    duotoneDark,
+    vscDarkPlus,
+    nord,
+    xonokai
+    //
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+    ArrowUpIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon
+} from "@heroicons/react/24/solid";
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 
 interface Props {
@@ -169,9 +183,9 @@ export function Chat({
                     }
                 case "text/markdown":
                     return (
-                        <Markdown className="h-full px-4 pb-20 overflow-y-auto">
+                        <CustomMarkdown className="h-full px-4 pb-20 overflow-y-auto">
                             {artifact.content || ""}
-                        </Markdown>
+                        </CustomMarkdown>
                     );
                 default:
                     return (
@@ -392,10 +406,8 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             value="preview"
                             className="flex-grow overflow-hidden flex flex-col"
                         >
-                            <div className="flex-grow overflow-hidden">
-                                <div className="h-full w-full">
-                                    {renderArtifactPreview(currentArtifact)}
-                                </div>
+                            <div className="h-full overflow-y-auto text-wrap">
+                                {renderArtifactPreview(currentArtifact)}
                             </div>
                         </TabsContent>
                         <TabsContent
@@ -407,11 +419,15 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                     language={
                                         currentArtifact.language || "javascript"
                                     }
-                                    style={dracula}
+                                    style={xonokai}
                                     customStyle={{
                                         margin: 0,
                                         minHeight: "90%",
                                         maxHeight: "90%"
+                                    }}
+                                    showLineNumbers={true}
+                                    lineNumberContainerStyle={{
+                                        paddingRight: "5px"
                                     }}
                                     className="h-full overflow-y-auto text-wrap bg-gray-900"
                                 >
@@ -423,26 +439,6 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                 </div>
             </div>
         </div>
-    );
-}
-
-function ArrowUpIcon(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m5 12 7-7 7 7" />
-            <path d="M12 19V5" />
-        </svg>
     );
 }
 
@@ -503,7 +499,7 @@ function AIResponse({
 }) {
     const processedContent = React.useMemo(() => {
         if (!artifact || !onArtifactClick) {
-            return <Markdown>{content}</Markdown>;
+            return <CustomMarkdown>{content}</CustomMarkdown>;
         }
 
         const parts = content.split(/(\[ARTIFACT:[^\]]+\])/);
@@ -529,7 +525,7 @@ function AIResponse({
             <>
                 {elements.map((element, index) =>
                     typeof element === "string" ? (
-                        <Markdown key={index}>{element}</Markdown>
+                        <CustomMarkdown key={index}>{element}</CustomMarkdown>
                     ) : (
                         element
                     )
@@ -546,7 +542,7 @@ function AIResponse({
             </Avatar>
             <div className="grid gap-1 break-words">
                 <div className="font-bold">Assistant</div>
-                <div className="prose text-muted-foreground max-w-full">
+                <div className="prose text-muted-foreground">
                     {processedContent}
                 </div>
             </div>
@@ -564,7 +560,7 @@ function UserResponse({ children }: { children: React.ReactNode }) {
             <div className="grid gap-1 break-words">
                 <div className="font-bold">You</div>
                 <div className="prose text-muted-foreground max-w-full">
-                    <Markdown>{children?.toString()}</Markdown>
+                    <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
             </div>
         </div>
@@ -618,5 +614,88 @@ const DynamicReactComponent: React.FC<{ code: string }> = ({ code }) => {
             <LivePreview />
             <LiveError className="text-wrap overflow-y-auto mx-2 mb-20" />
         </LiveProvider>
+    );
+};
+
+interface CodeProps {
+    node?: any;
+    inline?: any;
+    className?: any;
+    children?: any;
+}
+
+const CustomMarkdown = ({
+    children,
+    className = ""
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) => {
+    return (
+        <div className={`markdown-body prose max-w-full ${className}`}>
+            <Markdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                    h1: ({ node, ...props }) => (
+                        <h1
+                            className="text-2xl font-bold my-4 pb-2 border-b"
+                            {...props}
+                        />
+                    ),
+                    h2: ({ node, ...props }) => (
+                        <h2
+                            className="text-2xl font-semibold my-3 pb-1 border-b"
+                            {...props}
+                        />
+                    ),
+                    h3: ({ node, ...props }) => (
+                        <h3 className="text-xl font-semibold my-2" {...props} />
+                    ),
+                    h4: ({ node, ...props }) => (
+                        <h4 className="text-lg font-medium my-2" {...props} />
+                    ),
+                    h5: ({ node, ...props }) => (
+                        <h5 className="text-base font-medium my-1" {...props} />
+                    ),
+                    h6: ({ node, ...props }) => (
+                        <h6 className="text-sm font-medium my-1" {...props} />
+                    ),
+                    code({
+                        node,
+                        inline,
+                        className,
+                        children,
+                        ...props
+                    }: CodeProps) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        return !inline && match ? (
+                            <div className="code-block-wrapper">
+                                <SyntaxHighlighter
+                                    style={prism}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    customStyle={{
+                                        marginTop: "0.5rem",
+                                        marginBottom: "0.5rem",
+                                        marginRight: "0.5rem",
+                                        borderRadius: "0.375rem"
+                                    }}
+                                    wrapLines={true}
+                                    wrapLongLines={true}
+                                >
+                                    {String(children).replace(/\n$/, "")}
+                                </SyntaxHighlighter>
+                            </div>
+                        ) : (
+                            <code className={className} {...props}>
+                                {children}
+                            </code>
+                        );
+                    }
+                }}
+            >
+                {typeof children === "string" ? children : children?.toString()}
+            </Markdown>
+        </div>
     );
 };
