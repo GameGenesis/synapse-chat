@@ -782,9 +782,74 @@ mermaid.initialize({
 });
 
 const Mermaid = ({ chart }: { chart: string }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(1);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
     useEffect(() => {
         mermaid.contentLoaded();
     }, []);
 
-    return <div className="mermaid">{chart}</div>;
+    const handleWheel = (e: React.WheelEvent) => {
+        e.preventDefault();
+        const newScale = scale + (e.deltaY > 0 ? -0.1 : 0.1);
+        setScale(Math.max(0.5, Math.min(newScale, 3))); // Limit scale between 0.5 and 3
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent default behavior
+        setIsDragging(true);
+        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+        if (containerRef.current) {
+            containerRef.current.style.cursor = "grabbing";
+            containerRef.current.style.userSelect = "none";
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (isDragging) {
+            setPosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y
+            });
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        if (containerRef.current) {
+            containerRef.current.style.cursor = "move";
+            containerRef.current.style.userSelect = "auto";
+        }
+    };
+
+    return (
+        <div
+            ref={containerRef}
+            style={{
+                overflow: "hidden",
+                width: "100%",
+                height: "100%",
+                cursor: "move"
+            }}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+        >
+            <div
+                className="mermaid"
+                style={{
+                    transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                    transformOrigin: "0 0",
+                    transition: isDragging ? "none" : "transform 0.1s"
+                }}
+            >
+                {chart}
+            </div>
+        </div>
+    );
 };
