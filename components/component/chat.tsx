@@ -53,7 +53,7 @@ export function Chat({
             isStreamingArtifactRef.current = true;
             artifactAddedRef.current = false;
             setActiveTab("code");
-            setCurrentArtifactIndex((prev) => prev + 1);
+            setCurrentArtifactIndex(artifacts.length + 1);
             const attributes = startMatch[1];
             currentArtifactRef.current = {
                 identifier: getAttributeValue(attributes, "identifier"),
@@ -123,7 +123,7 @@ export function Chat({
             if (!artifact) return null;
 
             switch (artifact.type) {
-                case "svg":
+                case "image/svg+xml":
                     return (
                         <div
                             dangerouslySetInnerHTML={{
@@ -165,10 +165,9 @@ export function Chat({
     );
 
     const cleanMessage = useCallback((content: string) => {
-        const tagIndex = content.indexOf("<assistant");
-        return tagIndex !== -1
-            ? content.slice(0, tagIndex).trim()
-            : content.trim();
+        const tagRegex =
+            /<(assistantArtifact|assistantThinking)[^>]*>[\s\S]*?<\/\1>/g;
+        return content.replace(tagRegex, "").trim();
     }, []);
 
     const handlePreviousArtifact = () => {
@@ -274,11 +273,10 @@ export function Chat({
                         </TabsList>
                         <TabsContent
                             value="preview"
-                            className="h-full overflow-hidden"
+                            className="flex-grow overflow-hidden flex flex-col"
                         >
-                            <div className="h-full overflow-y-auto p-4">
-                                <div className="prose max-w-full break-words">
-                                    <h3>{currentArtifact?.title}</h3>
+                            <div className="flex-grow overflow-hidden">
+                                <div className="h-full w-full">
                                     {renderArtifactPreview(currentArtifact)}
                                 </div>
                             </div>
