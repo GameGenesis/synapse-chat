@@ -29,7 +29,8 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
-import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
+import { LiveProvider, LiveError, LivePreview } from "react-live";
+import mermaid from "mermaid";
 
 interface Props {
     messages: { id: string; role: string; content: string }[];
@@ -181,9 +182,20 @@ export function Chat({
                             </div>
                         );
                     }
+                case "application/mermaid":
+                    try {
+                        return <Mermaid chart={artifact.content || ""} />;
+                    } catch (error) {
+                        return (
+                            <div>
+                                Encountered an error while trying to display the
+                                Diagram
+                            </div>
+                        );
+                    }
                 case "text/markdown":
                     return (
-                        <CustomMarkdown className="h-full px-4 pb-20 overflow-y-auto">
+                        <CustomMarkdown className="h-full px-4 overflow-y-auto">
                             {artifact.content || ""}
                         </CustomMarkdown>
                     );
@@ -406,7 +418,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             value="preview"
                             className="flex-grow overflow-hidden flex flex-col"
                         >
-                            <div className="h-full overflow-y-auto text-wrap">
+                            <div className="h-full overflow-y-auto text-wrap pb-20">
                                 {renderArtifactPreview(currentArtifact)}
                             </div>
                         </TabsContent>
@@ -421,6 +433,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                     }
                                     style={xonokai}
                                     customStyle={{
+                                        paddingLeft: 0,
                                         margin: 0,
                                         minHeight: "90%",
                                         maxHeight: "90%"
@@ -698,4 +711,80 @@ const CustomMarkdown = ({
             </Markdown>
         </div>
     );
+};
+
+mermaid.initialize({
+    startOnLoad: true,
+    theme: "dark",
+    securityLevel: "loose",
+    fontFamily: "Fira Code, monospace",
+    themeVariables: {
+        background: "#2D3748",
+        primaryColor: "#4FD1C5",
+        secondaryColor: "#63B3ED",
+        tertiaryColor: "#F687B3",
+        primaryBorderColor: "#81E6D9",
+        secondaryBorderColor: "#90CDF4",
+        tertiaryBorderColor: "#FBB6CE",
+        primaryTextColor: "#E2E8F0",
+        secondaryTextColor: "#CBD5E0",
+        tertiaryTextColor: "#E2E8F0",
+        lineColor: "#718096",
+        textColor: "#E2E8F0",
+        mainBkg: "#4A5568",
+        secondBkg: "#2D3748",
+        mainContrastColor: "#E2E8F0",
+        darkTextColor: "#1A202C",
+        nodeBorder: "#81E6D9",
+        clusterBkg: "#4A5568",
+        clusterBorder: "#81E6D9",
+        defaultLinkColor: "#CBD5E0",
+        titleColor: "#F7FAFC",
+        edgeLabelBackground: "#4A5568",
+        actorBorder: "#81E6D9",
+        actorBkg: "#4A5568",
+        actorTextColor: "#E2E8F0",
+        actorLineColor: "#CBD5E0",
+        signalColor: "#CBD5E0",
+        signalTextColor: "#E2E8F0",
+        labelBoxBkgColor: "#4A5568",
+        labelBoxBorderColor: "#81E6D9",
+        labelTextColor: "#E2E8F0",
+        loopTextColor: "#E2E8F0",
+        noteBorderColor: "#81E6D9",
+        noteBkgColor: "#4A5568",
+        noteTextColor: "#E2E8F0",
+        activationBorderColor: "#81E6D9",
+        activationBkgColor: "#4A5568",
+        sequenceNumberColor: "#E2E8F0",
+        sectionBkgColor: "#4A5568",
+        altSectionBkgColor: "#2D3748",
+        sectionBkgColor2: "#2D3748",
+        excludeBkgColor: "#2D3748",
+        taskBorderColor: "#81E6D9",
+        taskBkgColor: "#4A5568",
+        taskTextLightColor: "#E2E8F0",
+        taskTextColor: "#E2E8F0",
+        taskTextDarkColor: "#1A202C",
+        taskTextOutsideColor: "#E2E8F0",
+        taskTextClickableColor: "#F7FAFC",
+        activeTaskBorderColor: "#F687B3",
+        activeTaskBkgColor: "#553C9A",
+        gridColor: "#718096",
+        doneTaskBkgColor: "#2D3748",
+        doneTaskBorderColor: "#CBD5E0",
+        critBorderColor: "#F687B3",
+        critBkgColor: "#553C9A",
+        todayLineColor: "#F687B3",
+        personBorder: "#81E6D9",
+        personBkg: "#4A5568"
+    }
+});
+
+const Mermaid = ({ chart }: { chart: string }) => {
+    useEffect(() => {
+        mermaid.contentLoaded();
+    }, []);
+
+    return <div className="mermaid">{chart}</div>;
 };
