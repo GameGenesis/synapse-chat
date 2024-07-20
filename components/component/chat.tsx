@@ -82,6 +82,18 @@ export function Chat() {
     const lastProcessedMessageRef = useRef<string | null>(null);
     const artifactAddedRef = useRef(false);
 
+    const [toasts, setToasts] = useState<Toast[]>([]);
+
+    const addToast = (message: string, type: "error" | "success") => {
+        const newToast = { id: Date.now(), message, type };
+        setToasts((prevToasts) => [...prevToasts, newToast]);
+        setTimeout(() => {
+            setToasts((prevToasts) =>
+                prevToasts.filter((toast) => toast.id !== newToast.id)
+            );
+        }, 3000);
+    };
+
     const processMessage = useCallback(
         (content: string) => {
             const artifactStartRegex = /<assistantArtifact([^>]*)>/;
@@ -433,6 +445,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                 if (supportedFileFormats.includes(fileExtension)) {
                     return true;
                 } else {
+                    addToast(`Unsupported file: ${file.name}`, "error");
                     return false;
                 }
             });
@@ -502,6 +515,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
 
     return (
         <div className="flex flex-col h-screen w-full">
+            <ToastContainer toasts={toasts} />
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
@@ -634,14 +648,23 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                             />
                                                         ) : (
                                                             <div
-                                                                className="flex items-center align-middle gap-2 bg-muted rounded-md p-2"
+                                                                className="flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors"
                                                                 key={`${m.id}-${index}`}
                                                             >
-                                                                <FileIcon className="h-5 w-5 text-muted-foreground" />
-                                                                <div className="text-sm text-muted-foreground">
-                                                                    {
-                                                                        attachment.name
-                                                                    }
+                                                                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary/10 rounded-md">
+                                                                    <FileIcon className="h-5 w-5 text-muted-foreground" />
+                                                                </div>
+                                                                <div className="flex-grow min-w-0">
+                                                                    <div className="text-sm font-medium truncate">
+                                                                        {
+                                                                            attachment.name
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-xs text-muted-foreground">
+                                                                        {
+                                                                            attachment.contentType
+                                                                        }
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         )
@@ -1100,6 +1123,13 @@ function UserResponse({
     children: React.ReactNode;
     attachments: React.ReactNode;
 }) {
+    const imageAttachments = React.Children.toArray(attachments).filter(
+        (attachment: any) => attachment.props.src
+    );
+    const fileAttachments = React.Children.toArray(attachments).filter(
+        (attachment: any) => !attachment.props.src
+    );
+
     return (
         <div className="flex items-start gap-4">
             <Avatar className="w-8 h-8 border flex-shrink-0">
@@ -1111,7 +1141,16 @@ function UserResponse({
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
-                {attachments}
+                {imageAttachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {imageAttachments}
+                    </div>
+                )}
+                {fileAttachments.length > 0 && (
+                    <div className="flex flex-col gap-2 mt-2">
+                        {fileAttachments}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -1124,6 +1163,7 @@ import * as ShadcnComponents from "@/components/ui";
 import { LayoutPanelLeftIcon, Loader2 } from "lucide-react";
 import { useChat } from "ai/react";
 import { FileIcon } from "@radix-ui/react-icons";
+import { Toast, ToastContainer } from "./toast";
 
 type ShadcnComponentType = keyof typeof ShadcnComponents;
 
