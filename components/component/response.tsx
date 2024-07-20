@@ -1,8 +1,10 @@
 import { Artifact } from "@/types";
-import { Children, useMemo } from "react";
+import { Children, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
 import { Loader2 } from "lucide-react";
+import AttachmentModal from "./modal";
+import { FileIcon } from "@radix-ui/react-icons";
 
 export const Response = ({
     content,
@@ -15,7 +17,7 @@ export const Response = ({
     role: string;
     artifact?: Artifact;
     onArtifactClick: (identifier: string) => void;
-    attachments?: React.ReactNode;
+    attachments?: { contentType: string; name: string; url: string }[];
 }) => {
     return (
         <div>
@@ -103,7 +105,7 @@ export const UserResponse = ({
     attachments
 }: {
     children: React.ReactNode;
-    attachments?: React.ReactNode;
+    attachments?: { contentType: string; name: string; url: string }[];
 }) => {
     return (
         <div className="flex items-start gap-4">
@@ -116,12 +118,78 @@ export const UserResponse = ({
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
-                {attachments && (
-                    <div className="w-full overflow-y-auto flex flex-row items-center space-x-2 row-auto space-y-2">
-                        {attachments}
-                    </div>
+                {attachments && attachments.length > 0 && (
+                    <AttachmentPreview attachments={attachments} />
                 )}
             </div>
         </div>
+    );
+};
+
+const AttachmentPreview = ({
+    attachments
+}: {
+    attachments?: { contentType: string; name: string; url: string }[];
+}) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedFileFallback, setSelectedFileFallback] = useState("");
+
+    const handleAttachmentClick = (attachment: {
+        contentType: string;
+        name: string;
+        url: string;
+    }) => {
+        setSelectedFile(
+            new File([], attachment.name, {
+                type: attachment.contentType
+            })
+        );
+        setSelectedFileFallback(atob(attachment.url.split(",")[1]));
+        setIsModalOpen(true);
+    };
+
+    return (
+        <>
+            <AttachmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                file={selectedFile}
+                fallback={selectedFileFallback}
+            />
+            <div className="w-full overflow-y-auto flex flex-row items-center space-x-2 row-auto space-y-2">
+                {attachments?.map((attachment, index) =>
+                    attachment?.contentType?.startsWith("image/") ? (
+                        <img
+                            className="rounded-md my-2 cursor-pointer"
+                            width={250}
+                            height={250}
+                            key={index}
+                            src={attachment.url}
+                            alt={attachment.name}
+                            onClick={() => handleAttachmentClick(attachment)}
+                        />
+                    ) : (
+                        <div
+                            className="my-2 flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors cursor-pointer"
+                            key={index}
+                            onClick={() => handleAttachmentClick(attachment)}
+                        >
+                            <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary/10 rounded-md">
+                                <FileIcon className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-grow min-w-0">
+                                <div className="text-sm font-medium truncate">
+                                    {attachment.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {attachment.contentType}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                )}
+            </div>
+        </>
     );
 };

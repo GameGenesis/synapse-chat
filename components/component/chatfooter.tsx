@@ -7,6 +7,7 @@ import { supportedFileFormats } from "@/utils/consts";
 import { FileIcon } from "@radix-ui/react-icons";
 import { XIcon } from "./icons";
 import toast from "react-hot-toast";
+import AttachmentModal from "./modal";
 
 interface Props {
     input: string;
@@ -28,6 +29,9 @@ const ChatFooter = ({
     const [isMultiline, setIsMultiline] = useState(false);
     const [files, setFiles] = useState<FileList | undefined>(undefined);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === "Enter" && !event.shiftKey) {
@@ -119,7 +123,11 @@ const ChatFooter = ({
         return (
             <div
                 key={file.name}
-                className="flex items-center bg-gray-100 rounded-md p-2 mb-2"
+                className="flex items-center bg-gray-100 rounded-md p-2 mb-2 cursor-pointer"
+                onClick={() => {
+                    setIsModalOpen(true);
+                    setSelectedFile(file);
+                }}
             >
                 {isImage ? (
                     <img
@@ -153,74 +161,84 @@ const ChatFooter = ({
     };
 
     return (
-        <div className="flex flex-grow-0 w-full bg-background py-2 px-4 border-t align-middle items-center justify-center">
-            <form
-                className="relative max-w-[650px] w-full"
-                onSubmit={(event) => {
-                    // console.log("NUMBER OF FILES SUBMITTED", files?.length);
-                    handleSubmit(event, { experimental_attachments: files });
-                    setFiles(undefined);
-                    if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
-                    }
-                }}
-            >
-                {files && files.length > 0 && (
-                    <div className="mb-2 max-h-32 overflow-y-auto">
-                        {Array.from(files).map(renderFilePreview)}
+        <>
+            <AttachmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                file={selectedFile}
+            />
+            <div className="flex flex-grow-0 w-full bg-background py-2 px-4 border-t align-middle items-center justify-center">
+                <form
+                    className="relative max-w-[650px] w-full"
+                    onSubmit={(event) => {
+                        // console.log("NUMBER OF FILES SUBMITTED", files?.length);
+                        handleSubmit(event, {
+                            experimental_attachments: files
+                        });
+                        setFiles(undefined);
+                        if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                        }
+                    }}
+                >
+                    {files && files.length > 0 && (
+                        <div className="mb-2 max-h-32 overflow-y-auto">
+                            {Array.from(files).map(renderFilePreview)}
+                        </div>
+                    )}
+                    <div
+                        className={`${
+                            isMultiline ? "rounded-2xl" : "rounded-full"
+                        } border border-neutral-400 shadow-sm bg-grey-100 w-full flex items-center min-h-[48px] max-h-[136px] overflow-hidden z-10`}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={handleDrop}
+                    >
+                        <div className="flex-shrink-0 w-12 h-full" />
+                        <textarea
+                            ref={textareaRef}
+                            placeholder="Message Assistant"
+                            name="message"
+                            id="message"
+                            className="resize-none py-3 px-1 m-0 w-full focus:outline-none bg-transparent border-none z-10"
+                            value={input}
+                            onChange={handleTextareaChange}
+                            onKeyDown={handleKeyDown}
+                            rows={1}
+                        />
+                        <div className="flex-shrink-0 w-12 h-full" />
                     </div>
-                )}
-                <div
-                    className={`${
-                        isMultiline ? "rounded-2xl" : "rounded-full"
-                    } border border-neutral-400 shadow-sm bg-grey-100 w-full flex items-center min-h-[48px] max-h-[136px] overflow-hidden z-10`}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleDrop}
-                >
-                    <div className="flex-shrink-0 w-12 h-full" />
-                    <textarea
-                        ref={textareaRef}
-                        placeholder="Message Assistant"
-                        name="message"
-                        id="message"
-                        className="resize-none py-3 px-1 m-0 w-full focus:outline-none bg-transparent border-none z-10"
-                        value={input}
-                        onChange={handleTextareaChange}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
+                    <label
+                        htmlFor="file-upload"
+                        className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer flex items-center justify-center"
+                    >
+                        <PaperClipIcon className="w-4 h-4 text-primary-foreground" />
+                        <span className="sr-only">Attach File</span>
+                    </label>
+                    <input
+                        id="file-upload"
+                        type="file"
+                        ref={fileInputRef}
+                        multiple
+                        accept={supportedFileFormats.join(", ")}
+                        onChange={handleFileUpload}
+                        className="hidden"
                     />
-                    <div className="flex-shrink-0 w-12 h-full" />
-                </div>
-                <label
-                    htmlFor="file-upload"
-                    className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer flex items-center justify-center"
-                >
-                    <PaperClipIcon className="w-4 h-4 text-primary-foreground" />
-                    <span className="sr-only">Attach File</span>
-                </label>
-                <input
-                    id="file-upload"
-                    type="file"
-                    ref={fileInputRef}
-                    multiple
-                    accept={supportedFileFormats.join(", ")}
-                    onChange={handleFileUpload}
-                    className="hidden"
-                />
-                <Button
-                    type="submit"
-                    size="icon"
-                    disabled={
-                        isLoading ||
-                        (input.length === 0 && (!files || files.length === 0))
-                    }
-                    className="absolute w-8 h-8 bottom-2 right-3 rounded-full items-center justify-center z-10"
-                >
-                    <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
-                    <span className="sr-only">Send</span>
-                </Button>
-            </form>
-        </div>
+                    <Button
+                        type="submit"
+                        size="icon"
+                        disabled={
+                            isLoading ||
+                            (input.length === 0 &&
+                                (!files || files.length === 0))
+                        }
+                        className="absolute w-8 h-8 bottom-2 right-3 rounded-full items-center justify-center z-10"
+                    >
+                        <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
+                        <span className="sr-only">Send</span>
+                    </Button>
+                </form>
+            </div>
+        </>
     );
 };
 

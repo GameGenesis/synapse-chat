@@ -19,7 +19,6 @@ import {
 } from "@heroicons/react/24/solid";
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
-import { FileIcon } from "@radix-ui/react-icons";
 import { Artifact } from "@/types";
 import { CustomMarkdown } from "./markdown";
 import { CopyIcon, DownloadIcon, XIcon } from "./icons";
@@ -381,48 +380,11 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                             openArtifact(identifier)
                                         }
                                         attachments={
-                                            <>
-                                                {m?.experimental_attachments?.map(
-                                                    (attachment, index) =>
-                                                        attachment?.contentType?.startsWith(
-                                                            "image/"
-                                                        ) ? (
-                                                            <img
-                                                                className="rounded-md my-2"
-                                                                width={250}
-                                                                height={250}
-                                                                key={`${m.id}-${index}`}
-                                                                src={
-                                                                    attachment.url
-                                                                }
-                                                                alt={
-                                                                    attachment.name
-                                                                }
-                                                            />
-                                                        ) : (
-                                                            <div
-                                                                className="my-2 flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors"
-                                                                key={`${m.id}-${index}`}
-                                                            >
-                                                                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary/10 rounded-md">
-                                                                    <FileIcon className="h-5 w-5 text-muted-foreground" />
-                                                                </div>
-                                                                <div className="flex-grow min-w-0">
-                                                                    <div className="text-sm font-medium truncate">
-                                                                        {
-                                                                            attachment.name
-                                                                        }
-                                                                    </div>
-                                                                    <div className="text-xs text-muted-foreground">
-                                                                        {
-                                                                            attachment.contentType
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )
-                                                )}
-                                            </>
+                                            (m?.experimental_attachments as {
+                                                contentType: string;
+                                                name: string;
+                                                url: string;
+                                            }[]) || undefined
                                         }
                                     />
                                 ))}
