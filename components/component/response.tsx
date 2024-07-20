@@ -116,11 +116,7 @@ export const UserResponse = ({
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
-                {attachments && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                        {attachments}
-                    </div>
-                )}
+                {attachments}
             </div>
         </div>
     );

@@ -389,7 +389,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                             openArtifact(identifier)
                                         }
                                         attachments={
-                                            <div className="w-full overflow-y-auto py-3 flex flex-row items-center space-x-2 row-auto space-y-2">
+                                            <div className="w-full overflow-y-auto py-2 flex flex-row items-center space-x-2 row-auto space-y-2">
                                                 {m?.experimental_attachments?.map(
                                                     (attachment, index) =>
                                                         attachment?.contentType?.startsWith(

@@ -6,11 +6,7 @@ interface ToastProps {
     duration?: number;
 }
 
-export const Toast: React.FC<ToastProps> = ({
-    message,
-    type,
-    duration = 3000
-}) => {
+export const Toast = ({ message, type, duration = 3000 }: ToastProps) => {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -25,7 +21,7 @@ export const Toast: React.FC<ToastProps> = ({
 
     return (
         <div
-            className={`fixed top-4 right-4 p-4 rounded-md shadow-md ${
+            className={`fixed p-4 rounded-md shadow-md ${
                 type === "error" ? "bg-red-500" : "bg-green-500"
             } text-white`}
         >
@@ -38,9 +34,9 @@ interface ToastContainerProps {
     toasts: Toast[];
 }
 
-export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts }) => {
+export const ToastContainer = ({ toasts }: ToastContainerProps) => {
     return (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center">
             {toasts.map((toast) => (
                 <Toast
                     key={toast.id}
