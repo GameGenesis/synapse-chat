@@ -49,13 +49,6 @@ export function Chat() {
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
-    // const [currentMessageData, setCurrentMessageData] = useState<{
-    //     cleanMessage: string;
-    //     artifact: Artifact;
-    //     startMatch: RegExpMatchArray | null;
-    //     endMatch: RegExpMatchArray | null;
-    // }>();
-
     const [cleanedMessages, setCleanedMessages] = useState<string[]>([]);
 
     const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
