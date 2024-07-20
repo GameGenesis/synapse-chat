@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { xonokai } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
+import { useState } from "react";
 
 export const CustomMarkdown = ({
     children,
@@ -11,6 +12,15 @@ export const CustomMarkdown = ({
     children: React.ReactNode;
     className?: string;
 }) => {
+    const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+    const copyToClipboard = (code: string) => {
+        navigator.clipboard.writeText(code).then(() => {
+            setCopiedCode(code);
+            setTimeout(() => setCopiedCode(null), 3000);
+        });
+    };
+
     return (
         <div className={`markdown-body prose max-w-full ${className}`}>
             <Markdown
@@ -50,11 +60,27 @@ export const CustomMarkdown = ({
                     }: CodeProps) {
                         const match = /language-(\w+)/.exec(className || "");
                         return !inline && match ? (
-                            <div className="code-block-wrapper">
+                            <div className="code-block-wrapper relative rounded-md overflow-hidden">
+                                <div className="flex justify-between items-center bg-gray-800 text-gray-200 px-4 py-2">
+                                    <span className="text-sm font-mono">
+                                        {match[1]}
+                                    </span>
+                                    <button
+                                        onClick={() =>
+                                            copyToClipboard(String(children))
+                                        }
+                                        className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                                    >
+                                        {copiedCode === String(children)
+                                            ? "Copied!"
+                                            : "Copy"}
+                                    </button>
+                                </div>
                                 <SyntaxHighlighter
                                     language={match[1]}
                                     style={xonokai}
                                     PreTag="div"
+                                    className="!m-0"
                                 >
                                     {String(children).replace(/\n$/, "")}
                                 </SyntaxHighlighter>
