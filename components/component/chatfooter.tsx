@@ -142,7 +142,10 @@ const ChatFooter = ({
                 )}
                 <span className="text-sm truncate flex-grow">{file.name}</span>
                 <button
-                    onClick={() => removeFile(file)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(file);
+                    }}
                     className="ml-2 text-red-500"
                 >
                     <XIcon className="w-4 h-4" />

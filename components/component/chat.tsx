@@ -21,7 +21,7 @@ import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
 import { Artifact } from "@/types";
 import { CustomMarkdown } from "./markdown";
-import { CopyIcon, DownloadIcon, XIcon } from "./icons";
+import { CopyIcon, DownloadIcon, RefreshIcon, XIcon } from "./icons";
 import { Mermaid } from "./mermaid";
 import { ReactRenderer } from "./reactrenderer";
 import ChatHeader from "./chatheader";
@@ -336,6 +336,14 @@ export function Chat() {
         );
     };
 
+    const handleRefreshPreview = useCallback(() => {
+        if (currentArtifact && currentArtifact.content) {
+            // Force a re-render of the preview
+            setActiveTab("code");
+            setTimeout(() => setActiveTab("preview"), 0);
+        }
+    }, [currentArtifact]);
+
     return (
         <div className="flex flex-col h-screen w-full">
             <div className="flex flex-grow overflow-hidden">
@@ -508,6 +516,21 @@ export function Chat() {
                                         <DownloadIcon className="w-5 h-5" />
                                     )}
                                     <span className="sr-only">Download</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={handleRefreshPreview}
+                                    disabled={
+                                        !currentArtifact ||
+                                        !currentArtifact.content
+                                    }
+                                >
+                                    <RefreshIcon className="w-5 h-5" />
+                                    <span className="sr-only">
+                                        Refresh Preview
+                                    </span>
                                 </Button>
                             </div>
                             <div className="flex items-center gap-2">
