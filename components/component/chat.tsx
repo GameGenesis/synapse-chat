@@ -63,11 +63,21 @@ export function Chat() {
     const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
-    const artifactAddedRef = useRef(false);
 
     const processMessage = useCallback(
         (content: string, index: number) => {
+            if (!content.includes("<assistant")) {
+                console.log("SKIPPING PROCESSING MESSAGES");
+                setCleanedMessages((prev) => {
+                    const updatedMessages = [...prev];
+                    updatedMessages[index] = content;
+                    return updatedMessages;
+                });
+                return;
+            }
+
             let cleanedContent = content;
+            let artifact: Artifact | null = null;
 
             // CLEANING THINKING START
             const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
@@ -98,91 +108,93 @@ export function Chat() {
             const startMatch = cleanedContent.match(artifactStartRegex);
             const endMatch = cleanedContent.match(artifactEndRegex);
 
-            if (startMatch && !isStreamingArtifactRef.current && !endMatch) {
-                isStreamingArtifactRef.current = true;
-                artifactAddedRef.current = false;
-                setIsArtifactsWindowOpen(true);
-                setActiveTab("code");
-                setCurrentArtifactIndex(artifacts.length);
-                const attributes = startMatch[1];
-                currentArtifactRef.current = {
-                    identifier: getAttributeValue(attributes, "identifier"),
-                    type: getAttributeValue(attributes, "type"),
-                    language: getAttributeValue(attributes, "language"),
-                    title: getAttributeValue(attributes, "title"),
-                    content: ""
-                };
-            }
-
-            if (
-                isStreamingArtifactRef.current &&
-                currentArtifactRef.current &&
-                startMatch
-            ) {
+            if (startMatch && startMatch.index !== undefined) {
                 const attributes = startMatch[1];
                 const identifier = getAttributeValue(attributes, "identifier");
 
-                let artifactContent = cleanedContent;
-                if (startMatch && startMatch.index) {
-                    if (endMatch && endMatch.index) {
-                        artifactContent = artifactContent.substring(
-                            startMatch.index + startMatch[0].length,
-                            endMatch.index
-                        );
-
-                        cleanedContent = `${cleanedContent.substring(
-                            0,
-                            startMatch.index
-                        )}[ARTIFACT:${identifier}]${cleanedContent.substring(
-                            endMatch.index + endMatch[0].length
-                        )}`;
-                    } else {
-                        artifactContent = artifactContent
-                            .substring(startMatch.index + startMatch[0].length)
-                            .trim();
-
-                        cleanedContent = `${cleanedContent.substring(
-                            0,
-                            startMatch.index
-                        )}\n[ARTIFACT:${identifier}]`;
-                    }
-                }
-
-                if (currentArtifactRef.current.content !== artifactContent) {
-                    currentArtifactRef.current = {
-                        ...currentArtifactRef.current,
-                        content: artifactContent
+                if (endMatch && endMatch.index !== undefined) {
+                    // Complete artifact
+                    artifact = {
+                        identifier,
+                        type: getAttributeValue(attributes, "type"),
+                        language: getAttributeValue(attributes, "language"),
+                        title: getAttributeValue(attributes, "title"),
+                        content: cleanedContent
+                            .substring(
+                                startMatch.index + startMatch[0].length,
+                                endMatch.index
+                            )
+                            .trim()
                     };
 
-                    if (endMatch && !artifactAddedRef.current) {
+                    cleanedContent = `${cleanedContent.substring(
+                        0,
+                        startMatch.index
+                    )}[ARTIFACT:${identifier}]${cleanedContent.substring(
+                        endMatch.index + endMatch[0].length
+                    )}`;
+
+                    if (isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = false;
-                        artifactAddedRef.current = true;
                         setArtifacts((prevArtifacts) => [
                             ...prevArtifacts,
-                            currentArtifactRef.current as Artifact
+                            artifact as Artifact
                         ]);
                         setActiveTab("preview");
+                        console.log("ISSUE SETTING NEW ARTIFACT");
+                    }
+                } else {
+                    // Incomplete artifact (streaming)
+                    artifact = {
+                        identifier,
+                        type: getAttributeValue(attributes, "type"),
+                        language: getAttributeValue(attributes, "language"),
+                        title: getAttributeValue(attributes, "title"),
+                        content: cleanedContent
+                            .substring(startMatch.index + startMatch[0].length)
+                            .trim()
+                    };
+
+                    cleanedContent = `${cleanedContent.substring(
+                        0,
+                        startMatch.index
+                    )}[ARTIFACT:${identifier}]`;
+
+                    if (!isStreamingArtifactRef.current) {
+                        isStreamingArtifactRef.current = true;
+                        setIsArtifactsWindowOpen(true);
+                        setActiveTab("code");
+                        setCurrentArtifactIndex(artifacts.length);
+                        console.log("ISSUE SETTING TAB AGAIN");
                     }
                 }
+
+                currentArtifactRef.current = artifact;
             }
 
             setCleanedMessages((prev) => {
                 const updatedMessages = [...prev];
                 updatedMessages[index] = cleanedContent;
+                console.log("MESSAGES", messages);
+                console.log("UPDATED MESSAGES", updatedMessages);
                 return updatedMessages;
             });
+
+            return { cleanedContent, artifact };
         },
-        [artifacts.length]
+        [artifacts.length, messages.length]
     );
 
     useEffect(() => {
-        const latestMessage = messages[messages.length - 1];
+        const nonEmptyMessages = messages.filter((message) => message.content);
+        const latestMessageIndex = nonEmptyMessages.length - 1;
+        const latestMessage = nonEmptyMessages[latestMessageIndex];
         if (
             latestMessage &&
             latestMessage.role === "assistant" &&
             latestMessage.content !== lastProcessedMessageRef.current
         ) {
-            processMessage(latestMessage.content, messages.length - 1);
+            processMessage(latestMessage.content, latestMessageIndex);
             lastProcessedMessageRef.current = latestMessage.content;
         }
     }, [messages, processMessage]);
