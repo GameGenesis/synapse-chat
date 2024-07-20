@@ -1,7 +1,7 @@
 import { CodeProps } from "@/types";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { xonokai } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import { useState } from "react";
 
@@ -60,27 +60,31 @@ export const CustomMarkdown = ({
                     }: CodeProps) {
                         const match = /language-(\w+)/.exec(className || "");
                         return !inline && match ? (
-                            <div className="code-block-wrapper relative rounded-md overflow-hidden">
-                                <div className="flex justify-between items-center bg-gray-800 text-gray-200 px-4 py-2">
-                                    <span className="text-sm font-mono">
+                            <div className="code-block-wrapper relative rounded-md overflow-hidden bg-[#1e1e1e] text-white">
+                                <div className="flex justify-between items-center bg-[#2d2d2d] px-4 py-2 text-sm">
+                                    <span className="text-gray-400">
                                         {match[1]}
                                     </span>
                                     <button
                                         onClick={() =>
                                             copyToClipboard(String(children))
                                         }
-                                        className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                                        className="text-gray-400 hover:text-white transition-colors duration-200"
                                     >
                                         {copiedCode === String(children)
                                             ? "Copied!"
-                                            : "Copy"}
+                                            : "Copy code"}
                                     </button>
                                 </div>
                                 <SyntaxHighlighter
                                     language={match[1]}
-                                    style={xonokai}
+                                    style={vscDarkPlus}
                                     PreTag="div"
-                                    className="!m-0"
+                                    customStyle={{
+                                        margin: 0,
+                                        borderRadius: 0,
+                                        padding: "1rem"
+                                    }}
                                 >
                                     {String(children).replace(/\n$/, "")}
                                 </SyntaxHighlighter>
