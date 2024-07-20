@@ -1,12 +1,5 @@
+import { assistant_name, date } from '@/utils/consts';
 import { DEFAULT_MODEL_CONFIG } from './model-provider';
-
-const assistant_name = "Poe";
-const date = new Date().toLocaleDateString('en-US', { 
-  weekday: 'long', 
-  year: 'numeric', 
-  month: 'long', 
-  day: 'numeric' 
-});
 
 export const model = DEFAULT_MODEL_CONFIG;
 export const temperature = 0.7;
