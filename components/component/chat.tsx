@@ -1,13 +1,6 @@
 "use client;";
 
-import React, {
-    useState,
-    useEffect,
-    useRef,
-    useCallback,
-    useMemo,
-    useContext
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -23,13 +16,12 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
     prism,
-    darcula,
-    oneDark,
-    duotoneDark,
-    vscDarkPlus,
-    nord,
+    // darcula,
+    // oneDark,
+    // duotoneDark,
+    // vscDarkPlus,
+    // nord,
     xonokai
-    //
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
     ArrowUpIcon,
@@ -1108,6 +1100,7 @@ const Mermaid = ({ chart }: { chart: string }) => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            className="bg-grey-100"
         >
             <div
                 className="mermaid"
