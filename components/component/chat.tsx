@@ -49,83 +49,145 @@ export function Chat() {
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
+    const [cleanedMessages, setCleanedMessages] = useState<string[]>([]);
+
     const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
 
-    const currentArtifactRef = useRef<Partial<Artifact> | null>(null);
+    const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
-    const artifactAddedRef = useRef(false);
 
     const processMessage = useCallback(
-        (content: string) => {
-            const artifactStartRegex = /<assistantArtifact([^>]*)>/;
-            const artifactEndRegex = /<\/assistantArtifact>/;
-            const startMatch = content.match(artifactStartRegex);
-            const endMatch = content.match(artifactEndRegex);
-
-            if (startMatch && !isStreamingArtifactRef.current && !endMatch) {
-                isStreamingArtifactRef.current = true;
-                artifactAddedRef.current = false;
-                setIsArtifactsWindowOpen(true);
-                setActiveTab("code");
-                setCurrentArtifactIndex((prevIndex) => artifacts.length);
-                const attributes = startMatch[1];
-                currentArtifactRef.current = {
-                    identifier: getAttributeValue(attributes, "identifier"),
-                    type: getAttributeValue(attributes, "type"),
-                    language: getAttributeValue(attributes, "language"),
-                    title: getAttributeValue(attributes, "title"),
-                    content: ""
-                };
+        (content: string, index: number) => {
+            if (!content.includes("<assistant")) {
+                console.log("SKIPPING PROCESSING MESSAGES");
+                setCleanedMessages((prev) => {
+                    const updatedMessages = [...prev];
+                    updatedMessages[index] = content;
+                    return updatedMessages;
+                });
+                return;
             }
 
-            if (isStreamingArtifactRef.current && currentArtifactRef.current) {
-                let artifactContent = content;
+            let cleanedContent = content;
+            let artifact: Artifact | null = null;
 
-                if (startMatch && startMatch.index) {
-                    if (endMatch && endMatch.index) {
-                        artifactContent = content
+            // CLEANING THINKING START
+            const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
+            const thinkingTagEndRegex = /<\/assistantThinking>/;
+            const thinkingTagStartMatch = content.match(thinkingTagStartRegex);
+            const thinkingTagEndMatch = content.match(thinkingTagEndRegex);
+
+            if (
+                thinkingTagStartMatch &&
+                thinkingTagEndMatch &&
+                thinkingTagEndMatch.index
+            ) {
+                cleanedContent = `${content.substring(
+                    0,
+                    thinkingTagStartMatch.index
+                )}${content.substring(
+                    thinkingTagEndMatch.index + thinkingTagEndMatch[0].length
+                )}`.trim();
+            } else if (thinkingTagStartMatch) {
+                cleanedContent = content
+                    .substring(0, thinkingTagStartMatch.index)
+                    .trim();
+            }
+            // CLEANING THINKING END
+
+            const artifactStartRegex = /<assistantArtifact([^>]*)>/;
+            const artifactEndRegex = /<\/assistantArtifact>/;
+            const startMatch = cleanedContent.match(artifactStartRegex);
+            const endMatch = cleanedContent.match(artifactEndRegex);
+
+            if (startMatch && startMatch.index !== undefined) {
+                const attributes = startMatch[1];
+                const identifier = getAttributeValue(attributes, "identifier");
+
+                if (endMatch && endMatch.index !== undefined) {
+                    // Complete artifact
+                    artifact = {
+                        identifier,
+                        type: getAttributeValue(attributes, "type"),
+                        language: getAttributeValue(attributes, "language"),
+                        title: getAttributeValue(attributes, "title"),
+                        content: cleanedContent
                             .substring(
                                 startMatch.index + startMatch[0].length,
                                 endMatch.index
                             )
-                            .trim();
-                    } else {
-                        artifactContent = content
-                            .substring(startMatch.index + startMatch[0].length)
-                            .trim();
-                    }
-                }
-
-                if (currentArtifactRef.current.content !== artifactContent) {
-                    currentArtifactRef.current = {
-                        ...currentArtifactRef.current,
-                        content: artifactContent
+                            .trim()
                     };
 
-                    if (endMatch && !artifactAddedRef.current) {
+                    cleanedContent = `${cleanedContent.substring(
+                        0,
+                        startMatch.index
+                    )}[ARTIFACT:${identifier}]${cleanedContent.substring(
+                        endMatch.index + endMatch[0].length
+                    )}`;
+
+                    if (isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = false;
-                        artifactAddedRef.current = true;
                         setArtifacts((prevArtifacts) => [
                             ...prevArtifacts,
-                            currentArtifactRef.current as Artifact
+                            artifact as Artifact
                         ]);
                         setActiveTab("preview");
+                        console.log("ISSUE SETTING NEW ARTIFACT");
+                    }
+                } else {
+                    // Incomplete artifact (streaming)
+                    artifact = {
+                        identifier,
+                        type: getAttributeValue(attributes, "type"),
+                        language: getAttributeValue(attributes, "language"),
+                        title: getAttributeValue(attributes, "title"),
+                        content: cleanedContent
+                            .substring(startMatch.index + startMatch[0].length)
+                            .trim()
+                    };
+
+                    cleanedContent = `${cleanedContent.substring(
+                        0,
+                        startMatch.index
+                    )}[ARTIFACT:${identifier}]`;
+
+                    if (!isStreamingArtifactRef.current) {
+                        isStreamingArtifactRef.current = true;
+                        setIsArtifactsWindowOpen(true);
+                        setActiveTab("code");
+                        setCurrentArtifactIndex(artifacts.length);
+                        console.log("ISSUE SETTING TAB AGAIN");
                     }
                 }
+
+                currentArtifactRef.current = artifact;
             }
+
+            setCleanedMessages((prev) => {
+                const updatedMessages = [...prev];
+                updatedMessages[index] = cleanedContent;
+                console.log("MESSAGES", messages);
+                console.log("UPDATED MESSAGES", updatedMessages);
+                return updatedMessages;
+            });
+
+            return { cleanedContent, artifact };
         },
-        [artifacts.length]
+        [artifacts.length, messages.length]
     );
 
     useEffect(() => {
-        const latestMessage = messages[messages.length - 1];
+        const nonEmptyMessages = messages.filter((message) => message.content);
+        const latestMessageIndex = nonEmptyMessages.length - 1;
+        const latestMessage = nonEmptyMessages[latestMessageIndex];
         if (
             latestMessage &&
             latestMessage.role === "assistant" &&
             latestMessage.content !== lastProcessedMessageRef.current
         ) {
-            processMessage(latestMessage.content);
+            processMessage(latestMessage.content, latestMessageIndex);
             lastProcessedMessageRef.current = latestMessage.content;
         }
     }, [messages, processMessage]);
@@ -135,142 +197,62 @@ export function Chat() {
         return match ? match[1] : "";
     };
 
-    const renderArtifactPreview = useCallback(
-        (artifact: Partial<Artifact> | null) => {
-            if (!artifact) return null;
+    const renderArtifactPreview = useCallback((artifact: Artifact | null) => {
+        if (!artifact) return null;
 
-            switch (artifact.type) {
-                case "image/svg+xml":
-                    return (
-                        <div
-                            dangerouslySetInnerHTML={{
-                                __html: artifact.content || ""
-                            }}
-                        />
-                    );
-                case "text/html":
-                    return (
-                        <iframe
-                            srcDoc={artifact.content}
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "none"
-                            }}
-                            title={artifact.title || "Preview"}
-                            sandbox="allow-scripts"
-                        />
-                    );
-                case "application/react":
-                    try {
-                        return <ReactRenderer code={artifact.content || ""} />;
-                    } catch (error) {
-                        return (
-                            <div>
-                                Encountered an error while trying to display the
-                                React component
-                            </div>
-                        );
-                    }
-                case "application/mermaid":
-                    try {
-                        return <Mermaid chart={artifact.content || ""} />;
-                    } catch (error) {
-                        return (
-                            <div>
-                                Encountered an error while trying to display the
-                                Diagram
-                            </div>
-                        );
-                    }
-                case "text/markdown":
-                    return (
-                        <CustomMarkdown className="h-full px-4 overflow-y-auto">
-                            {artifact.content || ""}
-                        </CustomMarkdown>
-                    );
-                default:
-                    return (
-                        <div>Unsupported artifact type: {artifact.type}</div>
-                    );
-            }
-        },
-        []
-    );
-
-    const cleanMessage = useCallback((content: string) => {
-        let cleanedContent = content;
-        let artifact: Artifact | null = null;
-
-        // Handle thinking tag
-        const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
-        const thinkingTagEndRegex = /<\/assistantThinking>/;
-        const thinkingTagStartMatch = content.match(thinkingTagStartRegex);
-        const thinkingTagEndMatch = content.match(thinkingTagEndRegex);
-
-        if (
-            thinkingTagStartMatch &&
-            thinkingTagEndMatch &&
-            thinkingTagEndMatch.index
-        ) {
-            cleanedContent =
-                content.substring(0, thinkingTagStartMatch.index) +
-                content.substring(
-                    thinkingTagEndMatch.index + thinkingTagEndMatch[0].length
+        switch (artifact.type) {
+            case "image/svg+xml":
+                return (
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: artifact.content || ""
+                        }}
+                    />
                 );
-        } else if (thinkingTagStartMatch) {
-            cleanedContent = content.substring(0, thinkingTagStartMatch.index);
-        }
-
-        // Handle artifact tag
-        const artifactStartRegex = /<assistantArtifact([^>]*)>/;
-        const artifactEndRegex = /<\/assistantArtifact>/;
-        const artifactStartMatch = cleanedContent.match(artifactStartRegex);
-        const artifactEndMatch = cleanedContent.match(artifactEndRegex);
-
-        if (artifactStartMatch && artifactStartMatch.index) {
-            const attributes = artifactStartMatch[1];
-            const title =
-                getAttributeValue(attributes, "title") || "Untitled Artifact";
-            const identifier =
-                getAttributeValue(attributes, "identifier") || "0";
-            const type = getAttributeValue(attributes, "type");
-            const language = getAttributeValue(attributes, "language");
-
-            artifact = {
-                identifier,
-                title,
-                type,
-                language,
-                content: ""
-            };
-
-            if (artifactEndMatch && artifactEndMatch.index) {
-                const artifactContent = cleanedContent.slice(
-                    artifactStartMatch.index + artifactStartMatch[0].length,
-                    artifactEndMatch.index
+            case "text/html":
+                return (
+                    <iframe
+                        srcDoc={artifact.content}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            border: "none"
+                        }}
+                        title={artifact.title || "Preview"}
+                        sandbox="allow-scripts"
+                    />
                 );
-
-                artifact = {
-                    ...artifact,
-                    content: artifactContent
-                };
-
-                cleanedContent =
-                    cleanedContent.substring(0, artifactStartMatch.index) +
-                    `[ARTIFACT:${identifier}]` +
-                    cleanedContent.substring(
-                        artifactEndMatch.index + artifactEndMatch[0].length
+            case "application/react":
+                try {
+                    return <ReactRenderer code={artifact.content || ""} />;
+                } catch (error) {
+                    return (
+                        <div>
+                            Encountered an error while trying to display the
+                            React component
+                        </div>
                     );
-            } else {
-                cleanedContent = `
-${cleanedContent.substring(0, artifactStartMatch.index)}
-[ARTIFACT:${identifier}]
-`;
-            }
+                }
+            case "application/mermaid":
+                try {
+                    return <Mermaid chart={artifact.content || ""} />;
+                } catch (error) {
+                    return (
+                        <div>
+                            Encountered an error while trying to display the
+                            Diagram
+                        </div>
+                    );
+                }
+            case "text/markdown":
+                return (
+                    <CustomMarkdown className="h-full px-4 overflow-y-auto">
+                        {artifact.content || ""}
+                    </CustomMarkdown>
+                );
+            default:
+                return <div>Unsupported artifact type: {artifact.type}</div>;
         }
-
-        return { cleanedContent: cleanedContent.trim(), artifact };
     }, []);
 
     const handlePreviousArtifact = () => {
@@ -364,17 +346,16 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
                             {messages
                                 .filter((m) => m.content !== "")
-                                .map((m) => (
+                                .map((m, index) => (
                                     <Response
                                         key={m.id}
                                         role={m.role}
-                                        artifact={
-                                            cleanMessage(m.content).artifact ||
-                                            undefined
-                                        }
+                                        artifact={currentArtifact || undefined}
                                         content={
-                                            cleanMessage(m.content)
-                                                .cleanedContent
+                                            m.role === "user"
+                                                ? m.content
+                                                : cleanedMessages[index] ||
+                                                  m.content
                                         }
                                         onArtifactClick={(identifier) =>
                                             openArtifact(identifier)
