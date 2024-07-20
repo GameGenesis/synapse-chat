@@ -28,6 +28,7 @@ import { Mermaid } from "./mermaid";
 import { ReactRenderer } from "./reactrenderer";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
+import { maxToolRoundtrips } from "@/utils/consts";
 
 export function Chat() {
     const {
@@ -39,7 +40,12 @@ export function Chat() {
         error,
         stop,
         data
-    } = useChat();
+    } = useChat({
+        maxToolRoundtrips,
+
+        // run client-side tools that are automatically executed:
+        async onToolCall({ toolCall }) {}
+    });
 
     const [activeTab, setActiveTab] = useState("preview");
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -389,14 +395,14 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                             openArtifact(identifier)
                                         }
                                         attachments={
-                                            <div className="w-full overflow-y-auto py-2 flex flex-row items-center space-x-2 row-auto space-y-2">
+                                            <>
                                                 {m?.experimental_attachments?.map(
                                                     (attachment, index) =>
                                                         attachment?.contentType?.startsWith(
                                                             "image/"
                                                         ) ? (
                                                             <img
-                                                                className="rounded-md"
+                                                                className="rounded-md my-2"
                                                                 width={250}
                                                                 height={250}
                                                                 key={`${m.id}-${index}`}
@@ -409,7 +415,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                             />
                                                         ) : (
                                                             <div
-                                                                className="flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors"
+                                                                className="my-2 flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors"
                                                                 key={`${m.id}-${index}`}
                                                             >
                                                                 <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary/10 rounded-md">
@@ -430,7 +436,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                             </div>
                                                         )
                                                 )}
-                                            </div>
+                                            </>
                                         }
                                     />
                                 ))}

@@ -21,3 +21,4 @@ export const supportedFileFormats = [
     ".tsx",
     ".c"
 ];
+export const maxToolRoundtrips = 3;

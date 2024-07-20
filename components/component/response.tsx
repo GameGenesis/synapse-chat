@@ -116,7 +116,11 @@ export const UserResponse = ({
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
-                {attachments}
+                {attachments && (
+                    <div className="w-full overflow-y-auto flex flex-row items-center space-x-2 row-auto space-y-2">
+                        {attachments}
+                    </div>
+                )}
             </div>
         </div>
     );
