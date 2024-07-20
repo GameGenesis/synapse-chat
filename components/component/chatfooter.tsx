@@ -6,6 +6,7 @@ import { PaperClipIcon, ArrowUpIcon } from "@heroicons/react/24/solid";
 import { supportedFileFormats } from "@/utils/consts";
 import { FileIcon } from "@radix-ui/react-icons";
 import { XIcon } from "./icons";
+import toast from "react-hot-toast";
 
 interface Props {
     input: string;
@@ -15,15 +16,13 @@ interface Props {
         options?: any
     ) => void;
     isLoading: boolean;
-    addToast: (message: string, type: "error" | "success") => void;
 }
 
 const ChatFooter = ({
     input,
     handleInputChange,
     handleSubmit,
-    isLoading,
-    addToast
+    isLoading
 }: Props) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMultiline, setIsMultiline] = useState(false);
@@ -86,7 +85,7 @@ const ChatFooter = ({
                 if (supportedFileFormats.includes(fileExtension)) {
                     return true;
                 } else {
-                    addToast(`Unsupported file: ${file.name}`, "error");
+                    toast.error(`Unsupported file: ${file.name}`);
                     return false;
                 }
             });

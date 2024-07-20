@@ -20,7 +20,6 @@ import {
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
 import { FileIcon } from "@radix-ui/react-icons";
-import { Toast, ToastContainer } from "./toast";
 import { Artifact } from "@/types";
 import { CustomMarkdown } from "./markdown";
 import { CopyIcon, DownloadIcon, XIcon } from "./icons";
@@ -57,18 +56,6 @@ export function Chat() {
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
     const artifactAddedRef = useRef(false);
-
-    const [toasts, setToasts] = useState<Toast[]>([]);
-
-    const addToast = (message: string, type: "error" | "success") => {
-        const newToast = { id: Date.now(), message, type };
-        setToasts((prevToasts) => [...prevToasts, newToast]);
-        setTimeout(() => {
-            setToasts((prevToasts) =>
-                prevToasts.filter((toast) => toast.id !== newToast.id)
-            );
-        }, 3000);
-    };
 
     const processMessage = useCallback(
         (content: string) => {
@@ -362,7 +349,6 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
 
     return (
         <div className="flex flex-col h-screen w-full">
-            <ToastContainer toasts={toasts} />
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
@@ -457,7 +443,6 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                         handleInputChange={handleInputChange}
                         handleSubmit={handleSubmit}
                         isLoading={isLoading}
-                        addToast={addToast}
                     />
                 </div>
                 {isArtifactsWindowOpen && (
