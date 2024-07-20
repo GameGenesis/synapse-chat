@@ -103,17 +103,8 @@ export const UserResponse = ({
     attachments
 }: {
     children: React.ReactNode;
-    attachments: React.ReactNode;
+    attachments?: React.ReactNode;
 }) => {
-    const imageAttachments = Children.toArray(attachments).filter(
-        (attachment: any) => attachment.props.src
-    );
-    const fileAttachments = Children.toArray(attachments).filter(
-        (attachment: any) =>
-            attachment.props.contentType &&
-            !attachment.props.contentType.startsWith("image/")
-    );
-
     return (
         <div className="flex items-start gap-4">
             <Avatar className="w-8 h-8 border flex-shrink-0">
@@ -125,14 +116,9 @@ export const UserResponse = ({
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
-                {imageAttachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2 bg-red-400">
-                        {imageAttachments}
-                    </div>
-                )}
-                {fileAttachments.length > 0 && (
-                    <div className="flex flex-col gap-2 mt-2 bg-green-400">
-                        {fileAttachments}
+                {attachments && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {attachments}
                     </div>
                 )}
             </div>

@@ -158,7 +158,7 @@ const ChatFooter = ({
             <form
                 className="relative max-w-[650px] w-full"
                 onSubmit={(event) => {
-                    console.log("NUMBER OF FILES SUBMITTED", files?.length);
+                    // console.log("NUMBER OF FILES SUBMITTED", files?.length);
                     handleSubmit(event, { experimental_attachments: files });
                     setFiles(undefined);
                     if (fileInputRef.current) {
