@@ -49,7 +49,9 @@ export function Chat() {
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
-    const [cleanedMessages, setCleanedMessages] = useState<string[]>([]);
+    const [cleanedMessages, setCleanedMessages] = useState<
+        { content: string; artifact?: Artifact }[]
+    >([]);
 
     const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
 
@@ -63,7 +65,10 @@ export function Chat() {
                 console.log("SKIPPING PROCESSING MESSAGES");
                 setCleanedMessages((prev) => {
                     const updatedMessages = [...prev];
-                    updatedMessages[index] = content;
+                    updatedMessages[index] = {
+                        content,
+                        artifact: undefined
+                    };
                     return updatedMessages;
                 });
                 return;
@@ -167,7 +172,10 @@ export function Chat() {
 
             setCleanedMessages((prev) => {
                 const updatedMessages = [...prev];
-                updatedMessages[index] = cleanedContent;
+                updatedMessages[index] = {
+                    content: cleanedContent,
+                    artifact: artifact || undefined
+                };
                 console.log("MESSAGES", messages);
                 console.log("UPDATED MESSAGES", updatedMessages);
                 return updatedMessages;
@@ -350,12 +358,15 @@ export function Chat() {
                                     <Response
                                         key={m.id}
                                         role={m.role}
-                                        artifact={currentArtifact || undefined}
+                                        artifact={
+                                            cleanedMessages[index]?.artifact ||
+                                            currentArtifact
+                                        }
                                         content={
                                             m.role === "user"
                                                 ? m.content
-                                                : cleanedMessages[index] ||
-                                                  m.content
+                                                : cleanedMessages[index]
+                                                      ?.content || m.content
                                         }
                                         onArtifactClick={(identifier) =>
                                             openArtifact(identifier)
