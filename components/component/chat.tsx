@@ -15,8 +15,8 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
-    prism,
-    // darcula,
+    // prism,
+    darcula,
     // oneDark,
     // duotoneDark,
     // vscDarkPlus,
@@ -42,6 +42,8 @@ interface Artifact {
     content: string;
 }
 
+const supportedFileFormats = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".txt"];
+
 export function Chat() {
     const {
         messages,
@@ -57,7 +59,7 @@ export function Chat() {
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
-    const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(true);
+    const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
 
     const currentArtifactRef = useRef<Partial<Artifact> | null>(null);
     const isStreamingArtifactRef = useRef(false);
@@ -67,8 +69,6 @@ export function Chat() {
     const [files, setFiles] = useState<FileList | undefined>(undefined);
     const [fileInput, setFileInput] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const supportedImageFormats = ["png", "jpeg", "gif", "webp"];
 
     const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -463,50 +463,65 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             </div>
                         </div>
                     </header>
-                    <div className="flex-grow overflow-y-auto p-4 space-y-4 max-w-[1000px]">
-                        {messages
-                            .filter((m) => m.content !== "")
-                            .map((m) => (
-                                <Response
-                                    key={m.id}
-                                    role={m.role}
-                                    artifact={
-                                        cleanMessage(m.content).artifact ||
-                                        undefined
-                                    }
-                                    content={
-                                        cleanMessage(m.content).cleanedContent
-                                    }
-                                    onArtifactClick={(identifier) =>
-                                        openArtifact(identifier)
-                                    }
-                                    attachments={
-                                        <div className="w-full overflow-y-auto pt-4 flex flex-row items-center space-x-2 row-auto space-y-2">
-                                            {m?.experimental_attachments
-                                                ?.filter((attachment) =>
-                                                    attachment?.contentType?.startsWith(
-                                                        "image/"
+                    <div
+                        className={`flex-grow h-full w-full overflow-y-auto ${
+                            isArtifactsWindowOpen
+                                ? "justify-start"
+                                : "justify-center"
+                        } transition-all duration-300`}
+                    >
+                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[1000px] mx-auto bg-grey-100">
+                            {messages
+                                .filter((m) => m.content !== "")
+                                .map((m) => (
+                                    <Response
+                                        key={m.id}
+                                        role={m.role}
+                                        artifact={
+                                            cleanMessage(m.content).artifact ||
+                                            undefined
+                                        }
+                                        content={
+                                            cleanMessage(m.content)
+                                                .cleanedContent
+                                        }
+                                        onArtifactClick={(identifier) =>
+                                            openArtifact(identifier)
+                                        }
+                                        attachments={
+                                            <div className="w-full overflow-y-auto pt-4 flex flex-row items-center space-x-2 row-auto space-y-2">
+                                                {m?.experimental_attachments
+                                                    ?.filter((attachment) =>
+                                                        attachment?.contentType?.startsWith(
+                                                            "image/"
+                                                        )
                                                     )
-                                                )
-                                                .map((attachment, index) => (
-                                                    <img
-                                                        className="rounded-md"
-                                                        width={250}
-                                                        height={250}
-                                                        key={`${m.id}-${index}`}
-                                                        src={attachment.url}
-                                                        alt={attachment.name}
-                                                    />
-                                                ))}
-                                        </div>
-                                    }
-                                />
-                            ))}
-                        {fileInput}
+                                                    .map(
+                                                        (attachment, index) => (
+                                                            <img
+                                                                className="rounded-md"
+                                                                width={250}
+                                                                height={250}
+                                                                key={`${m.id}-${index}`}
+                                                                src={
+                                                                    attachment.url
+                                                                }
+                                                                alt={
+                                                                    attachment.name
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                            </div>
+                                        }
+                                    />
+                                ))}
+                            {fileInput}
+                        </div>
                     </div>
-                    <div className="flex w-full bg-background py-2 px-4 border-t align-middle items-center justify-center">
+                    <div className="flex flex-grow-0 w-full bg-background py-2 px-4 border-t align-middle items-center justify-center">
                         <form
-                            className="relative max-w-[750px] w-full"
+                            className="relative max-w-[650px] w-full"
                             onSubmit={(event) => {
                                 handleSubmit(event, {
                                     experimental_attachments: files
@@ -526,6 +541,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             >
                                 <input
                                     type="file"
+                                    accept={supportedFileFormats.join(", ")}
                                     ref={fileInputRef}
                                     className="absolute w-full h-full top-0 left-0 opacity-0 cursor-pointer z-0"
                                     multiple
@@ -562,6 +578,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                             <input
                                 type="file"
                                 ref={fileInputRef}
+                                accept={supportedFileFormats.join(", ")}
                                 className="absolute w-8 h-8 top-3 left-3 opacity-0 cursor-pointer z-[20]"
                                 multiple
                                 onChange={(event) => {
@@ -1026,6 +1043,7 @@ const CustomMarkdown = ({
     return (
         <div className={`markdown-body prose max-w-full ${className}`}>
             <Markdown
+                className="prose"
                 remarkPlugins={[remarkGfm]}
                 components={{
                     h1: ({ node, ...props }) => (
@@ -1063,17 +1081,9 @@ const CustomMarkdown = ({
                         return !inline && match ? (
                             <div className="code-block-wrapper">
                                 <SyntaxHighlighter
-                                    style={prism}
                                     language={match[1]}
+                                    style={xonokai}
                                     PreTag="div"
-                                    customStyle={{
-                                        marginTop: "0.5rem",
-                                        marginBottom: "0.5rem",
-                                        marginRight: "0.5rem",
-                                        borderRadius: "0.375rem"
-                                    }}
-                                    wrapLines={true}
-                                    wrapLongLines={true}
                                 >
                                     {String(children).replace(/\n$/, "")}
                                 </SyntaxHighlighter>
