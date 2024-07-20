@@ -28,19 +28,11 @@ import {
     CheckCircleIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
-    ChevronRightIcon
+    ChevronRightIcon,
+    PaperClipIcon
 } from "@heroicons/react/24/solid";
 import mermaid from "mermaid";
 import { Runner } from "react-runner";
-
-interface Props {
-    messages: { id: string; role: string; content: string }[];
-    input: string;
-    handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    isLoading: boolean;
-    data: any;
-}
 
 interface Artifact {
     identifier: string;
@@ -50,22 +42,40 @@ interface Artifact {
     content: string;
 }
 
-export function Chat({
-    messages,
-    input,
-    handleSubmit,
-    handleInputChange,
-    isLoading,
-    data
-}: Props) {
+export function Chat() {
+    const {
+        messages,
+        input,
+        handleInputChange,
+        handleSubmit,
+        isLoading,
+        stop,
+        data
+    } = useChat();
+
     const [activeTab, setActiveTab] = useState("preview");
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
+
+    const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(true);
 
     const currentArtifactRef = useRef<Partial<Artifact> | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
     const artifactAddedRef = useRef(false);
+
+    const [files, setFiles] = useState<FileList | undefined>(undefined);
+    const [fileInput, setFileInput] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const supportedImageFormats = ["png", "jpeg", "gif", "webp"];
+
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        if (event.dataTransfer.files) {
+            setFiles(event.dataTransfer.files);
+        }
+    };
 
     const processMessage = useCallback(
         (content: string) => {
@@ -77,6 +87,7 @@ export function Chat({
             if (startMatch && !isStreamingArtifactRef.current && !endMatch) {
                 isStreamingArtifactRef.current = true;
                 artifactAddedRef.current = false;
+                setIsArtifactsWindowOpen(true);
                 setActiveTab("code");
                 setCurrentArtifactIndex((prevIndex) => artifacts.length);
                 const attributes = startMatch[1];
@@ -349,12 +360,27 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
         }
     }, [currentArtifact]);
 
+    const openArtifact = (identifier: string) => {
+        setIsArtifactsWindowOpen(true);
+        setCurrentArtifactIndex(
+            artifacts.indexOf(
+                artifacts.filter(
+                    (artifact) => artifact.identifier === identifier
+                )[0]
+            ) || 0
+        );
+    };
+
     return (
         <div className="flex flex-col h-screen w-full">
             <div className="flex flex-grow overflow-hidden">
-                <div className="flex flex-col w-3/5 h-full bg-background">
-                    <header className="bg-background text-foreground py-3 px-4 md:px-6 border-b">
-                        <div className="container mx-auto flex items-center justify-between">
+                <div
+                    className={`flex flex-col ${
+                        isArtifactsWindowOpen ? "w-3/5" : "w-full"
+                    } h-full bg-background transition-all duration-300`}
+                >
+                    <header className="flex w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
+                        <div className="flex container items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <Sheet>
                                     <SheetTrigger asChild>
@@ -420,9 +446,24 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
+                            <div className="flex items-center gap-4">
+                                {!isArtifactsWindowOpen && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() =>
+                                            setIsArtifactsWindowOpen(true)
+                                        }
+                                        className="ml-auto"
+                                    >
+                                        <LayoutPanelLeftIcon className="w-4 h-4 mr-2" />
+                                        Open Artifacts
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </header>
-                    <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                    <div className="flex-grow overflow-y-auto p-4 space-y-4 max-w-[1000px]">
                         {messages
                             .filter((m) => m.content !== "")
                             .map((m) => (
@@ -437,175 +478,242 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                         cleanMessage(m.content).cleanedContent
                                     }
                                     onArtifactClick={(identifier) =>
-                                        setCurrentArtifactIndex(
-                                            artifacts.indexOf(
-                                                artifacts.filter(
-                                                    (artifact) =>
-                                                        artifact.identifier ===
-                                                        identifier
-                                                )[0]
-                                            ) || 0
-                                        )
+                                        openArtifact(identifier)
+                                    }
+                                    attachments={
+                                        <div className="w-full overflow-y-auto pt-4 flex flex-row items-center space-x-2 row-auto space-y-2">
+                                            {m?.experimental_attachments
+                                                ?.filter((attachment) =>
+                                                    attachment?.contentType?.startsWith(
+                                                        "image/"
+                                                    )
+                                                )
+                                                .map((attachment, index) => (
+                                                    <img
+                                                        className="rounded-md"
+                                                        width={250}
+                                                        height={250}
+                                                        key={`${m.id}-${index}`}
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                    />
+                                                ))}
+                                        </div>
                                     }
                                 />
                             ))}
+                        {fileInput}
                     </div>
-                    <div className="w-full bg-background py-2 px-4 border-t">
-                        <form className="relative" onSubmit={handleSubmit}>
-                            <input
-                                placeholder="Type your message..."
-                                name="message"
-                                id="message"
-                                className="rounded-full resize-none p-4 border border-neutral-400 shadow-sm pr-16 w-full bg-grey-100"
-                                value={input}
-                                onChange={handleInputChange}
-                            />
+                    <div className="flex w-full bg-background py-2 px-4 border-t align-middle items-center justify-center">
+                        <form
+                            className="relative max-w-[750px] w-full"
+                            onSubmit={(event) => {
+                                handleSubmit(event, {
+                                    experimental_attachments: files
+                                });
+
+                                setFiles(undefined);
+
+                                if (fileInputRef.current) {
+                                    fileInputRef.current.value = "";
+                                }
+                            }}
+                        >
+                            <div
+                                className="flex w-full items-center z-0"
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={handleDrop}
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="absolute w-full h-full top-0 left-0 opacity-0 cursor-pointer z-0"
+                                    multiple
+                                    onChange={(event) => {
+                                        if (event.target.files) {
+                                            setFiles(event.target.files);
+                                        }
+                                    }}
+                                />
+                                <input
+                                    placeholder="Type your message..."
+                                    name="message"
+                                    id="message"
+                                    className="rounded-full resize-none py-4 px-14 border border-neutral-400 shadow-sm w-full bg-grey-100 z-10"
+                                    value={input}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="absolute w-8 h-8 top-3 left-3 rounded-full z-10 bg-black cursor-pointer">
+                                <div className="flex flex-col items-center align-middle justify-center w-full h-full m-auto">
+                                    <PaperClipIcon className="w-4 h-4 text-primary-foreground" />
+                                    <span className="sr-only">Attach File</span>
+                                </div>
+                            </div>
                             <Button
                                 type="submit"
                                 size="icon"
                                 disabled={isLoading || input.length === 0}
-                                className="absolute w-8 h-8 top-3 right-3 rounded-full items-center justify-center"
+                                className="absolute w-8 h-8 top-3 right-3 rounded-full items-center justify-center z-10"
                             >
                                 <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
                                 <span className="sr-only">Send</span>
                             </Button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="absolute w-8 h-8 top-3 left-3 opacity-0 cursor-pointer z-[20]"
+                                multiple
+                                onChange={(event) => {
+                                    if (event.target.files) {
+                                        setFiles(event.target.files);
+                                    }
+                                }}
+                            />
                         </form>
                     </div>
                 </div>
-                <div className="w-2/5 bg-background border-l flex flex-col h-full">
-                    <div className="flex items-center justify-between px-4 py-2 border-b">
-                        <h3 className="text-md font-medium">
-                            {currentArtifact?.title || "Artifacts"}
-                        </h3>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+                {isArtifactsWindowOpen && (
+                    <div className="w-2/5 bg-background border-l flex flex-col h-full">
+                        <div className="flex items-center justify-between px-4 py-2 border-b">
+                            <h3 className="text-md font-medium">
+                                {currentArtifact?.title || "Artifacts"}
+                            </h3>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className={`px-3 py-1 rounded-full ${
+                                            activeTab === "preview"
+                                                ? "bg-background text-foreground hover:bg-white"
+                                                : "text-muted-foreground"
+                                        }`}
+                                        onClick={() => setActiveTab("preview")}
+                                    >
+                                        Preview
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className={`px-3 py-1 rounded-full ${
+                                            activeTab === "code"
+                                                ? "bg-background text-foreground hover:bg-white"
+                                                : "text-muted-foreground"
+                                        }`}
+                                        onClick={() => setActiveTab("code")}
+                                    >
+                                        Code
+                                    </Button>
+                                </div>
                                 <Button
                                     variant="ghost"
-                                    size="sm"
-                                    className={`px-3 py-1 rounded-full ${
-                                        activeTab === "preview"
-                                            ? "bg-background text-foreground hover:bg-white"
-                                            : "text-muted-foreground"
-                                    }`}
-                                    onClick={() => setActiveTab("preview")}
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={() =>
+                                        setIsArtifactsWindowOpen(false)
+                                    }
                                 >
-                                    Preview
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className={`px-3 py-1 rounded-full ${
-                                        activeTab === "code"
-                                            ? "bg-background text-foreground hover:bg-white"
-                                            : "text-muted-foreground"
-                                    }`}
-                                    onClick={() => setActiveTab("code")}
-                                >
-                                    Code
+                                    <XIcon className="w-5 h-5" />
+                                    <span className="sr-only">Close</span>
                                 </Button>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                            >
-                                <XIcon className="w-5 h-5" />
-                                <span className="sr-only">Close</span>
-                            </Button>
                         </div>
-                    </div>
-                    <div className="flex-grow overflow-hidden">
-                        {activeTab === "preview" && (
-                            <div className="h-full overflow-y-auto">
-                                {renderArtifactPreview(currentArtifact)}
-                            </div>
-                        )}
-                        {activeTab === "code" && currentArtifact && (
-                            <SyntaxHighlighter
-                                language={
-                                    currentArtifact.language || "javascript"
-                                }
-                                style={xonokai}
-                                customStyle={{
-                                    margin: 0,
-                                    height: "100%",
-                                    overflow: "auto"
-                                }}
-                                showLineNumbers={true}
-                                lineNumberContainerStyle={{
-                                    paddingRight: "5px"
-                                }}
-                                className="h-full bg-gray-900"
-                            >
-                                {currentArtifact.content || ""}
-                            </SyntaxHighlighter>
-                        )}
-                    </div>
-                    <div className="border-t flex items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                                onClick={handleCopyCode}
-                                disabled={
-                                    !currentArtifact || !currentArtifact.content
-                                }
-                            >
-                                {isCopied ? (
-                                    <CheckCircleIcon className="w-5 h-5" />
-                                ) : (
-                                    <CopyIcon className="w-5 h-5" />
-                                )}
+                        <div className="flex-grow overflow-hidden">
+                            {activeTab === "preview" && (
+                                <div className="h-full overflow-y-auto">
+                                    {renderArtifactPreview(currentArtifact)}
+                                </div>
+                            )}
+                            {activeTab === "code" && currentArtifact && (
+                                <SyntaxHighlighter
+                                    language={
+                                        currentArtifact.language || "javascript"
+                                    }
+                                    style={xonokai}
+                                    customStyle={{
+                                        margin: 0,
+                                        height: "100%",
+                                        overflow: "auto"
+                                    }}
+                                    showLineNumbers={true}
+                                    lineNumberContainerStyle={{
+                                        paddingRight: "5px"
+                                    }}
+                                    className="h-full bg-gray-900"
+                                >
+                                    {currentArtifact.content || ""}
+                                </SyntaxHighlighter>
+                            )}
+                        </div>
+                        <div className="border-t flex items-center justify-between px-4 py-3">
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={handleCopyCode}
+                                    disabled={
+                                        !currentArtifact ||
+                                        !currentArtifact.content
+                                    }
+                                >
+                                    {isCopied ? (
+                                        <CheckCircleIcon className="w-5 h-5" />
+                                    ) : (
+                                        <CopyIcon className="w-5 h-5" />
+                                    )}
 
-                                <span className="sr-only">Copy</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                                onClick={handleDownload}
-                                disabled={
-                                    !currentArtifact || !currentArtifact.content
-                                }
-                            >
-                                {isDownloaded ? (
-                                    <CheckCircleIcon className="w-5 h-5" />
-                                ) : (
-                                    <DownloadIcon className="w-5 h-5" />
-                                )}
-                                <span className="sr-only">Download</span>
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                                onClick={handlePreviousArtifact}
-                                disabled={currentArtifactIndex <= 0}
-                            >
-                                <ChevronLeftIcon className="w-5 h-5" />
-                                <span className="sr-only">Previous</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                                onClick={handleNextArtifact}
-                                disabled={
-                                    currentArtifactIndex >=
-                                    (isStreamingArtifactRef.current
-                                        ? artifacts.length
-                                        : artifacts.length - 1)
-                                }
-                            >
-                                <ChevronRightIcon className="w-5 h-5" />
-                                <span className="sr-only">Next</span>
-                            </Button>
+                                    <span className="sr-only">Copy</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={handleDownload}
+                                    disabled={
+                                        !currentArtifact ||
+                                        !currentArtifact.content
+                                    }
+                                >
+                                    {isDownloaded ? (
+                                        <CheckCircleIcon className="w-5 h-5" />
+                                    ) : (
+                                        <DownloadIcon className="w-5 h-5" />
+                                    )}
+                                    <span className="sr-only">Download</span>
+                                </Button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={handlePreviousArtifact}
+                                    disabled={currentArtifactIndex <= 0}
+                                >
+                                    <ChevronLeftIcon className="w-5 h-5" />
+                                    <span className="sr-only">Previous</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full"
+                                    onClick={handleNextArtifact}
+                                    disabled={
+                                        currentArtifactIndex >=
+                                        (isStreamingArtifactRef.current
+                                            ? artifacts.length
+                                            : artifacts.length - 1)
+                                    }
+                                >
+                                    <ChevronRightIcon className="w-5 h-5" />
+                                    <span className="sr-only">Next</span>
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
@@ -735,17 +843,19 @@ function Response({
     content,
     role,
     artifact,
-    onArtifactClick
+    onArtifactClick,
+    attachments
 }: {
     content: string;
     role: string;
     artifact?: Artifact;
     onArtifactClick: (identifier: string) => void;
+    attachments?: React.ReactNode;
 }) {
     return (
         <div>
             {role === "user" ? (
-                <UserResponse>{content}</UserResponse>
+                <UserResponse attachments={attachments}>{content}</UserResponse>
             ) : (
                 <AIResponse
                     content={content}
@@ -823,7 +933,13 @@ function AIResponse({
     );
 }
 
-function UserResponse({ children }: { children: React.ReactNode }) {
+function UserResponse({
+    children,
+    attachments
+}: {
+    children: React.ReactNode;
+    attachments: React.ReactNode;
+}) {
     return (
         <div className="flex items-start gap-4">
             <Avatar className="w-8 h-8 border flex-shrink-0">
@@ -835,6 +951,7 @@ function UserResponse({ children }: { children: React.ReactNode }) {
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{children?.toString()}</CustomMarkdown>
                 </div>
+                {attachments}
             </div>
         </div>
     );
@@ -844,7 +961,8 @@ import * as Recharts from "recharts";
 import * as LucideIcons from "lucide-react";
 import * as RadixIcons from "@radix-ui/react-icons";
 import * as ShadcnComponents from "@/components/ui";
-import { Loader2 } from "lucide-react";
+import { LayoutPanelLeftIcon, Loader2 } from "lucide-react";
+import { useChat } from "ai/react";
 
 type ShadcnComponentType = keyof typeof ShadcnComponents;
 

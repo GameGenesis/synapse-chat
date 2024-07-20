@@ -1,4 +1,4 @@
-import { streamText } from 'ai';
+import { convertToCoreMessages, streamText } from 'ai';
 import { getModel } from './model-provider';
 import { maxTokens, model, systemPrompt, temperature } from './config';
 
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     system: systemPrompt,
     maxTokens: maxTokens,
     temperature: temperature,
-    messages,
+    messages: convertToCoreMessages(messages),
   });
 
   return result.toAIStreamResponse();
