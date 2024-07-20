@@ -33,6 +33,7 @@ import {
 } from "@heroicons/react/24/solid";
 import mermaid from "mermaid";
 import { Runner } from "react-runner";
+import { toast, Toaster } from "react-hot-toast";
 
 interface Artifact {
     identifier: string;
@@ -387,8 +388,108 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
         );
     };
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [isMultiline, setIsMultiline] = useState(false);
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            handleSubmit(event as any);
+        } else if (event.key === "Enter" && event.shiftKey) {
+            // Delay the scroll to after the new line is added
+            setTimeout(() => scrollToBottom(), 10);
+        }
+    };
+
+    const handleTextareaChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
+        handleInputChange(event);
+        adjustTextareaHeight();
+        scrollToBottom();
+    };
+
+    const adjustTextareaHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            const newHeight = Math.min(
+                textareaRef.current.scrollHeight,
+                5 * 24 + 16
+            );
+            textareaRef.current.style.height = `${newHeight}px`;
+            setIsMultiline(textareaRef.current.value.split("\n").length > 1);
+        }
+    };
+
+    const scrollToBottom = () => {
+        if (textareaRef.current) {
+            textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        adjustTextareaHeight();
+    }, [input]);
+
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newFiles = Array.from(event.target.files || []);
+        const validFiles: File[] = [];
+
+        newFiles.forEach((file) => {
+            const fileExtension = `.${file.name
+                .split(".")
+                .pop()
+                ?.toLowerCase()}`;
+            if (supportedFileFormats.includes(fileExtension)) {
+                validFiles.push(file);
+            } else {
+                toast.error(`Unsupported file: ${file.name}`);
+            }
+        });
+
+        setUploadedFiles((prevFiles) => [...prevFiles, ...validFiles]);
+    };
+
+    const removeFile = (fileToRemove: File) => {
+        setUploadedFiles((prevFiles) =>
+            prevFiles.filter((file) => file !== fileToRemove)
+        );
+    };
+
+    const renderFilePreview = (file: File) => {
+        const isImage = file.type.startsWith("image/");
+        return (
+            <div
+                key={file.name}
+                className="flex items-center bg-gray-100 rounded-md p-2 mb-2"
+            >
+                {isImage ? (
+                    <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-8 h-8 object-cover mr-2"
+                    />
+                ) : (
+                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center mr-2 rounded">
+                        <FileIcon className="w-4 h-4" />
+                    </div>
+                )}
+                <span className="text-sm truncate flex-grow">{file.name}</span>
+                <button
+                    onClick={() => removeFile(file)}
+                    className="ml-2 text-red-500"
+                >
+                    <XIcon className="w-4 h-4" />
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col h-screen w-full">
+            <Toaster position="top-center" />
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
@@ -565,6 +666,11 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 }
                             }}
                         >
+                            {uploadedFiles.length > 0 && (
+                                <div className="mb-2 max-h-32 overflow-y-auto">
+                                    {uploadedFiles.map(renderFilePreview)}
+                                </div>
+                            )}
                             <div
                                 className="flex w-full items-center z-0"
                                 onDragOver={(e) => e.preventDefault()}
@@ -582,16 +688,31 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                         }
                                     }}
                                 />
-                                <input
-                                    placeholder="Type your message..."
-                                    name="message"
-                                    id="message"
-                                    className="rounded-full resize-none py-4 px-14 border border-neutral-400 shadow-sm w-full bg-grey-100 z-10"
-                                    value={input}
-                                    onChange={handleInputChange}
-                                />
+                                <div
+                                    className={`${
+                                        isMultiline
+                                            ? "rounded-2xl"
+                                            : "rounded-full"
+                                    } border border-neutral-400 shadow-sm bg-grey-100 w-full flex items-center min-h-[48px] max-h-[136px] overflow-hidden z-10`}
+                                >
+                                    <div className="flex-shrink-0 w-12 h-full" />{" "}
+                                    {/* Space for left button */}
+                                    <textarea
+                                        ref={textareaRef}
+                                        placeholder="Message Assistant"
+                                        name="message"
+                                        id="message"
+                                        className="resize-none py-3 px-1 m-0 w-full focus:outline-none bg-transparent border-none z-10"
+                                        value={input}
+                                        onChange={handleTextareaChange}
+                                        onKeyDown={handleKeyDown}
+                                        rows={1}
+                                    />
+                                    <div className="flex-shrink-0 w-12 h-full" />{" "}
+                                    {/* Space for right button */}
+                                </div>
                             </div>
-                            <div className="absolute w-8 h-8 top-3 left-3 rounded-full z-10 bg-black cursor-pointer">
+                            <div className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer">
                                 <div className="flex flex-col items-center align-middle justify-center w-full h-full m-auto">
                                     <PaperClipIcon className="w-4 h-4 text-primary-foreground" />
                                     <span className="sr-only">Attach File</span>
@@ -601,7 +722,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 type="submit"
                                 size="icon"
                                 disabled={isLoading || input.length === 0}
-                                className="absolute w-8 h-8 top-3 right-3 rounded-full items-center justify-center z-10"
+                                className="absolute w-8 h-8 bottom-2 right-3 rounded-full items-center justify-center z-10"
                             >
                                 <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
                                 <span className="sr-only">Send</span>
@@ -610,7 +731,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 type="file"
                                 ref={fileInputRef}
                                 accept={supportedFileFormats.join(", ")}
-                                className="absolute w-8 h-8 top-3 left-3 opacity-0 cursor-pointer z-[20]"
+                                className="absolute w-8 h-8 bottom-2 left-3 opacity-0 cursor-pointer z-[20]"
                                 multiple
                                 onChange={(event) => {
                                     if (event.target.files) {
