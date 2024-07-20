@@ -52,6 +52,10 @@ const supportedFileFormats = [
     ".html",
     ".xml",
     ".css",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
     ".c"
 ];
 
@@ -497,7 +501,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                             openArtifact(identifier)
                                         }
                                         attachments={
-                                            <div className="w-full overflow-y-auto pt-4 flex flex-row items-center space-x-2 row-auto space-y-2">
+                                            <div className="w-full overflow-y-auto py-3 flex flex-row items-center space-x-2 row-auto space-y-2">
                                                 {m?.experimental_attachments?.map(
                                                     (attachment, index) =>
                                                         attachment?.contentType?.startsWith(
@@ -517,7 +521,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                             />
                                                         ) : (
                                                             <div
-                                                                className="flex items-center align-middle gap-2 bg-muted rounded-md p-2 mb-1"
+                                                                className="flex items-center align-middle gap-2 bg-muted rounded-md p-2"
                                                                 key={`${m.id}-${index}`}
                                                             >
                                                                 <FileIcon className="h-5 w-5 text-muted-foreground" />
@@ -620,7 +624,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                 {isArtifactsWindowOpen && (
                     <div className="max-w-2/5 w-2/5 overflow-x-hidden bg-background border-l flex flex-col h-full">
                         <div className="flex items-center justify-between px-4 py-2 border-b">
-                            <h3 className="text-md font-medium text-ellipsis pr-4">
+                            <h3 className="text-md font-medium truncate pr-4">
                                 {currentArtifact?.title || "Artifacts"}
                             </h3>
                             <div className="flex items-center gap-4">
