@@ -42,7 +42,18 @@ interface Artifact {
     content: string;
 }
 
-const supportedFileFormats = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".txt"];
+const supportedFileFormats = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".txt",
+    ".html",
+    ".xml",
+    ".css",
+    ".c"
+];
 
 export function Chat() {
     const {
@@ -51,6 +62,7 @@ export function Chat() {
         handleInputChange,
         handleSubmit,
         isLoading,
+        error,
         stop,
         data
     } = useChat();
@@ -436,7 +448,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                             <ZapIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
                                             <div>
                                                 <div className="font-medium">
-                                                    GPT-3
+                                                    GPT-3.5
                                                 </div>
                                                 <div className="text-muted-foreground/80">
                                                     Great for everyday tasks
@@ -464,13 +476,9 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                         </div>
                     </header>
                     <div
-                        className={`flex-grow h-full w-full overflow-y-auto ${
-                            isArtifactsWindowOpen
-                                ? "justify-start"
-                                : "justify-center"
-                        } transition-all duration-300`}
+                        className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
                     >
-                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[1000px] mx-auto bg-grey-100">
+                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
                             {messages
                                 .filter((m) => m.content !== "")
                                 .map((m) => (
@@ -490,14 +498,11 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                         }
                                         attachments={
                                             <div className="w-full overflow-y-auto pt-4 flex flex-row items-center space-x-2 row-auto space-y-2">
-                                                {m?.experimental_attachments
-                                                    ?.filter((attachment) =>
+                                                {m?.experimental_attachments?.map(
+                                                    (attachment, index) =>
                                                         attachment?.contentType?.startsWith(
                                                             "image/"
-                                                        )
-                                                    )
-                                                    .map(
-                                                        (attachment, index) => (
+                                                        ) ? (
                                                             <img
                                                                 className="rounded-md"
                                                                 width={250}
@@ -510,12 +515,34 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                                     attachment.name
                                                                 }
                                                             />
+                                                        ) : (
+                                                            <div
+                                                                className="flex items-center align-middle gap-2 bg-muted rounded-md p-2 mb-1"
+                                                                key={`${m.id}-${index}`}
+                                                            >
+                                                                <FileIcon className="h-5 w-5 text-muted-foreground" />
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    {
+                                                                        attachment.name
+                                                                    }
+                                                                </div>
+                                                            </div>
                                                         )
-                                                    )}
+                                                )}
                                             </div>
                                         }
                                     />
                                 ))}
+                            {error && (
+                                <AIResponse
+                                    content={`Encountered an Error: ${
+                                        error.message ||
+                                        error.cause ||
+                                        error.name ||
+                                        error.stack
+                                    }`}
+                                />
+                            )}
                             {fileInput}
                         </div>
                     </div>
@@ -591,9 +618,9 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                     </div>
                 </div>
                 {isArtifactsWindowOpen && (
-                    <div className="w-2/5 bg-background border-l flex flex-col h-full">
+                    <div className="max-w-2/5 w-2/5 overflow-x-hidden bg-background border-l flex flex-col h-full">
                         <div className="flex items-center justify-between px-4 py-2 border-b">
-                            <h3 className="text-md font-medium">
+                            <h3 className="text-md font-medium text-ellipsis pr-4">
                                 {currentArtifact?.title || "Artifacts"}
                             </h3>
                             <div className="flex items-center gap-4">
@@ -980,6 +1007,7 @@ import * as RadixIcons from "@radix-ui/react-icons";
 import * as ShadcnComponents from "@/components/ui";
 import { LayoutPanelLeftIcon, Loader2 } from "lucide-react";
 import { useChat } from "ai/react";
+import { FileIcon } from "@radix-ui/react-icons";
 
 type ShadcnComponentType = keyof typeof ShadcnComponents;
 
