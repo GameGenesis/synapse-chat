@@ -166,6 +166,7 @@ const config: Config = {
         },
         borderRadius: {
             full: "9999px",
+            "xl": "0.75rem",
             "2xl": "1rem",
             lg: "var(--radius)",
             md: "calc(var(--radius) - 2px)",

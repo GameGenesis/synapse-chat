@@ -18,7 +18,6 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -34,6 +33,7 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
     ArrowUpIcon,
+    CheckCircleIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon
@@ -314,9 +314,48 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
         artifacts[currentArtifactIndex] || currentArtifactRef.current;
 
     const currentArtifactIndexRef = useRef(currentArtifactIndex);
+
     useEffect(() => {
         currentArtifactIndexRef.current = currentArtifactIndex;
     }, [currentArtifactIndex]);
+
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopyCode = useCallback(() => {
+        if (currentArtifact && currentArtifact.content) {
+            navigator.clipboard
+                .writeText(currentArtifact.content)
+                .then(() => {
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+                })
+                .catch((err) => {
+                    console.error("Failed to copy code: ", err);
+                });
+        }
+    }, [currentArtifact]);
+
+    const [isDownloaded, setIsDownloaded] = useState(false);
+    const handleDownload = useCallback(() => {
+        if (currentArtifact && currentArtifact.content) {
+            const fileName = `${
+                currentArtifact.identifier || "artifact"
+            }${getFileExtension(currentArtifact.type)}`;
+            const blob = new Blob([currentArtifact.content], {
+                type: "text/plain"
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            setIsDownloaded(true);
+            setTimeout(() => setIsDownloaded(false), 2000); // Reset after 2 seconds
+        }
+    }, [currentArtifact]);
 
     return (
         <div className="flex flex-col h-screen w-full">
@@ -413,7 +452,7 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                                         artifact.identifier ===
                                                         identifier
                                                 )[0]
-                                            ) || currentArtifactIndex
+                                            ) || 0
                                         )
                                     }
                                 />
@@ -516,16 +555,33 @@ ${cleanedContent.substring(0, artifactStartMatch.index)}
                                 variant="ghost"
                                 size="icon"
                                 className="rounded-full"
+                                onClick={handleCopyCode}
+                                disabled={
+                                    !currentArtifact || !currentArtifact.content
+                                }
                             >
-                                <CopyIcon className="w-5 h-5" />
+                                {isCopied ? (
+                                    <CheckCircleIcon className="w-5 h-5" />
+                                ) : (
+                                    <CopyIcon className="w-5 h-5" />
+                                )}
+
                                 <span className="sr-only">Copy</span>
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="rounded-full"
+                                onClick={handleDownload}
+                                disabled={
+                                    !currentArtifact || !currentArtifact.content
+                                }
                             >
-                                <DownloadIcon className="w-5 h-5" />
+                                {isDownloaded ? (
+                                    <CheckCircleIcon className="w-5 h-5" />
+                                ) : (
+                                    <DownloadIcon className="w-5 h-5" />
+                                )}
                                 <span className="sr-only">Download</span>
                             </Button>
                         </div>
@@ -703,7 +759,7 @@ function Response({
                     content={content}
                     artifact={artifact}
                     onArtifactClick={onArtifactClick}
-                ></AIResponse>
+                />
             )}
         </div>
     );
@@ -727,6 +783,7 @@ function AIResponse({
         const elements = parts.map((part, index) => {
             const match = part.match(/\[ARTIFACT:([^\]]+)\]/);
             if (match && match[1] === artifact.identifier) {
+                const isGenerating = !artifact.content;
                 return (
                     <Button
                         key={index}
@@ -735,6 +792,9 @@ function AIResponse({
                         onClick={() => onArtifactClick(artifact.identifier)}
                         className="my-2"
                     >
+                        {isGenerating && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         {artifact.title}
                     </Button>
                 );
@@ -792,6 +852,7 @@ import * as Recharts from "recharts";
 import * as LucideIcons from "lucide-react";
 import * as RadixIcons from "@radix-ui/react-icons";
 import * as ShadcnComponents from "@/components/ui";
+import { Loader2 } from "lucide-react";
 
 type ShadcnComponentType = keyof typeof ShadcnComponents;
 
@@ -1060,4 +1121,27 @@ const Mermaid = ({ chart }: { chart: string }) => {
             </div>
         </div>
     );
+};
+
+const getFileExtension = (artifactType: string): string => {
+    switch (artifactType) {
+        case "application/javascript":
+            return ".js";
+        case "application/react":
+            return ".jsx";
+        case "text/html":
+            return ".html";
+        case "text/css":
+            return ".css";
+        case "application/json":
+            return ".json";
+        case "text/markdown":
+            return ".md";
+        case "image/svg+xml":
+            return ".svg";
+        case "application/mermaid":
+            return ".mmd";
+        default:
+            return ".txt";
+    }
 };
