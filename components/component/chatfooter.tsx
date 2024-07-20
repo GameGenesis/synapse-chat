@@ -33,7 +33,12 @@ const ChatFooter = ({
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-            handleSubmit(event as any);
+            const form = event.currentTarget.form;
+            if (form) {
+                form.dispatchEvent(
+                    new Event("submit", { cancelable: true, bubbles: true })
+                );
+            }
         } else if (event.key === "Enter" && event.shiftKey) {
             // Delay the scroll to after the new line is added
             setTimeout(() => scrollToBottom(), 10);
@@ -153,6 +158,7 @@ const ChatFooter = ({
             <form
                 className="relative max-w-[650px] w-full"
                 onSubmit={(event) => {
+                    console.log("NUMBER OF FILES SUBMITTED", files?.length);
                     handleSubmit(event, { experimental_attachments: files });
                     setFiles(undefined);
                     if (fileInputRef.current) {
