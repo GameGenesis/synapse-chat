@@ -24,6 +24,9 @@ export const ReactRenderer = ({ code }: { code: string }) => {
             "@/components/ui/avatar": ShadcnComponents,
             "@/components/ui/button": ShadcnComponents,
             "@/components/ui/card": ShadcnComponents,
+            "@/components/ui/dialog": ShadcnComponents,
+            "@/components/ui/dropdown-menu": ShadcnComponents,
+            "@/components/ui/sheet": ShadcnComponents,
             "@/components/ui/tabs": ShadcnComponents,
             "@/components/ui/textarea": ShadcnComponents
         }
