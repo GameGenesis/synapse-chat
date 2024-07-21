@@ -74,8 +74,8 @@ const ChatHeader = ({
     };
 
     return (
-        <header className="flex w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
-            <div className="flex container items-center justify-between">
+        <header className="flex align-middle justify-center w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
+            <div className="flex container items-center justify-between mx-auto">
                 <div className="flex items-center gap-4">
                     <Sheet>
                         <SheetTrigger asChild>

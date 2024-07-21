@@ -51,6 +51,18 @@ export async function POST(req: Request) {
                         hour12: true,
                         timeZone
                     })
+                }),
+                webSearch: tool({
+                    description: "Search the web for current information",
+                    parameters: z.object({
+                        query: z
+                            .string()
+                            .describe("The search query to look up on the web")
+                    }),
+                    execute: async ({ query }) => {
+                        const searchResults = `Mock search results for: "${query}". This is a placeholder result.`;
+                        return { results: searchResults };
+                    }
                 })
             })
         },

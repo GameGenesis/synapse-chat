@@ -2,13 +2,12 @@
 
 import React, { useRef, useState, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { PaperClipIcon, ArrowUpIcon } from "@heroicons/react/24/solid";
 import { supportedFileFormats } from "@/utils/consts";
 import { FileIcon } from "@radix-ui/react-icons";
-import { XIcon } from "./icons";
+import ArrowUpIcon, { XIcon } from "./icons";
 import toast from "react-hot-toast";
 import AttachmentModal from "./modal";
-import { ModelKey } from "@/app/api/chat/model-provider";
+import { PaperclipIcon } from "lucide-react";
 
 interface Props {
     input: string;
@@ -214,7 +213,7 @@ const ChatFooter = ({
                         htmlFor="file-upload"
                         className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer flex items-center justify-center"
                     >
-                        <PaperClipIcon className="w-4 h-4 text-primary-foreground" />
+                        <PaperclipIcon className="w-4 h-4 text-primary-foreground" />
                         <span className="sr-only">Attach File</span>
                     </label>
                     <input
