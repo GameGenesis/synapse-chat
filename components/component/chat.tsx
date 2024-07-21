@@ -32,7 +32,7 @@ import ErrorMessage from "./errormessage";
 import { SettingsMenu } from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
-    DEFAULT_ENABLE_PROMPT,
+    DEFAULT_ENABLE_INSTRUCTIONS,
     DEFAULT_ENABLE_SAFEGUARDS,
     DEFAULT_ENABLE_TOOLS,
     DEFAULT_MAX_TOKENS,
@@ -46,8 +46,8 @@ export function Chat() {
     const [enableArtifacts, setEnableArtifacts] = useState(
         DEFAULT_ENABLE_ARTIFACTS
     );
-    const [enableDefaultPrompt, setEnableDefaultPrompt] = useState(
-        DEFAULT_ENABLE_PROMPT
+    const [enableInstructions, setEnableInstructions] = useState(
+        DEFAULT_ENABLE_INSTRUCTIONS
     );
     const [enableSafeguards, setEnableSafeguards] = useState(
         DEFAULT_ENABLE_SAFEGUARDS
@@ -70,7 +70,7 @@ export function Chat() {
             temperature,
             maxTokens,
             enableArtifacts,
-            enableDefaultPrompt,
+            enableInstructions,
             enableSafeguards,
             enableTools,
             userPrompt: systemPrompt
@@ -408,8 +408,8 @@ export function Chat() {
                 setMaxTokens={setMaxTokens}
                 enableArtifacts={enableArtifacts}
                 setEnableArtifacts={setEnableArtifacts}
-                enableDefaultPrompt={enableDefaultPrompt}
-                setEnableDefaultPrompt={setEnableDefaultPrompt}
+                enableInstructions={enableInstructions}
+                setEnableInstructions={setEnableInstructions}
                 enableSafeguards={enableSafeguards}
                 setEnableSafeguards={setEnableSafeguards}
                 enableTools={enableTools}

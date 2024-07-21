@@ -3,7 +3,7 @@ import { assistant_name, date } from '@/utils/consts';
 export const DEFAULT_TEMPERATURE = 0.5;
 export const DEFAULT_MAX_TOKENS = 4096;
 export const DEFAULT_ENABLE_ARTIFACTS = true;
-export const DEFAULT_ENABLE_PROMPT = true;
+export const DEFAULT_ENABLE_INSTRUCTIONS = true;
 export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_TOOLS = true;
 

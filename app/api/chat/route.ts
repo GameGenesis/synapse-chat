@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         temperature,
         maxTokens,
         enableArtifacts,
-        enableDefaultPrompt,
+        enableInstructions,
         enableSafeguards,
         enableTools,
         userPrompt
@@ -22,13 +22,13 @@ export async function POST(req: Request) {
         temperature: number;
         maxTokens: number;
         enableArtifacts: boolean;
-        enableDefaultPrompt: boolean;
+        enableInstructions: boolean;
         enableSafeguards: boolean;
         enableTools: boolean;
         userPrompt?: string;
     } = await req.json();
 
-    const system = buildPrompt(enableArtifacts, enableDefaultPrompt, enableSafeguards, userPrompt);
+    const system = buildPrompt(enableArtifacts, enableInstructions, enableSafeguards, userPrompt);
     const data = new StreamData();
     data.append({});
 
