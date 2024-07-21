@@ -19,6 +19,7 @@ export const supportedFileFormats = [
     ".jsx",
     ".ts",
     ".tsx",
-    ".c"
+    ".c",
+    ".csv"
 ];
 export const maxToolRoundtrips = 3;
