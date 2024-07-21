@@ -5,19 +5,24 @@ import { CustomMarkdown } from "./markdown";
 import { Loader2 } from "lucide-react";
 import AttachmentModal from "./modal";
 import { FileIcon } from "@radix-ui/react-icons";
+import { ModelKey } from "@/app/api/chat/model-provider";
 
 export const Response = ({
     content,
     role,
     artifact,
     onArtifactClick,
-    attachments
+    attachments,
+    model,
+    tools
 }: {
     content: string;
     role: string;
     artifact?: Artifact;
     onArtifactClick: (identifier: string) => void;
     attachments?: { contentType: string; name: string; url: string }[];
+    model?: ModelKey;
+    tools?: string[];
 }) => {
     return (
         <div>
@@ -28,6 +33,8 @@ export const Response = ({
                     content={content}
                     artifact={artifact}
                     onArtifactClick={onArtifactClick}
+                    model={model}
+                    tools={tools}
                 />
             )}
         </div>
@@ -37,11 +44,15 @@ export const Response = ({
 export const AIResponse = ({
     content,
     artifact,
-    onArtifactClick
+    onArtifactClick,
+    model,
+    tools
 }: {
     content: string;
     artifact?: Artifact;
     onArtifactClick?: (identifier: string) => void;
+    model?: ModelKey;
+    tools?: string[];
 }) => {
     const processedContent = useMemo(() => {
         if (!artifact || !onArtifactClick) {
@@ -91,10 +102,29 @@ export const AIResponse = ({
                 <AvatarFallback>OA</AvatarFallback>
             </Avatar>
             <div className="grid gap-1 break-words">
-                <div className="font-bold">Assistant</div>
+                <div className="font-bold flex items-center gap-2">
+                    Assistant
+                    {model && (
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                            {model}
+                        </span>
+                    )}
+                </div>
                 <div className="prose text-muted-foreground">
                     {processedContent}
                 </div>
+                {tools && tools.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        {tools.map((tool, index) => (
+                            <span
+                                key={index}
+                                className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+                            >
+                                {tool}
+                            </span>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

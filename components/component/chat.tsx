@@ -61,7 +61,7 @@ export function Chat() {
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
     const [cleanedMessages, setCleanedMessages] = useState<
-        { content: string; artifact?: Artifact }[]
+        { content: string; artifact?: Artifact; model?: ModelKey }[]
     >([]);
 
     const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
@@ -73,12 +73,12 @@ export function Chat() {
     const processMessage = useCallback(
         (content: string, index: number) => {
             if (!content.includes("<assistant")) {
-                console.log("SKIPPING PROCESSING MESSAGES");
                 setCleanedMessages((prev) => {
                     const updatedMessages = [...prev];
                     updatedMessages[index] = {
                         content,
-                        artifact: undefined
+                        artifact: undefined,
+                        model: updatedMessages[index]?.model || model
                     };
                     return updatedMessages;
                 });
@@ -185,7 +185,8 @@ export function Chat() {
                 const updatedMessages = [...prev];
                 updatedMessages[index] = {
                     content: cleanedContent,
-                    artifact: artifact || undefined
+                    artifact: artifact || undefined,
+                    model: updatedMessages[index]?.model || model
                 };
                 console.log("MESSAGES", messages);
                 console.log("UPDATED MESSAGES", updatedMessages);
@@ -403,6 +404,10 @@ export function Chat() {
                                                 url: string;
                                             }[]) || undefined
                                         }
+                                        model={cleanedMessages[index]?.model}
+                                        tools={m.toolInvocations?.map(
+                                            (tool) => tool.toolName
+                                        )}
                                     />
                                 ))}
                             {error && (

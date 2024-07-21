@@ -13,7 +13,7 @@ const bing = new BingClient();
 const wikipedia = new WikipediaClient();
 
 export const tools = {
-    time: tool({
+    get_current_time: tool({
         description: "Get the current time",
         parameters: z.object({
             timeZone: z
@@ -64,7 +64,7 @@ export const tools = {
             ).data[0].url
         })
     }),
-    calculate: tool({
+    calculate_math_expression: tool({
         description:
             "A tool for evaluating mathematical expressions. " +
             "Example expressions: " +
