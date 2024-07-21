@@ -10,12 +10,12 @@ const buildPrompt = (
     enableSafeguards: boolean,
     userPrompt?: string
 ) => {
-    return `${enableArtifacts && artifactPrompt}${assistantPrompt.replace(
+    return `${enableArtifacts ? artifactPrompt : ""}${assistantPrompt.replace(
         "{{SAFEGUARDS}}",
-        enableSafeguards ? safetyPrompt : ""
-    )}\n${enableSafeguards && imageSafetyPrompt}${
-        userPrompt &&
-        `\n---\n<user_system_prompt>${userPrompt}</user_system_prompt>`
+        enableSafeguards ? safetyPrompt.trim() : ""
+    )}\n${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+        userPrompt ?
+        `\n---\n<user_system_prompt>${userPrompt}</user_system_prompt>` : ""
     }`;
 };
 

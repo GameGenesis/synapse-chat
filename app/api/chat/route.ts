@@ -25,8 +25,6 @@ export async function POST(req: Request) {
     } = await req.json();
 
     const system = buildPrompt(enableArtifacts, enableSafeguards, userPrompt);
-    console.log("TEMPERATURE: ", temperature);
-    console.log(system);
     const data = new StreamData();
     data.append({});
 
