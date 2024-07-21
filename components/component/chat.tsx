@@ -27,8 +27,11 @@ import { ReactRenderer } from "./reactrenderer";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import { maxToolRoundtrips } from "@/utils/consts";
+import { ModelKey } from "@/app/api/chat/model-provider";
 
 export function Chat() {
+    const [model, setModel] = useState<ModelKey>("gpt4o");
+
     const {
         messages,
         input,
@@ -39,6 +42,13 @@ export function Chat() {
         stop,
         data
     } = useChat({
+        body: { model },
+        onFinish: (message) => {
+            console.log("Chat finished:", message);
+        },
+        onError: (error) => {
+            console.error("Chat error:", error);
+        },
         maxToolRoundtrips,
 
         // run client-side tools that are automatically executed:
@@ -355,6 +365,7 @@ export function Chat() {
                     <ChatHeader
                         isArtifactsWindowOpen={isArtifactsWindowOpen}
                         setIsArtifactsWindowOpen={setIsArtifactsWindowOpen}
+                        onModelChange={(newModel) => setModel(newModel)}
                     />
                     <div
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}

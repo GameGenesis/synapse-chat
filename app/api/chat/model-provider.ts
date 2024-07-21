@@ -2,19 +2,20 @@ import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { azure } from '@ai-sdk/azure';
 
-enum ModelProvider {
+export enum ModelProvider {
     OpenAI = 'openai',
     Anthropic = 'anthropic',
     Azure = 'azure',
 }
 
-interface ModelConfig {
+export interface ModelConfig {
     name: string;
     provider: ModelProvider;
 }
 
-type ModelKey =
+export type ModelKey =
     | 'gpt4o'
+    | 'gpt4omini'
     | 'gpt4turbo'
     | 'gpt4'
     | 'gpt35'
@@ -28,6 +29,7 @@ type ModelKey =
 // Used to specify a model other than the DEFAULT_MODEL_CONFIG for certain usage
 export const models: { [key in ModelKey]: ModelConfig } = {
     gpt4o: { name: 'gpt-4o', provider: ModelProvider.OpenAI },
+    gpt4omini: { name: 'gpt-4o-mini', provider: ModelProvider.OpenAI },
     gpt4turbo: { name: 'gpt-4-turbo', provider: ModelProvider.OpenAI },
     gpt4: { name: 'gpt-4', provider: ModelProvider.OpenAI },
     gpt35: { name: 'gpt-3.5-turbo', provider: ModelProvider.OpenAI },

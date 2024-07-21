@@ -1,15 +1,18 @@
 import { convertToCoreMessages, streamText, tool } from "ai";
-import { getModel } from "./model-provider";
-import { maxTokens, model, systemPrompt, temperature } from "./config";
+import { getModel, ModelKey, models } from "./model-provider";
+import { maxTokens, systemPrompt, temperature } from "./config";
 import { z } from "zod";
 
 export const maxDuration = 1000;
 
 export async function POST(req: Request) {
-    const { messages } = await req.json();
+    const { messages, model }: { messages: any; model: ModelKey } =
+        await req.json();
+
+    console.log(model);
 
     const result = await streamText({
-        model: getModel(model),
+        model: getModel(models[model]),
         system: systemPrompt,
         maxTokens: maxTokens,
         temperature: temperature,
@@ -31,10 +34,15 @@ export async function POST(req: Request) {
                 description: "Get the current time",
                 parameters: z.object({
                     timeZone: z
-                        .enum(Intl.supportedValuesOf("timeZone") as unknown as readonly [string, ...string[]])
+                        .enum(
+                            Intl.supportedValuesOf(
+                                "timeZone"
+                            ) as unknown as readonly [string, ...string[]]
+                        )
                         .describe(
                             "The time zone to get the time for. This can be deduced from the location"
-                        ).default("America/New_York")
+                        )
+                        .default("America/New_York")
                 }),
                 execute: async ({ timeZone }) => ({
                     time: new Date().toLocaleTimeString("en-us", {

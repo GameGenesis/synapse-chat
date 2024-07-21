@@ -8,6 +8,7 @@ import { FileIcon } from "@radix-ui/react-icons";
 import { XIcon } from "./icons";
 import toast from "react-hot-toast";
 import AttachmentModal from "./modal";
+import { ModelKey } from "@/app/api/chat/model-provider";
 
 interface Props {
     input: string;
@@ -174,7 +175,6 @@ const ChatFooter = ({
                 <form
                     className="relative max-w-[650px] w-full"
                     onSubmit={(event) => {
-                        // console.log("NUMBER OF FILES SUBMITTED", files?.length);
                         handleSubmit(event, {
                             experimental_attachments: files
                         });

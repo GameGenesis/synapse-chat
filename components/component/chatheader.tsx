@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +13,66 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { LayoutPanelLeftIcon } from "lucide-react";
 import { MenuIcon, SparkleIcon, ZapIcon } from "./icons";
+import { ModelKey } from "@/app/api/chat/model-provider";
 
 interface Props {
     isArtifactsWindowOpen: boolean;
     setIsArtifactsWindowOpen: (open: boolean) => void;
+    onModelChange: (model: ModelKey) => void;
 }
+
+const modelInfo: Partial<
+    Record<
+        ModelKey,
+        {
+            name: string;
+            description: string;
+            icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+        }
+    >
+> = {
+    gpt4o: {
+        name: "GPT-4o",
+        description: "Most capable GPT-4 model for a wide range of tasks.",
+        icon: SparkleIcon
+    },
+    claude35sonnet: {
+        name: "Claude 3.5 Sonnet",
+        description:
+            "Anthropic's latest model, great for various applications.",
+        icon: SparkleIcon
+    },
+    gpt4omini: {
+        name: "GPT-4o Mini",
+        description: "Fast and efficient for most everyday tasks.",
+        icon: ZapIcon
+    }
+};
 
 const ChatHeader = ({
     isArtifactsWindowOpen,
-    setIsArtifactsWindowOpen
+    setIsArtifactsWindowOpen,
+    onModelChange
 }: Props) => {
+    const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt4o");
+
+    const handleModelChange = (model: ModelKey) => {
+        setSelectedModel(model);
+        onModelChange(model);
+    };
+
+    const getModelDisplayName = (modelKey: ModelKey) => {
+        return modelInfo[modelKey]?.name;
+    };
+
+    const getModelDescription = (modelKey: ModelKey) => {
+        return modelInfo[modelKey]?.description;
+    };
+
+    const getModelIcon = (modelKey: ModelKey) => {
+        return modelInfo[modelKey]?.icon || SparkleIcon;
+    };
+
     return (
         <header className="flex w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
             <div className="flex container items-center justify-between">
@@ -51,10 +102,7 @@ const ChatHeader = ({
                                 variant="ghost"
                                 className="gap-1 rounded-xl px-3 h-10 data-[state=open]:bg-muted text-lg"
                             >
-                                ChatGPT{" "}
-                                <span className="text-muted-foreground">
-                                    3.5
-                                </span>
+                                {getModelDisplayName(selectedModel)}
                                 <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -62,26 +110,38 @@ const ChatHeader = ({
                             align="end"
                             className="max-w-[300px]"
                         >
-                            <DropdownMenuItem className="items-start gap-2">
-                                <SparkleIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
-                                <div>
-                                    <div className="font-medium">GPT-4</div>
-                                    <div className="text-muted-foreground/80">
-                                        With DALL-E, browsing, and analysis.
-                                        Limit 40 messages / 3 hours
-                                    </div>
-                                </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="items-start gap-2">
-                                <ZapIcon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
-                                <div>
-                                    <div className="font-medium">GPT-3.5</div>
-                                    <div className="text-muted-foreground/80">
-                                        Great for everyday tasks
-                                    </div>
-                                </div>
-                            </DropdownMenuItem>
+                            {(Object.keys(modelInfo) as ModelKey[]).map(
+                                (modelKey, index) => {
+                                    const Icon = getModelIcon(modelKey);
+                                    return (
+                                        <div key={modelKey}>
+                                            {index > 0 && (
+                                                <DropdownMenuSeparator />
+                                            )}
+                                            <DropdownMenuItem
+                                                className="items-start gap-2"
+                                                onClick={() =>
+                                                    handleModelChange(modelKey)
+                                                }
+                                            >
+                                                <Icon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
+                                                <div>
+                                                    <div className="font-medium">
+                                                        {getModelDisplayName(
+                                                            modelKey
+                                                        )}
+                                                    </div>
+                                                    <div className="text-muted-foreground/80">
+                                                        {getModelDescription(
+                                                            modelKey
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </DropdownMenuItem>
+                                        </div>
+                                    );
+                                }
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
