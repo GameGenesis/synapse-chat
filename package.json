@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@agentic/stdlib": "^6.2.4",
     "@ai-sdk/anthropic": "^0.0.30",
     "@ai-sdk/azure": "^0.0.12",
     "@ai-sdk/openai": "^0.0.36",

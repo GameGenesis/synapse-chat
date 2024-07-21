@@ -3,6 +3,13 @@ import { getModel, ModelKey, models } from "./model-provider";
 import { maxTokens, systemPrompt, temperature } from "./config";
 import { z } from "zod";
 
+import { createAISDKTools } from '@agentic/stdlib/ai-sdk'
+import { WeatherClient, WikipediaClient } from '@agentic/stdlib'
+
+const weather = new WeatherClient()
+// const bing = new BingClient()
+const wikipedia = new WikipediaClient()
+
 export const maxDuration = 1000;
 
 export async function POST(req: Request) {
@@ -18,18 +25,6 @@ export async function POST(req: Request) {
         temperature: temperature,
         messages: convertToCoreMessages(messages),
         tools: {
-            weather: tool({
-                description: "Get the weather in a location",
-                parameters: z.object({
-                    location: z
-                        .string()
-                        .describe("The location to get the weather for")
-                }),
-                execute: async ({ location }) => ({
-                    location,
-                    temperature: 72 + Math.floor(Math.random() * 21) - 10
-                })
-            }),
             time: tool({
                 description: "Get the current time",
                 parameters: z.object({
@@ -53,18 +48,7 @@ export async function POST(req: Request) {
                     })
                 }),
             }),
-            webSearch: tool({
-                description: "Search the web for current information",
-                parameters: z.object({
-                    query: z
-                        .string()
-                        .describe("The search query to look up on the web")
-                }),
-                execute: async ({ query }) => {
-                    const searchResults = `Mock search results for: "${query}". This is a placeholder result.`;
-                    return { results: searchResults };
-                }
-            })
+            ...createAISDKTools(weather, wikipedia)
         },
         toolChoice: "auto"
     });
