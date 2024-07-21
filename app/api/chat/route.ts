@@ -3,11 +3,15 @@ import { getModel, ModelKey, models } from "./model-provider";
 import { maxTokens, systemPrompt, temperature } from "./config";
 import { z } from "zod";
 
+import OpenAI from 'openai';
+
 import { createAISDKTools } from '@agentic/stdlib/ai-sdk'
-import { WeatherClient, WikipediaClient } from '@agentic/stdlib'
+import { BingClient, WeatherClient, WikipediaClient } from '@agentic/stdlib'
+
+const openai = new OpenAI();
 
 const weather = new WeatherClient()
-// const bing = new BingClient()
+const bing = new BingClient()
 const wikipedia = new WikipediaClient()
 
 export const maxDuration = 1000;
@@ -48,7 +52,22 @@ export async function POST(req: Request) {
                     })
                 }),
             }),
-            ...createAISDKTools(weather, wikipedia)
+            image: tool({
+                description: "Generate an image (using DALLE)",
+                parameters: z.object({
+                    prompt: z.string().describe("The prompt used to generate the image"),
+                    size: z.enum(["1024x1024", "256x256", "512x512", "1792x1024", "1024x1792"]).describe("The size of the image").default("1024x1024")
+                }),
+                execute: async({prompt, size}) => ({
+                    url: (await openai.images.generate({
+                        model: "dall-e-3",
+                        prompt,
+                        n: 1,
+                        size,
+                      })).data[0].url
+                })
+            }),
+            ...createAISDKTools(weather, wikipedia, bing)
         },
         toolChoice: "auto"
     });
