@@ -11,14 +11,15 @@ import {
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { LayoutPanelLeftIcon } from "lucide-react";
+import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
 import { MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
 
 interface Props {
-    isArtifactsWindowOpen: boolean;
-    setIsArtifactsWindowOpen: (open: boolean) => void;
+    isArtifactsOpen: boolean;
+    setIsArtifactsOpen: (open: boolean) => void;
     onModelChange: (model: ModelKey) => void;
+    onOpenSettings: () => void;
 }
 
 const modelInfo: Partial<
@@ -50,9 +51,10 @@ const modelInfo: Partial<
 };
 
 const ChatHeader = ({
-    isArtifactsWindowOpen,
-    setIsArtifactsWindowOpen,
-    onModelChange
+    isArtifactsOpen,
+    setIsArtifactsOpen,
+    onModelChange,
+    onOpenSettings
 }: Props) => {
     const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt4o");
 
@@ -145,18 +147,25 @@ const ChatHeader = ({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <div className="flex items-center gap-4">
-                    {!isArtifactsWindowOpen && (
+                <div className="flex space-x-2">
+                    {!isArtifactsOpen && (
                         <Button
                             variant="outline"
-                            size="sm"
-                            onClick={() => setIsArtifactsWindowOpen(true)}
+                            size="default"
+                            onClick={() => setIsArtifactsOpen(true)}
                             className="ml-auto"
                         >
                             <LayoutPanelLeftIcon className="w-4 h-4 mr-2" />
                             Open Artifacts
                         </Button>
                     )}
+                    <Button
+                        variant="default"
+                        size="icon"
+                        onClick={onOpenSettings}
+                    >
+                        <SettingsIcon className="h-4 w-4" />
+                    </Button>
                 </div>
             </div>
         </header>

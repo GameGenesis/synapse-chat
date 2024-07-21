@@ -29,9 +29,25 @@ import ChatFooter from "./chatfooter";
 import { maxToolRoundtrips } from "@/utils/consts";
 import { ModelKey } from "@/app/api/chat/model-provider";
 import ErrorMessage from "./errormessage";
+import { SettingsMenu } from "./settings";
+import {
+    DEFAULT_ENABLE_ARTIFACTS,
+    DEFAULT_ENABLE_SAFEGUARDS,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_TEMPERATURE
+} from "@/app/api/chat/config";
 
 export function Chat() {
     const [model, setModel] = useState<ModelKey>("gpt4o");
+    const [temperature, setTemperature] = useState(DEFAULT_TEMPERATURE);
+    const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
+    const [enableArtifacts, setEnableArtifacts] = useState(
+        DEFAULT_ENABLE_ARTIFACTS
+    );
+    const [enableSafeguards, setEnableSafeguards] = useState(
+        DEFAULT_ENABLE_SAFEGUARDS
+    );
+    const [systemPrompt, setSystemPrompt] = useState("");
 
     const {
         messages,
@@ -43,7 +59,14 @@ export function Chat() {
         stop,
         data
     } = useChat({
-        body: { model },
+        body: {
+            model,
+            temperature,
+            maxTokens,
+            enableArtifacts,
+            enableSafeguards,
+            userPrompt: systemPrompt
+        },
         onFinish: (message) => {
             console.log("Chat finished:", message);
         },
@@ -68,7 +91,8 @@ export function Chat() {
         }[]
     >([]);
 
-    const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
+    const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
@@ -175,7 +199,7 @@ export function Chat() {
 
                     if (!isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = true;
-                        setIsArtifactsWindowOpen(true);
+                        setIsArtifactsOpen(true);
                         setActiveTab("code");
                         setCurrentArtifactIndex(artifacts.length);
                         console.log("ISSUE SETTING TAB AGAIN");
@@ -347,7 +371,7 @@ export function Chat() {
     }, [currentArtifact]);
 
     const openArtifact = (identifier: string) => {
-        setIsArtifactsWindowOpen(true);
+        setIsArtifactsOpen(true);
         setCurrentArtifactIndex(
             artifacts.indexOf(
                 artifacts.filter(
@@ -367,16 +391,31 @@ export function Chat() {
 
     return (
         <div className="flex flex-col h-screen w-full">
+            <SettingsMenu
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                temperature={temperature}
+                setTemperature={setTemperature}
+                maxTokens={maxTokens}
+                setMaxTokens={setMaxTokens}
+                enableArtifacts={enableArtifacts}
+                setEnableArtifacts={setEnableArtifacts}
+                enableSafeguards={enableSafeguards}
+                setEnableSafeguards={setEnableSafeguards}
+                systemPrompt={systemPrompt}
+                setSystemPrompt={setSystemPrompt}
+            />
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
-                        isArtifactsWindowOpen ? "w-3/5" : "w-full"
+                        isArtifactsOpen ? "w-3/5" : "w-full"
                     } h-full bg-background transition-all duration-300`}
                 >
                     <ChatHeader
-                        isArtifactsWindowOpen={isArtifactsWindowOpen}
-                        setIsArtifactsWindowOpen={setIsArtifactsWindowOpen}
+                        isArtifactsOpen={isArtifactsOpen}
+                        setIsArtifactsOpen={setIsArtifactsOpen}
                         onModelChange={(newModel) => setModel(newModel)}
+                        onOpenSettings={() => setIsSettingsOpen(true)}
                     />
                     <div
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
@@ -444,7 +483,7 @@ export function Chat() {
                         isLoading={isLoading}
                     />
                 </div>
-                {isArtifactsWindowOpen && (
+                {isArtifactsOpen && (
                     <div className="max-w-2/5 w-2/5 overflow-x-hidden bg-background border-l flex flex-col h-full">
                         <div className="flex items-center justify-between px-4 py-2 border-b">
                             <h3 className="text-md font-medium truncate pr-4">
@@ -481,9 +520,7 @@ export function Chat() {
                                     variant="ghost"
                                     size="icon"
                                     className="rounded-full"
-                                    onClick={() =>
-                                        setIsArtifactsWindowOpen(false)
-                                    }
+                                    onClick={() => setIsArtifactsOpen(false)}
                                 >
                                     <XIcon className="w-5 h-5" />
                                     <span className="sr-only">Close</span>

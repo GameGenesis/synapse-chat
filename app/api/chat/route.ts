@@ -1,22 +1,40 @@
 import { convertToCoreMessages, StreamData, streamText, tool } from "ai";
 import { getModel, ModelKey, models } from "./model-provider";
-import { maxTokens, systemPrompt, temperature } from "./config";
 import { tools } from "./tools";
+import buildPrompt from "./prompt-builder";
 
 export const maxDuration = 1000;
 
 export async function POST(req: Request) {
-    const { messages, model }: { messages: any; model: ModelKey } =
-        await req.json();
+    const {
+        messages,
+        model,
+        temperature,
+        maxTokens,
+        enableArtifacts,
+        enableSafeguards,
+        userPrompt
+    }: {
+        messages: any;
+        model: ModelKey;
+        temperature: number;
+        maxTokens: number;
+        enableArtifacts: boolean;
+        enableSafeguards: boolean;
+        userPrompt?: string;
+    } = await req.json();
 
+    const system = buildPrompt(enableArtifacts, enableSafeguards, userPrompt);
+    console.log("TEMPERATURE: ", temperature);
+    console.log(system);
     const data = new StreamData();
-    data.append({})
+    data.append({});
 
     const result = await streamText({
         model: getModel(models[model]),
-        system: systemPrompt,
-        maxTokens: maxTokens,
-        temperature: temperature,
+        system,
+        temperature,
+        maxTokens,
         messages: convertToCoreMessages(messages),
         tools,
         toolChoice: "auto",
@@ -25,7 +43,7 @@ export async function POST(req: Request) {
                 data.append({
                     completionTokens: result.usage.completionTokens,
                     promptTokens: result.usage.promptTokens,
-                    totalTokens: result.usage.totalTokens,
+                    totalTokens: result.usage.totalTokens
                 });
             }
             data.close();
