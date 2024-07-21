@@ -18,7 +18,8 @@ import { ModelKey } from "@/app/api/chat/model-provider";
 interface Props {
     isArtifactsOpen: boolean;
     setIsArtifactsOpen: (open: boolean) => void;
-    onModelChange: (model: ModelKey) => void;
+    selectedModel: ModelKey;
+    onModelSelect: (model: ModelKey) => void;
     onOpenSettings: () => void;
 }
 
@@ -53,13 +54,11 @@ const modelInfo: Partial<
 const ChatHeader = ({
     isArtifactsOpen,
     setIsArtifactsOpen,
-    onModelChange,
+    selectedModel,
+    onModelSelect: onModelChange,
     onOpenSettings
 }: Props) => {
-    const [selectedModel, setSelectedModel] = useState<ModelKey>("gpt4o");
-
     const handleModelChange = (model: ModelKey) => {
-        setSelectedModel(model);
         onModelChange(model);
     };
 

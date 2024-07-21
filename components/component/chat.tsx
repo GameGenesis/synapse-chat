@@ -36,11 +36,12 @@ import {
     DEFAULT_ENABLE_SAFEGUARDS,
     DEFAULT_ENABLE_TOOLS,
     DEFAULT_MAX_TOKENS,
+    DEFAULT_MODEL,
     DEFAULT_TEMPERATURE
 } from "@/app/api/chat/config";
 
 export function Chat() {
-    const [model, setModel] = useState<ModelKey>("gpt4o");
+    const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
     const [temperature, setTemperature] = useState(DEFAULT_TEMPERATURE);
     const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
     const [enableArtifacts, setEnableArtifacts] = useState(
@@ -426,7 +427,8 @@ export function Chat() {
                     <ChatHeader
                         isArtifactsOpen={isArtifactsOpen}
                         setIsArtifactsOpen={setIsArtifactsOpen}
-                        onModelChange={(newModel) => setModel(newModel)}
+                        selectedModel={model}
+                        onModelSelect={(newModel) => setModel(newModel)}
                         onOpenSettings={() => setIsSettingsOpen(true)}
                     />
                     <div
