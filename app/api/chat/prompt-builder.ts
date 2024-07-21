@@ -7,13 +7,19 @@ import {
 
 const buildPrompt = (
     enableArtifacts: boolean,
+    enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
     userPrompt?: string
 ) => {
-    return `${enableArtifacts ? artifactPrompt : ""}${assistantPrompt.replace(
-        "{{SAFEGUARDS}}",
-        enableSafeguards ? safetyPrompt.trim() : ""
-    )}\n${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+    let defaultPrompt = ""
+    if (enableDefaultPrompt) {
+        defaultPrompt = assistantPrompt.replace(
+            "{{SAFEGUARDS}}",
+            enableSafeguards ? safetyPrompt.trim() : ""
+        )
+    }
+    
+    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}\n${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
         userPrompt ?
         `\n---\n<user_system_prompt>${userPrompt}</user_system_prompt>` : ""
     }`;

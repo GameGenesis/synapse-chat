@@ -20,8 +20,12 @@ interface Props {
     setMaxTokens: (value: number) => void;
     enableArtifacts: boolean;
     setEnableArtifacts: (value: boolean) => void;
+    enableDefaultPrompt: boolean;
+    setEnableDefaultPrompt: (value: boolean) => void;
     enableSafeguards: boolean;
     setEnableSafeguards: (value: boolean) => void;
+    enableTools: boolean;
+    setEnableTools: (value: boolean) => void;
     systemPrompt: string;
     setSystemPrompt: (value: string) => void;
 }
@@ -35,8 +39,12 @@ export function SettingsMenu({
     setMaxTokens,
     enableArtifacts,
     setEnableArtifacts,
+    enableDefaultPrompt,
+    setEnableDefaultPrompt,
     enableSafeguards,
     setEnableSafeguards,
+    enableTools,
+    setEnableTools,
     systemPrompt,
     setSystemPrompt
 }: Props) {
@@ -111,12 +119,39 @@ export function SettingsMenu({
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch
+                            id="enableDefaultPrompt"
+                            checked={enableDefaultPrompt}
+                            onCheckedChange={(checked: boolean) => {
+                                setEnableDefaultPrompt(checked);
+                                setEnableSafeguards(
+                                    checked && enableSafeguards
+                                );
+                            }}
+                        />
+                        <Label htmlFor="enableDefaultPrompt">
+                            Enable Default System Prompt
+                        </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch
                             id="enableSafeguards"
                             checked={enableSafeguards}
                             onCheckedChange={setEnableSafeguards}
+                            disabled={!enableDefaultPrompt}
                         />
                         <Label htmlFor="enableSafeguards">
                             Enable Safeguards
+                        </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="enableTools"
+                            checked={enableTools}
+                            onCheckedChange={setEnableTools}
+                        />
+                        <Label htmlFor="enableTools">
+                            Enable Tools (DALLE, Bing, Weather, Wikipedia,
+                            Calculator, Time)
                         </Label>
                     </div>
                     <div className="grid w-full gap-1.5">
