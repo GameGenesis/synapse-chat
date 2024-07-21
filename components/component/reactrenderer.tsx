@@ -4,6 +4,7 @@ import * as LucideIcons from "lucide-react";
 import * as RadixIcons from "@radix-ui/react-icons";
 import * as ShadcnComponents from "@/components/ui";
 import { Runner } from "react-runner";
+import ErrorMessage from "./errormessage";
 
 export const ReactRenderer = ({ code }: { code: string }) => {
     const [error, setError] = useState<string | undefined>("");
@@ -43,9 +44,7 @@ export const ReactRenderer = ({ code }: { code: string }) => {
                 onRendered={(e) => setError(e?.message)}
             />
             {error && (
-                <div className="text-red-500 text-wrap overflow-y-auto mx-2">
-                    Error: {error}
-                </div>
+                <ErrorMessage title="React Rendering Error" message={error} />
             )}
         </div>
     );

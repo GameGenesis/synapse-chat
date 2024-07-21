@@ -28,6 +28,7 @@ import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import { maxToolRoundtrips } from "@/utils/consts";
 import { ModelKey } from "@/app/api/chat/model-provider";
+import ErrorMessage from "./errormessage";
 
 export function Chat() {
     const [model, setModel] = useState<ModelKey>("gpt4o");
@@ -245,10 +246,10 @@ export function Chat() {
                     return <ReactRenderer code={artifact.content || ""} />;
                 } catch (error) {
                     return (
-                        <div>
-                            Encountered an error while trying to display the
-                            React component
-                        </div>
+                        <ErrorMessage
+                            title="React Component Error"
+                            message="An error occurred while trying to display the React component. Please check the component code for any issues."
+                        />
                     );
                 }
             case "application/mermaid":
@@ -256,10 +257,10 @@ export function Chat() {
                     return <Mermaid chart={artifact.content || ""} />;
                 } catch (error) {
                     return (
-                        <div>
-                            Encountered an error while trying to display the
-                            Diagram
-                        </div>
+                        <ErrorMessage
+                            title="Diagram Error"
+                            message="An error occurred while trying to display the Mermaid diagram. Please verify the diagram syntax."
+                        />
                     );
                 }
             case "text/markdown":
@@ -269,7 +270,12 @@ export function Chat() {
                     </CustomMarkdown>
                 );
             default:
-                return <div>Unsupported artifact type: {artifact.type}</div>;
+                return (
+                    <ErrorMessage
+                        title="Unsupported Artifact"
+                        message={`The artifact type "${artifact.type}" is not supported.`}
+                    />
+                );
         }
     }, []);
 
