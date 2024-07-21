@@ -36,7 +36,7 @@ export const tools = {
             })
         })
     }),
-    image: tool({
+    dalle_image_generation: tool({
         description: "Generate an image (using DALLE)",
         parameters: z.object({
             prompt: z
