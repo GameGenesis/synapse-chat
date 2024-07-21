@@ -27,7 +27,11 @@ export const ReactRenderer = ({ code }: { code: string }) => {
             "@/components/ui/card": ShadcnComponents,
             "@/components/ui/dialog": ShadcnComponents,
             "@/components/ui/dropdown-menu": ShadcnComponents,
+            "@/components/ui/input": ShadcnComponents,
+            "@/components/ui/label": ShadcnComponents,
             "@/components/ui/sheet": ShadcnComponents,
+            "@/components/ui/slider": ShadcnComponents,
+            "@/components/ui/switch": ShadcnComponents,
             "@/components/ui/tabs": ShadcnComponents,
             "@/components/ui/textarea": ShadcnComponents,
             "@/components/ui/tooltip": ShadcnComponents
