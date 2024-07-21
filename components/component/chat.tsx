@@ -61,7 +61,11 @@ export function Chat() {
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
     const [cleanedMessages, setCleanedMessages] = useState<
-        { content: string; artifact?: Artifact; model?: ModelKey }[]
+        {
+            content: string;
+            artifact?: Artifact;
+            model?: ModelKey;
+        }[]
     >([]);
 
     const [isArtifactsWindowOpen, setIsArtifactsWindowOpen] = useState(false);
@@ -408,6 +412,17 @@ export function Chat() {
                                         tools={m.toolInvocations?.map(
                                             (tool) => tool.toolName
                                         )}
+                                        usage={
+                                            data &&
+                                            data.length > 0 &&
+                                            data[index]
+                                                ? JSON.parse(
+                                                      JSON.stringify(
+                                                          data[index]
+                                                      )
+                                                  )
+                                                : undefined
+                                        }
                                     />
                                 ))}
                             {error && (

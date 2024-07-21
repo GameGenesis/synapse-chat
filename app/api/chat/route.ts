@@ -1,4 +1,4 @@
-import { convertToCoreMessages, streamText, tool } from "ai";
+import { convertToCoreMessages, StreamData, streamText, tool } from "ai";
 import { getModel, ModelKey, models } from "./model-provider";
 import { maxTokens, systemPrompt, temperature } from "./config";
 import { tools } from "./tools";
@@ -9,7 +9,8 @@ export async function POST(req: Request) {
     const { messages, model }: { messages: any; model: ModelKey } =
         await req.json();
 
-    console.log(model);
+    const data = new StreamData();
+    data.append({})
 
     const result = await streamText({
         model: getModel(models[model]),
@@ -18,8 +19,18 @@ export async function POST(req: Request) {
         temperature: temperature,
         messages: convertToCoreMessages(messages),
         tools,
-        toolChoice: "auto"
+        toolChoice: "auto",
+        onFinish: (result) => {
+            if (result.text) {
+                data.append({
+                    completionTokens: result.usage.completionTokens,
+                    promptTokens: result.usage.promptTokens,
+                    totalTokens: result.usage.totalTokens,
+                });
+            }
+            data.close();
+        }
     });
 
-    return result.toAIStreamResponse();
+    return result.toAIStreamResponse({ data });
 }

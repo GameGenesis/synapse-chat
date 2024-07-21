@@ -1,11 +1,18 @@
 import { Artifact } from "@/types";
-import { Children, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
 import { Loader2 } from "lucide-react";
 import AttachmentModal from "./modal";
 import { FileIcon } from "@radix-ui/react-icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
+
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip";
 
 export const Response = ({
     content,
@@ -14,7 +21,8 @@ export const Response = ({
     onArtifactClick,
     attachments,
     model,
-    tools
+    tools,
+    usage
 }: {
     content: string;
     role: string;
@@ -23,6 +31,11 @@ export const Response = ({
     attachments?: { contentType: string; name: string; url: string }[];
     model?: ModelKey;
     tools?: string[];
+    usage?: {
+        completionTokens: number;
+        promptTokens: number;
+        totalTokens: number;
+    };
 }) => {
     return (
         <div>
@@ -35,6 +48,7 @@ export const Response = ({
                     onArtifactClick={onArtifactClick}
                     model={model}
                     tools={tools}
+                    usage={usage}
                 />
             )}
         </div>
@@ -46,13 +60,19 @@ export const AIResponse = ({
     artifact,
     onArtifactClick,
     model,
-    tools
+    tools,
+    usage
 }: {
     content: string;
     artifact?: Artifact;
     onArtifactClick?: (identifier: string) => void;
     model?: ModelKey;
     tools?: string[];
+    usage?: {
+        completionTokens: number;
+        promptTokens: number;
+        totalTokens: number;
+    };
 }) => {
     const processedContent = useMemo(() => {
         if (!artifact || !onArtifactClick) {
@@ -102,12 +122,33 @@ export const AIResponse = ({
                 <AvatarFallback>OA</AvatarFallback>
             </Avatar>
             <div className="grid gap-1 break-words">
-                <div className="font-bold flex items-center gap-2">
-                    Assistant
+                <div className="flex items-center gap-2">
+                    <span className="font-bold">Assistant</span>
                     {model && (
-                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                            {model}
-                        </span>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="font-semibold text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                        {model}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {usage && (
+                                        <div className="flex flex-col space-y-1">
+                                            <span>
+                                                Output Tokens:{" "}
+                                                {usage?.completionTokens ||
+                                                    "N/A"}
+                                            </span>
+                                            <span>
+                                                Context Tokens:{" "}
+                                                {usage?.promptTokens || "N/A"}
+                                            </span>
+                                        </div>
+                                    )}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     )}
                 </div>
                 <div className="prose text-muted-foreground">
