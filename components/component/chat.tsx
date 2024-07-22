@@ -427,6 +427,10 @@ export function Chat() {
                     } h-full bg-background transition-all duration-300`}
                 >
                     <ChatHeader
+                        artifacts={
+                            (artifacts && artifacts.length > 0) ||
+                            !!currentArtifactRef.current
+                        }
                         isArtifactsOpen={isArtifactsOpen}
                         setIsArtifactsOpen={setIsArtifactsOpen}
                         selectedModel={model}

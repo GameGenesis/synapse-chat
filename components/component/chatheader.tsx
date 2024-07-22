@@ -16,6 +16,7 @@ import { MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
 
 interface Props {
+    artifacts: boolean;
     isArtifactsOpen: boolean;
     setIsArtifactsOpen: (open: boolean) => void;
     selectedModel: ModelKey;
@@ -52,6 +53,7 @@ const modelInfo: Partial<
 };
 
 const ChatHeader = ({
+    artifacts,
     isArtifactsOpen,
     setIsArtifactsOpen,
     selectedModel,
@@ -147,7 +149,7 @@ const ChatHeader = ({
                     </DropdownMenu>
                 </div>
                 <div className="flex space-x-2">
-                    {!isArtifactsOpen && (
+                    {artifacts && !isArtifactsOpen && (
                         <Button
                             variant="outline"
                             size="default"
