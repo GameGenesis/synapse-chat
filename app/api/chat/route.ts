@@ -3,7 +3,6 @@ import { getModel, ModelKey, models } from "./model-provider";
 import { tools } from "./tools";
 import buildPrompt from "./prompt-builder";
 
-export const runtime = "edge";
 export const maxDuration = 1000;
 
 export async function POST(req: Request) {
