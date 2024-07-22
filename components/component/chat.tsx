@@ -19,7 +19,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
-import { Artifact } from "@/types";
+import { Artifact, CombinedMessage } from "@/types";
 import { CustomMarkdown } from "./markdown";
 import { CopyIcon, DownloadIcon, RefreshIcon, XIcon } from "./icons";
 import { Mermaid } from "./mermaid";
@@ -40,7 +40,7 @@ import {
     DEFAULT_TEMPERATURE
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
-import { generateId, ToolInvocation } from "ai";
+import { generateId, Message, ToolInvocation } from "ai";
 import { FastForwardIcon } from "lucide-react";
 
 export function Chat() {
@@ -101,15 +101,6 @@ export function Chat() {
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
 
-    const [cleanedMessages, setCleanedMessages] = useState<
-        {
-            content: string;
-            artifact?: Artifact;
-            model?: ModelKey;
-            toolInvocations?: ToolInvocation[];
-        }[]
-    >([]);
-
     const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -119,19 +110,18 @@ export function Chat() {
 
     const [showContinueButton, setShowContinueButton] = useState(false);
 
+    const [combinedMessages, setCombinedMessages] = useState<CombinedMessage[]>(
+        []
+    );
+
     const processMessage = useCallback(
         (content: string, index: number) => {
             if (!content.includes("<assistant")) {
-                setCleanedMessages((prev) => {
-                    const updatedMessages = [...prev];
-                    updatedMessages[index] = {
-                        content,
-                        artifact: undefined,
-                        model: updatedMessages[index]?.model || model
-                    };
-                    return updatedMessages;
-                });
-                return { content, undefined };
+                return {
+                    cleanedContent: content,
+                    artifact: undefined,
+                    model: combinedMessages[index]?.model || model
+                };
             }
 
             let cleanedContent = content;
@@ -228,24 +218,89 @@ export function Chat() {
                 currentArtifactRef.current = artifact;
             }
 
-            setCleanedMessages((prev) => {
-                const updatedMessages = [...prev];
-                updatedMessages[index] = {
-                    content: cleanedContent,
-                    artifact: artifact || undefined,
-                    model: updatedMessages[index]?.model || model
-                };
-                return updatedMessages;
-            });
-
-            return { cleanedContent, artifact };
+            return {
+                cleanedContent,
+                artifact,
+                model: combinedMessages[index]?.model || model
+            };
         },
         [artifacts.length, messages.length]
     );
 
     useEffect(() => {
-        console.log("MESSAGES: ", messages);
-        console.log("CLEANED MESSAGES: ", cleanedMessages);
+        const processMessages = () => {
+            const latestMessageIndex = messages.length - 1;
+            const latestMessage = messages[latestMessageIndex];
+
+            if (!latestMessage) return;
+
+            const { cleanedContent, artifact, model } = processMessage(
+                latestMessage.content,
+                latestMessageIndex
+            );
+
+            let newCombinedMessages = [...combinedMessages];
+
+            if (
+                newCombinedMessages.length > 0 &&
+                newCombinedMessages[newCombinedMessages.length - 1].role ===
+                    latestMessage.role
+            ) {
+                // Update the last combined message
+                const lastCombinedMessage =
+                    newCombinedMessages[newCombinedMessages.length - 1];
+                lastCombinedMessage.originalContent = latestMessage.content;
+                lastCombinedMessage.processedContent = cleanedContent;
+                lastCombinedMessage.states.push({
+                    content: cleanedContent || "",
+                    artifact: artifact || undefined,
+                    timestamp: Date.now()
+                });
+                const data = latestMessage.data as any;
+                if (data) {
+                    lastCombinedMessage.promptTokens = data.promptTokens;
+                    lastCombinedMessage.completionTokens = data.promptTokens;
+                    lastCombinedMessage.totalTokens = data.totalTokens;
+                    lastCombinedMessage.finishReason = data.finishReason;
+                }
+            } else {
+                // Create a new combined message
+                newCombinedMessages.push({
+                    id: latestMessage.id,
+                    role: latestMessage.role,
+                    originalContent: latestMessage.content,
+                    processedContent: cleanedContent || "",
+                    attachments: latestMessage.experimental_attachments,
+                    artifact: artifact || undefined,
+                    model,
+                    toolInvocations: latestMessage.toolInvocations,
+                    ...(latestMessage.data as object),
+                    states: [
+                        {
+                            content: cleanedContent || "",
+                            artifact: artifact || undefined,
+                            timestamp: Date.now()
+                        }
+                    ]
+                });
+            }
+
+            setCombinedMessages(newCombinedMessages);
+        };
+
+        const latestMessageIndex = messages.length - 1;
+        const latestMessage = messages[latestMessageIndex];
+
+        if (
+            latestMessage &&
+            latestMessage.content !== lastProcessedMessageRef.current
+        ) {
+            processMessages();
+            lastProcessedMessageRef.current = latestMessage.content;
+        }
+    }, [messages, model, processMessage, combinedMessages]);
+
+    useEffect(() => {
         if (messages && messages[messages.length - 1]) {
             messages[messages.length - 1].data = data &&
                 data.length > 0 && {
@@ -263,19 +318,6 @@ export function Chat() {
             }
         }
     }, [messages.length, data]);
-
-    useEffect(() => {
-        const latestMessageIndex = messages.length - 1;
-        const latestMessage = messages[latestMessageIndex];
-        if (
-            latestMessage &&
-            latestMessage.role === "assistant" &&
-            latestMessage.content !== lastProcessedMessageRef.current
-        ) {
-            processMessage(latestMessage.content, latestMessageIndex);
-            lastProcessedMessageRef.current = latestMessage.content;
-        }
-    }, [messages, processMessage]);
 
     const getAttributeValue = (attributes: string, attr: string) => {
         const match = attributes.match(new RegExp(`${attr}="([^"]*)"`));
@@ -481,49 +523,35 @@ export function Chat() {
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
-                            {messages.length === 0 ? (
+                            {combinedMessages.length === 0 ? (
                                 <DefaultPrompts
                                     addMessage={(message) => append(message)}
                                 />
                             ) : (
-                                messages.map((m, index) => (
+                                combinedMessages.map((m, index) => (
                                     <Response
                                         key={m.id}
                                         role={m.role}
-                                        artifact={
-                                            cleanedMessages[index]?.artifact ||
-                                            currentArtifact
-                                        }
-                                        content={
-                                            m.role === "user"
-                                                ? m.content
-                                                : cleanedMessages[index]
-                                                      ?.content || m.content
-                                        }
+                                        artifact={m.artifact}
+                                        content={m.processedContent}
                                         onArtifactClick={(identifier) =>
                                             openArtifact(identifier)
                                         }
-                                        attachments={
-                                            (m?.experimental_attachments as {
-                                                contentType: string;
-                                                name: string;
-                                                url: string;
-                                            }[]) || undefined
-                                        }
-                                        model={cleanedMessages[index]?.model}
+                                        attachments={m.attachments}
+                                        model={m.model}
                                         tools={m.toolInvocations?.map(
                                             (tool) => tool.toolName
                                         )}
-                                        usage={
-                                            m.data
-                                                ? JSON.parse(
-                                                      JSON.stringify(m.data)
-                                                  )
-                                                : undefined
-                                        }
+                                        usage={{
+                                            completionTokens:
+                                                m.completionTokens,
+                                            promptTokens: m.promptTokens,
+                                            totalTokens: m.totalTokens
+                                        }}
                                         onRegenerate={reload}
                                         isLatestResponse={
-                                            index === messages.length - 1 &&
+                                            index ===
+                                                combinedMessages.length - 1 &&
                                             m.role === "assistant"
                                         }
                                     />

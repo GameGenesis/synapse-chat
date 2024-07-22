@@ -35,9 +35,9 @@ export const Response = ({
     model?: ModelKey;
     tools?: string[];
     usage?: {
-        completionTokens: number;
-        promptTokens: number;
-        totalTokens: number;
+        completionTokens?: number;
+        promptTokens?: number;
+        totalTokens?: number;
     };
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
@@ -80,9 +80,9 @@ export const AIResponse = ({
     model?: ModelKey;
     tools?: string[];
     usage?: {
-        completionTokens: number;
-        promptTokens: number;
-        totalTokens: number;
+        completionTokens?: number;
+        promptTokens?: number;
+        totalTokens?: number;
     };
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
