@@ -13,6 +13,7 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import { RefreshIcon } from "./icons";
+import Image from "next/image";
 
 export const Response = ({
     content,
@@ -253,14 +254,15 @@ const AttachmentPreview = ({
             <div className="w-full overflow-y-auto flex flex-row items-center space-x-2 row-auto space-y-2">
                 {attachments?.map((attachment, index) =>
                     attachment?.contentType?.startsWith("image/") ? (
-                        <img
-                            className="rounded-md cursor-pointer hover:opacity-80 transition-opacity my-2 cursor-pointer"
+                        <Image
+                            className="rounded-md cursor-pointer hover:opacity-80 transition-opacity my-2"
                             width={250}
                             height={250}
                             key={index}
                             src={attachment.url}
                             alt={attachment.name}
                             onClick={() => handleAttachmentClick(attachment)}
+                            loader={() => attachment.url}
                         />
                     ) : (
                         <div

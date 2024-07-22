@@ -6,6 +6,7 @@ import {
     DialogDescription
 } from "@/components/ui";
 import { FileIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 
 interface AttachmentModalProps {
     isOpen: boolean;
@@ -51,10 +52,14 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                 </DialogDescription>
                 <div className="mt-4 flex-grow overflow-auto">
                     {isImage ? (
-                        <img
+                        <Image
                             src={fallback || URL.createObjectURL(file)}
                             alt={file.name}
+                            width={0}
+                            height={0}
                             className="max-w-full max-h-[calc(90vh-10rem)] object-contain mx-auto"
+                            style={{ width: "auto", height: "auto" }}
+                            loader={() => fallback || URL.createObjectURL(file)}
                         />
                     ) : (
                         <div className="flex flex-col h-full w-full">

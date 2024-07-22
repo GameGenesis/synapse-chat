@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import AttachmentModal from "./modal";
 import { PaperclipIcon } from "lucide-react";
 import { StopIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
 
 interface Props {
     input: string;
@@ -123,6 +124,7 @@ const ChatFooter = ({
 
     const renderFilePreview = (file: File) => {
         const isImage = file.type.startsWith("image/");
+        const imageSrc = isImage ? URL.createObjectURL(file) : "";
         return (
             <div
                 key={file.name}
@@ -133,10 +135,13 @@ const ChatFooter = ({
                 }}
             >
                 {isImage ? (
-                    <img
-                        src={URL.createObjectURL(file)}
+                    <Image
+                        src={imageSrc}
                         alt={file.name}
+                        width={0}
+                        height={0}
                         className="w-8 h-8 object-cover mr-2"
+                        loader={() => imageSrc}
                     />
                 ) : (
                     <div className="w-8 h-8 bg-gray-300 flex items-center justify-center mr-2 rounded">
