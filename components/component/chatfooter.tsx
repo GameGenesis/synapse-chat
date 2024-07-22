@@ -8,6 +8,7 @@ import { XIcon, ArrowUpIcon } from "./icons";
 import toast from "react-hot-toast";
 import AttachmentModal from "./modal";
 import { PaperclipIcon } from "lucide-react";
+import { StopIcon } from "@heroicons/react/24/solid";
 
 interface Props {
     input: string;
@@ -17,13 +18,15 @@ interface Props {
         options?: any
     ) => void;
     isLoading: boolean;
+    handleStop: () => void;
 }
 
 const ChatFooter = ({
     input,
     handleInputChange,
     handleSubmit,
-    isLoading
+    isLoading,
+    handleStop
 }: Props) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMultiline, setIsMultiline] = useState(false);
@@ -226,17 +229,24 @@ const ChatFooter = ({
                         className="hidden"
                     />
                     <Button
-                        type="submit"
+                        type={isLoading ? "button" : "submit"}
                         size="icon"
                         disabled={
-                            isLoading ||
-                            (input.length === 0 &&
-                                (!files || files.length === 0))
+                            !isLoading &&
+                            input.length === 0 &&
+                            (!files || files.length === 0)
                         }
                         className="absolute w-8 h-8 bottom-2 right-3 rounded-full items-center justify-center z-10"
+                        onClick={handleStop}
                     >
-                        <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
-                        <span className="sr-only">Send</span>
+                        {isLoading ? (
+                            <StopIcon className="w-4 h-4 text-primary-foreground" />
+                        ) : (
+                            <ArrowUpIcon className="w-4 h-4 text-primary-foreground" />
+                        )}
+                        <span className="sr-only">
+                            {isLoading ? "Stop" : "Send"}
+                        </span>
                     </Button>
                 </form>
             </div>

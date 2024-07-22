@@ -507,6 +507,7 @@ export function Chat() {
                         handleInputChange={handleInputChange}
                         handleSubmit={handleSubmit}
                         isLoading={isLoading}
+                        handleStop={stop}
                     />
                 </div>
                 {isArtifactsOpen && (
