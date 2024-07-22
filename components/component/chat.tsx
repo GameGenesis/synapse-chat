@@ -227,6 +227,10 @@ export function Chat() {
         [artifacts.length, messages.length]
     );
 
+    const [regeneratingMessageId, setRegeneratingMessageId] = useState<
+        string | null
+    >(null);
+
     useEffect(() => {
         const processMessages = () => {
             const latestMessageIndex = messages.length - 1;
@@ -241,48 +245,83 @@ export function Chat() {
 
             let newCombinedMessages = [...combinedMessages];
 
-            if (
-                newCombinedMessages.length > 0 &&
-                newCombinedMessages[newCombinedMessages.length - 1].role ===
-                    latestMessage.role
-            ) {
-                // Update the last combined message
-                const lastCombinedMessage =
-                    newCombinedMessages[newCombinedMessages.length - 1];
-                lastCombinedMessage.originalContent = latestMessage.content;
-                lastCombinedMessage.processedContent = cleanedContent;
-                lastCombinedMessage.states.push({
-                    content: cleanedContent || "",
-                    artifact: artifact || undefined,
-                    timestamp: Date.now()
-                });
-                const data = latestMessage.data as any;
-                if (data) {
-                    lastCombinedMessage.promptTokens = data.promptTokens;
-                    lastCombinedMessage.completionTokens = data.promptTokens;
-                    lastCombinedMessage.totalTokens = data.totalTokens;
-                    lastCombinedMessage.finishReason = data.finishReason;
+            // Check if we're regenerating a message
+            if (regeneratingMessageId && latestMessage.role === "assistant") {
+                // Find the index of the message we're regenerating
+                const regeneratedIndex = newCombinedMessages.findIndex(
+                    (m) => m.id === regeneratingMessageId
+                );
+
+                if (regeneratedIndex !== -1) {
+                    // Update the regenerated message
+                    newCombinedMessages[regeneratedIndex] = {
+                        ...newCombinedMessages[regeneratedIndex],
+                        id: latestMessage.id, // Update with the new message ID
+                        originalContent: latestMessage.content,
+                        processedContent: cleanedContent,
+                        artifact: artifact || undefined,
+                        model,
+                        toolInvocations: latestMessage.toolInvocations,
+                        ...(latestMessage.data as object),
+                        states: [
+                            ...newCombinedMessages[regeneratedIndex].states,
+                            {
+                                content: cleanedContent || "",
+                                artifact: artifact || undefined,
+                                timestamp: Date.now()
+                            }
+                        ]
+                    };
+
+                    // Reset the regeneratingMessageId
+                    setRegeneratingMessageId(null);
                 }
             } else {
-                // Create a new combined message
-                newCombinedMessages.push({
-                    id: latestMessage.id,
-                    role: latestMessage.role,
-                    originalContent: latestMessage.content,
-                    processedContent: cleanedContent || "",
-                    attachments: latestMessage.experimental_attachments,
-                    artifact: artifact || undefined,
-                    model,
-                    toolInvocations: latestMessage.toolInvocations,
-                    ...(latestMessage.data as object),
-                    states: [
-                        {
-                            content: cleanedContent || "",
-                            artifact: artifact || undefined,
-                            timestamp: Date.now()
-                        }
-                    ]
-                });
+                // Normal message processing (new message or update)
+                const existingMessageIndex = newCombinedMessages.findIndex(
+                    (m) => m.id === latestMessage.id
+                );
+
+                if (existingMessageIndex !== -1) {
+                    // Update existing message
+                    newCombinedMessages[existingMessageIndex] = {
+                        ...newCombinedMessages[existingMessageIndex],
+                        originalContent: latestMessage.content,
+                        processedContent: cleanedContent,
+                        artifact: artifact || undefined,
+                        model,
+                        toolInvocations: latestMessage.toolInvocations,
+                        ...(latestMessage.data as object),
+                        states: [
+                            ...newCombinedMessages[existingMessageIndex].states,
+                            {
+                                content: cleanedContent || "",
+                                artifact: artifact || undefined,
+                                timestamp: Date.now()
+                            }
+                        ]
+                    };
+                } else {
+                    // Add new message
+                    newCombinedMessages.push({
+                        id: latestMessage.id,
+                        role: latestMessage.role,
+                        originalContent: latestMessage.content,
+                        processedContent: cleanedContent || "",
+                        attachments: latestMessage.experimental_attachments,
+                        artifact: artifact || undefined,
+                        model,
+                        toolInvocations: latestMessage.toolInvocations,
+                        ...(latestMessage.data as object),
+                        states: [
+                            {
+                                content: cleanedContent || "",
+                                artifact: artifact || undefined,
+                                timestamp: Date.now()
+                            }
+                        ]
+                    });
+                }
             }
 
             setCombinedMessages(newCombinedMessages);
@@ -298,7 +337,24 @@ export function Chat() {
             processMessages();
             lastProcessedMessageRef.current = latestMessage.content;
         }
-    }, [messages, model, processMessage, combinedMessages]);
+    }, [
+        messages,
+        model,
+        processMessage,
+        combinedMessages,
+        regeneratingMessageId
+    ]);
+
+    // Modify the reload function to set the regeneratingMessageId
+    const handleReload = useCallback(() => {
+        const lastAssistantMessage = combinedMessages.findLast(
+            (m) => m.role === "assistant"
+        );
+        if (lastAssistantMessage) {
+            setRegeneratingMessageId(lastAssistantMessage.id);
+        }
+        reload();
+    }, [combinedMessages, reload]);
 
     useEffect(() => {
         if (messages && messages[messages.length - 1]) {
@@ -548,7 +604,7 @@ export function Chat() {
                                             promptTokens: m.promptTokens,
                                             totalTokens: m.totalTokens
                                         }}
-                                        onRegenerate={reload}
+                                        onRegenerate={handleReload}
                                         isLatestResponse={
                                             index ===
                                                 combinedMessages.length - 1 &&
