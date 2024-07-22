@@ -11,6 +11,7 @@ import {
     CalculatorIcon,
     BeakerIcon
 } from "@heroicons/react/24/outline";
+import { generateId, Message } from "ai";
 
 interface Prompt {
     icon: React.ElementType;
@@ -83,28 +84,16 @@ const allPrompts: Prompt[] = [
 ];
 
 interface DefaultPromptsProps {
-    setInput: (value: string) => void;
-    handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    addMessage: (message: Message) => void;
 }
 
-const DefaultPrompts: React.FC<DefaultPromptsProps> = ({
-    setInput,
-    handleSubmit
-}) => {
+const DefaultPrompts: React.FC<DefaultPromptsProps> = ({ addMessage }) => {
     const [randomPrompts, setRandomPrompts] = useState<Prompt[]>([]);
-    const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
         const shuffled = [...allPrompts].sort(() => 0.5 - Math.random());
         setRandomPrompts(shuffled.slice(0, 4));
     }, []);
-
-    const handlePromptSelect = (prompt: string) => {
-        setInput(prompt);
-        if (formRef.current) {
-            setTimeout(() => formRef.current?.requestSubmit(), 0);
-        }
-    };
 
     if (randomPrompts.length === 0) {
         return null;
@@ -121,7 +110,13 @@ const DefaultPrompts: React.FC<DefaultPromptsProps> = ({
                         <button
                             key={index}
                             className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 text-center h-full"
-                            onClick={() => handlePromptSelect(item.prompt)}
+                            onClick={() =>
+                                addMessage({
+                                    id: generateId(),
+                                    role: "user",
+                                    content: item.prompt
+                                })
+                            }
                         >
                             <div
                                 className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${item.color}`}
@@ -135,9 +130,6 @@ const DefaultPrompts: React.FC<DefaultPromptsProps> = ({
                     ))}
                 </div>
             </div>
-            <form ref={formRef} onSubmit={handleSubmit} className="hidden">
-                <input type="submit" />
-            </form>
         </>
     );
 };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
-import { MenuIcon, SparkleIcon, ZapIcon } from "./icons";
+import { MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
+import { useState } from "react";
+import Sidebar from "./sidebar";
 
 interface Props {
     artifacts: boolean;
@@ -22,6 +23,7 @@ interface Props {
     selectedModel: ModelKey;
     onModelSelect: (model: ModelKey) => void;
     onOpenSettings: () => void;
+    onNewChat: () => void;
 }
 
 const modelInfo: Partial<
@@ -57,11 +59,14 @@ const ChatHeader = ({
     isArtifactsOpen,
     setIsArtifactsOpen,
     selectedModel,
-    onModelSelect: onModelChange,
-    onOpenSettings
+    onModelSelect,
+    onOpenSettings,
+    onNewChat
 }: Props) => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     const handleModelChange = (model: ModelKey) => {
-        onModelChange(model);
+        onModelSelect(model);
     };
 
     const getModelDisplayName = (modelKey: ModelKey) => {
@@ -80,23 +85,27 @@ const ChatHeader = ({
         <header className="flex align-middle justify-center w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
             <div className="flex container items-center justify-between mx-auto">
                 <div className="flex items-center gap-4">
-                    <Sheet>
+                    <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                            >
-                                <MenuIcon className="w-6 h-6" />
-                                <span className="sr-only">
-                                    Toggle navigation
-                                </span>
+                            <Button variant="default" size="icon">
+                                <MenuIcon className="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left">
-                            <div className="grid gap-2 py-6" />
+                        <SheetContent
+                            side="left"
+                            className="w-[300px] sm:w-[400px] p-0"
+                        >
+                            <Sidebar onNewChat={onNewChat} />
                         </SheetContent>
                     </Sheet>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="hidden md:flex"
+                        onClick={onNewChat}
+                    >
+                        <NewChatIcon className="h-5 w-5" />
+                    </Button>
                 </div>
                 <div className="flex items-center gap-4">
                     <DropdownMenu>

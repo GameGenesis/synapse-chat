@@ -12,6 +12,7 @@ import {
     TooltipProvider,
     TooltipTrigger
 } from "@/components/ui/tooltip";
+import { RefreshIcon } from "./icons";
 
 export const Response = ({
     content,
@@ -21,7 +22,9 @@ export const Response = ({
     attachments,
     model,
     tools,
-    usage
+    usage,
+    onRegenerate,
+    isLatestResponse
 }: {
     content: string;
     role: string;
@@ -35,6 +38,8 @@ export const Response = ({
         promptTokens: number;
         totalTokens: number;
     };
+    onRegenerate?: () => void;
+    isLatestResponse?: boolean;
 }) => {
     return (
         <div>
@@ -48,6 +53,8 @@ export const Response = ({
                     model={model}
                     tools={tools}
                     usage={usage}
+                    onRegenerate={onRegenerate}
+                    isLatestResponse={isLatestResponse}
                 />
             )}
         </div>
@@ -60,7 +67,9 @@ export const AIResponse = ({
     onArtifactClick,
     model,
     tools,
-    usage
+    usage,
+    onRegenerate,
+    isLatestResponse
 }: {
     content: string;
     artifact?: Artifact;
@@ -72,6 +81,8 @@ export const AIResponse = ({
         promptTokens: number;
         totalTokens: number;
     };
+    onRegenerate?: () => void;
+    isLatestResponse?: boolean;
 }) => {
     const processedContent = useMemo(() => {
         if (!artifact || !onArtifactClick) {
@@ -116,34 +127,48 @@ export const AIResponse = ({
                 <AvatarImage src="/placeholder-user.jpg" />
                 <AvatarFallback>OA</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words">
-                <div className="flex items-center gap-2">
-                    <span className="font-bold">Assistant</span>
-                    {model && (
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <span className="font-semibold text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                        {model}
-                                    </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {usage && (
-                                        <div className="flex flex-col space-y-1">
-                                            <span>
-                                                Output Tokens:{" "}
-                                                {usage?.completionTokens ||
-                                                    "N/A"}
-                                            </span>
-                                            <span>
-                                                Context Tokens:{" "}
-                                                {usage?.promptTokens || "N/A"}
-                                            </span>
-                                        </div>
-                                    )}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+            <div className="grid gap-1 break-words w-full">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold">Assistant</span>
+                        {model && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <span className="font-semibold text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                            {model}
+                                        </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {usage && (
+                                            <div className="flex flex-col space-y-1">
+                                                <span>
+                                                    Output Tokens:{" "}
+                                                    {usage?.completionTokens ||
+                                                        "N/A"}
+                                                </span>
+                                                <span>
+                                                    Context Tokens:{" "}
+                                                    {usage?.promptTokens ||
+                                                        "N/A"}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
+                    </div>
+                    {isLatestResponse && onRegenerate && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onRegenerate}
+                            className="flex items-center gap-2"
+                        >
+                            <RefreshIcon className="w-4 h-4" />
+                            Regenerate
+                        </Button>
                     )}
                 </div>
                 <div className="prose text-muted-foreground">

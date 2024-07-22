@@ -59,13 +59,15 @@ export function Chat() {
 
     const {
         messages,
+        setMessages,
         input,
-        setInput,
+        append,
         handleInputChange,
         handleSubmit,
         isLoading,
         error,
         stop,
+        reload,
         data
     } = useChat({
         body: {
@@ -189,7 +191,6 @@ export function Chat() {
                             artifact as Artifact
                         ]);
                         setActiveTab("preview");
-                        console.log("ISSUE SETTING NEW ARTIFACT");
                     }
                 } else {
                     // Incomplete artifact (streaming)
@@ -213,7 +214,6 @@ export function Chat() {
                         setIsArtifactsOpen(true);
                         setActiveTab("code");
                         setCurrentArtifactIndex(artifacts.length);
-                        console.log("ISSUE SETTING TAB AGAIN");
                     }
                 }
 
@@ -227,8 +227,6 @@ export function Chat() {
                     artifact: artifact || undefined,
                     model: updatedMessages[index]?.model || model
                 };
-                console.log("MESSAGES", messages);
-                console.log("UPDATED MESSAGES", updatedMessages);
                 return updatedMessages;
             });
 
@@ -236,6 +234,14 @@ export function Chat() {
         },
         [artifacts.length, messages.length]
     );
+
+    useEffect(() => {
+        console.log("MESSAGES: ", messages);
+        if (messages && messages[messages.length - 1]) {
+            messages[messages.length - 1].data =
+                data && data.length > 0 && data[data?.length - 1];
+        }
+    }, [messages.length, data]);
 
     useEffect(() => {
         const nonEmptyMessages = messages.filter((message) => message.content);
@@ -436,6 +442,10 @@ export function Chat() {
                         selectedModel={model}
                         onModelSelect={(newModel) => setModel(newModel)}
                         onOpenSettings={() => setIsSettingsOpen(true)}
+                        onNewChat={() => {
+                            stop();
+                            setMessages([]);
+                        }}
                     />
                     <div
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
@@ -443,8 +453,7 @@ export function Chat() {
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
                             {messages.length === 0 ? (
                                 <DefaultPrompts
-                                    setInput={setInput}
-                                    handleSubmit={handleSubmit}
+                                    addMessage={(message) => append(message)}
                                 />
                             ) : (
                                 messages
@@ -481,15 +490,20 @@ export function Chat() {
                                                 (tool) => tool.toolName
                                             )}
                                             usage={
-                                                data &&
-                                                data.length > 0 &&
-                                                data[index]
+                                                m.data
                                                     ? JSON.parse(
-                                                          JSON.stringify(
-                                                              data[index]
-                                                          )
+                                                          JSON.stringify(m.data)
                                                       )
                                                     : undefined
+                                            }
+                                            onRegenerate={reload}
+                                            isLatestResponse={
+                                                index ===
+                                                    messages.filter(
+                                                        (m) => m.content !== ""
+                                                    ).length -
+                                                        1 &&
+                                                m.role === "assistant"
                                             }
                                         />
                                     ))
