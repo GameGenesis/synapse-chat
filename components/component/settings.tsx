@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -19,14 +19,16 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
+import { ModelKey } from "@/app/api/chat/model-provider";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    selectedModel: ModelKey;
     temperature: number;
     setTemperature: (value: number) => void;
     maxTokens: number;
-    setMaxTokens: (value: number) => void;
+    setMaxTokens: React.Dispatch<React.SetStateAction<number>>;
     enableArtifacts: boolean;
     setEnableArtifacts: (value: boolean) => void;
     enableInstructions: boolean;
@@ -42,6 +44,7 @@ interface Props {
 export function SettingsMenu({
     isOpen,
     onClose,
+    selectedModel,
     temperature,
     setTemperature,
     maxTokens,
@@ -57,6 +60,20 @@ export function SettingsMenu({
     systemPrompt,
     setSystemPrompt
 }: Props) {
+    const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
+    useEffect(() => {
+        const newMaxPossibleOutput =
+            selectedModel === "gpt4omini" ? 16384 : 4096;
+        setMaxPossibleOutput(newMaxPossibleOutput);
+        setMaxTokens((prevMaxTokens) =>
+            Math.min(prevMaxTokens, newMaxPossibleOutput)
+        );
+    }, [selectedModel]);
+
+    const handleSetMaxTokens = (value: number) => {
+        setMaxTokens(Math.min(Math.max(1, value), maxPossibleOutput));
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[550px]">
@@ -109,7 +126,7 @@ export function SettingsMenu({
                                 <Slider
                                     id="maxTokens"
                                     min={1}
-                                    max={4096}
+                                    max={maxPossibleOutput}
                                     step={1}
                                     value={[maxTokens]}
                                     onValueChange={(value) =>
@@ -121,10 +138,12 @@ export function SettingsMenu({
                                     type="number"
                                     value={maxTokens}
                                     onChange={(e) =>
-                                        setMaxTokens(Number(e.target.value))
+                                        handleSetMaxTokens(
+                                            Number(e.target.value)
+                                        )
                                     }
                                     min={1}
-                                    max={4096}
+                                    max={maxPossibleOutput}
                                     step={1}
                                     className="w-20"
                                 />

@@ -436,6 +436,7 @@ export function Chat() {
             <SettingsMenu
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
+                selectedModel={model}
                 temperature={temperature}
                 setTemperature={setTemperature}
                 maxTokens={maxTokens}
