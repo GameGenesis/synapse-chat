@@ -40,6 +40,8 @@ import {
     DEFAULT_TEMPERATURE
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
+import { generateId } from "ai";
+import { FastForwardIcon } from "lucide-react";
 
 export function Chat() {
     const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
@@ -110,6 +112,8 @@ export function Chat() {
     const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
+
+    const [showContinueButton, setShowContinueButton] = useState(false);
 
     const processMessage = useCallback(
         (content: string, index: number) => {
@@ -238,8 +242,20 @@ export function Chat() {
     useEffect(() => {
         console.log("MESSAGES: ", messages);
         if (messages && messages[messages.length - 1]) {
-            messages[messages.length - 1].data =
-                data && data.length > 0 && data[data?.length - 1];
+            messages[messages.length - 1].data = data &&
+                data.length > 0 && {
+                    ...(messages[messages.length - 1].data as object),
+                    ...(data[data?.length - 1] as object)
+                };
+
+            setShowContinueButton(
+                (messages[messages.length - 1].data as any)?.finishReason ===
+                    "length"
+            );
+
+            if (messages[messages.length - 1].role !== "assistant") {
+                setShowContinueButton(false);
+            }
         }
     }, [messages.length, data]);
 
@@ -406,6 +422,15 @@ export function Chat() {
         }
     }, [currentArtifact]);
 
+    const handleContinueResponse = () => {
+        append({
+            id: generateId(),
+            role: "system",
+            content: "Continue Response"
+        });
+        setShowContinueButton(false);
+    };
+
     return (
         <div className="flex flex-col h-screen w-full">
             <SettingsMenu
@@ -520,6 +545,17 @@ export function Chat() {
                             )}
                         </div>
                     </div>
+                    {showContinueButton && (
+                        <div className="fixed bottom-20 left-4 z-10">
+                            <Button
+                                onClick={handleContinueResponse}
+                                className="flex items-center space-x-2 shadow-lg"
+                            >
+                                <FastForwardIcon className="w-5 h-5" />
+                                <span>Continue Response</span>
+                            </Button>
+                        </div>
+                    )}
                     <ChatFooter
                         input={input}
                         handleInputChange={handleInputChange}

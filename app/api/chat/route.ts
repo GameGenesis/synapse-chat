@@ -45,11 +45,12 @@ export async function POST(req: Request) {
                 data.append({
                     completionTokens: result.usage.completionTokens,
                     promptTokens: result.usage.promptTokens,
-                    totalTokens: result.usage.totalTokens
+                    totalTokens: result.usage.totalTokens,
+                    finishReason: result.finishReason
                 });
             }
             data.close();
-        }
+        },
     });
 
     return result.toAIStreamResponse({ data });

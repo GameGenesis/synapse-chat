@@ -41,6 +41,8 @@ export const Response = ({
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
 }) => {
+    if (role !== "user" && role !== "assistant") return;
+
     return (
         <div>
             {role === "user" ? (
