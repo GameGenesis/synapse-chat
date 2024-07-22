@@ -40,7 +40,7 @@ import {
     DEFAULT_TEMPERATURE
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
-import { generateId } from "ai";
+import { generateId, ToolInvocation } from "ai";
 import { FastForwardIcon } from "lucide-react";
 
 export function Chat() {
@@ -82,6 +82,9 @@ export function Chat() {
             enableTools,
             userPrompt: systemPrompt
         },
+        onResponse: (response: Response) => {
+            console.log("Received response from server:", response);
+        },
         onFinish: (message) => {
             console.log("Chat finished:", message);
         },
@@ -103,6 +106,7 @@ export function Chat() {
             content: string;
             artifact?: Artifact;
             model?: ModelKey;
+            toolInvocations?: ToolInvocation[];
         }[]
     >([]);
 
@@ -127,7 +131,7 @@ export function Chat() {
                     };
                     return updatedMessages;
                 });
-                return;
+                return { content, undefined };
             }
 
             let cleanedContent = content;
@@ -241,6 +245,7 @@ export function Chat() {
 
     useEffect(() => {
         console.log("MESSAGES: ", messages);
+        console.log("CLEANED MESSAGES: ", cleanedMessages);
         if (messages && messages[messages.length - 1]) {
             messages[messages.length - 1].data = data &&
                 data.length > 0 && {
@@ -260,9 +265,8 @@ export function Chat() {
     }, [messages.length, data]);
 
     useEffect(() => {
-        const nonEmptyMessages = messages.filter((message) => message.content);
-        const latestMessageIndex = nonEmptyMessages.length - 1;
-        const latestMessage = nonEmptyMessages[latestMessageIndex];
+        const latestMessageIndex = messages.length - 1;
+        const latestMessage = messages[latestMessageIndex];
         if (
             latestMessage &&
             latestMessage.role === "assistant" &&
@@ -482,66 +486,54 @@ export function Chat() {
                                     addMessage={(message) => append(message)}
                                 />
                             ) : (
-                                messages
-                                    .filter((m) => m.content !== "")
-                                    .map((m, index) => (
-                                        <Response
-                                            key={m.id}
-                                            role={m.role}
-                                            artifact={
-                                                cleanedMessages[index]
-                                                    ?.artifact ||
-                                                currentArtifact
-                                            }
-                                            content={
-                                                m.role === "user"
-                                                    ? m.content
-                                                    : cleanedMessages[index]
-                                                          ?.content || m.content
-                                            }
-                                            onArtifactClick={(identifier) =>
-                                                openArtifact(identifier)
-                                            }
-                                            attachments={
-                                                (m?.experimental_attachments as {
-                                                    contentType: string;
-                                                    name: string;
-                                                    url: string;
-                                                }[]) || undefined
-                                            }
-                                            model={
-                                                cleanedMessages[index]?.model
-                                            }
-                                            tools={m.toolInvocations?.map(
-                                                (tool) => tool.toolName
-                                            )}
-                                            usage={
-                                                m.data
-                                                    ? JSON.parse(
-                                                          JSON.stringify(m.data)
-                                                      )
-                                                    : undefined
-                                            }
-                                            onRegenerate={reload}
-                                            isLatestResponse={
-                                                index ===
-                                                    messages.filter(
-                                                        (m) => m.content !== ""
-                                                    ).length -
-                                                        1 &&
-                                                m.role === "assistant"
-                                            }
-                                        />
-                                    ))
+                                messages.map((m, index) => (
+                                    <Response
+                                        key={m.id}
+                                        role={m.role}
+                                        artifact={
+                                            cleanedMessages[index]?.artifact ||
+                                            currentArtifact
+                                        }
+                                        content={
+                                            m.role === "user"
+                                                ? m.content
+                                                : cleanedMessages[index]
+                                                      ?.content || m.content
+                                        }
+                                        onArtifactClick={(identifier) =>
+                                            openArtifact(identifier)
+                                        }
+                                        attachments={
+                                            (m?.experimental_attachments as {
+                                                contentType: string;
+                                                name: string;
+                                                url: string;
+                                            }[]) || undefined
+                                        }
+                                        model={cleanedMessages[index]?.model}
+                                        tools={m.toolInvocations?.map(
+                                            (tool) => tool.toolName
+                                        )}
+                                        usage={
+                                            m.data
+                                                ? JSON.parse(
+                                                      JSON.stringify(m.data)
+                                                  )
+                                                : undefined
+                                        }
+                                        onRegenerate={reload}
+                                        isLatestResponse={
+                                            index === messages.length - 1 &&
+                                            m.role === "assistant"
+                                        }
+                                    />
+                                ))
                             )}
                             {error && (
                                 <AIResponse
-                                    content={`Encountered an Error: ${
-                                        error.message ||
-                                        error.cause ||
-                                        error.name ||
-                                        error.stack
-                                    }`}
+                                    content="Encountered an Error"
+                                    onRegenerate={reload}
+                                    isLatestResponse
                                 />
                             )}
                         </div>
