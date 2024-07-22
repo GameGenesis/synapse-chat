@@ -5,6 +5,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import { useState } from "react";
 import AttachmentModal from "./modal";
+import Image from "next/image";
 
 export const CustomMarkdown = ({
     children,
@@ -61,13 +62,30 @@ export const CustomMarkdown = ({
                     h6: ({ node, ...props }) => (
                         <h6 className="text-sm font-medium my-1" {...props} />
                     ),
-                    img: ({ node, ...props }) => (
-                        <img
-                            {...props}
-                            onClick={() => openImageModal(props.src || "")}
-                            className="cursor-pointer hover:opacity-80 transition-opacity"
-                        />
-                    ),
+                    img: ({ node, ...props }) => {
+                        const { src, alt, width, height, ...rest } = props;
+                        return (
+                            <Image
+                                {...rest}
+                                src={src || ""}
+                                alt={alt || "Image"}
+                                onClick={() => openImageModal(src || "")}
+                                className="cursor-pointer hover:opacity-80 transition-opacity"
+                                width={
+                                    typeof width === "number"
+                                        ? width
+                                        : parseInt(width || "", 10) || 0
+                                }
+                                height={
+                                    typeof height === "number"
+                                        ? height
+                                        : parseInt(height || "", 10) || 0
+                                }
+                                layout="responsive"
+                                loader={() => src || ""}
+                            />
+                        );
+                    },
                     code({
                         node,
                         inline,
