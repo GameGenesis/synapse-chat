@@ -232,7 +232,7 @@ const AttachmentPreview = ({
                 {attachments?.map((attachment, index) =>
                     attachment?.contentType?.startsWith("image/") ? (
                         <img
-                            className="rounded-md my-2 cursor-pointer"
+                            className="rounded-md cursor-pointer hover:opacity-80 transition-opacity my-2 cursor-pointer"
                             width={250}
                             height={250}
                             key={index}

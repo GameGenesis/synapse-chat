@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import { useState } from "react";
+import AttachmentModal from "./modal";
 
 export const CustomMarkdown = ({
     children,
@@ -13,12 +14,21 @@ export const CustomMarkdown = ({
     className?: string;
 }) => {
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const copyToClipboard = (code: string) => {
         navigator.clipboard.writeText(code).then(() => {
             setCopiedCode(code);
             setTimeout(() => setCopiedCode(null), 3000);
         });
+    };
+
+    const openImageModal = (src: string) => {
+        setSelectedImage(src);
+    };
+
+    const closeImageModal = () => {
+        setSelectedImage(null);
     };
 
     return (
@@ -50,6 +60,13 @@ export const CustomMarkdown = ({
                     ),
                     h6: ({ node, ...props }) => (
                         <h6 className="text-sm font-medium my-1" {...props} />
+                    ),
+                    img: ({ node, ...props }) => (
+                        <img
+                            {...props}
+                            onClick={() => openImageModal(props.src || "")}
+                            className="cursor-pointer hover:opacity-80 transition-opacity"
+                        />
                     ),
                     code({
                         node,
@@ -99,6 +116,18 @@ export const CustomMarkdown = ({
             >
                 {typeof children === "string" ? children : children?.toString()}
             </Markdown>
+            <AttachmentModal
+                isOpen={!!selectedImage}
+                onClose={closeImageModal}
+                file={
+                    selectedImage
+                        ? new File([selectedImage], "image.png", {
+                              type: "image/png"
+                          })
+                        : null
+                }
+                fallback={selectedImage || ""}
+            />
         </div>
     );
 };

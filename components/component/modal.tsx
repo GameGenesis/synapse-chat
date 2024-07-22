@@ -52,7 +52,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                 <div className="mt-4 flex-grow overflow-auto">
                     {isImage ? (
                         <img
-                            src={URL.createObjectURL(file) || fallback}
+                            src={fallback || URL.createObjectURL(file)}
                             alt={file.name}
                             className="max-w-full max-h-[calc(90vh-10rem)] object-contain mx-auto"
                         />

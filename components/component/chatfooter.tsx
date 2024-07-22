@@ -76,7 +76,7 @@ const ChatFooter = ({
 
     useEffect(() => {
         adjustTextareaHeight();
-    }, [input]);
+    }, [input, handleInputChange]);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {

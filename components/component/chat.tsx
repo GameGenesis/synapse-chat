@@ -39,6 +39,7 @@ import {
     DEFAULT_MODEL,
     DEFAULT_TEMPERATURE
 } from "@/app/api/chat/config";
+import DefaultPrompts from "./defaultprompts";
 
 export function Chat() {
     const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
@@ -59,6 +60,7 @@ export function Chat() {
     const {
         messages,
         input,
+        setInput,
         handleInputChange,
         handleSubmit,
         isLoading,
@@ -435,49 +437,59 @@ export function Chat() {
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
-                            {messages
-                                .filter((m) => m.content !== "")
-                                .map((m, index) => (
-                                    <Response
-                                        key={m.id}
-                                        role={m.role}
-                                        artifact={
-                                            cleanedMessages[index]?.artifact ||
-                                            currentArtifact
-                                        }
-                                        content={
-                                            m.role === "user"
-                                                ? m.content
-                                                : cleanedMessages[index]
-                                                      ?.content || m.content
-                                        }
-                                        onArtifactClick={(identifier) =>
-                                            openArtifact(identifier)
-                                        }
-                                        attachments={
-                                            (m?.experimental_attachments as {
-                                                contentType: string;
-                                                name: string;
-                                                url: string;
-                                            }[]) || undefined
-                                        }
-                                        model={cleanedMessages[index]?.model}
-                                        tools={m.toolInvocations?.map(
-                                            (tool) => tool.toolName
-                                        )}
-                                        usage={
-                                            data &&
-                                            data.length > 0 &&
-                                            data[index]
-                                                ? JSON.parse(
-                                                      JSON.stringify(
-                                                          data[index]
+                            {messages.length < 0 ? (
+                                <DefaultPrompts
+                                    setInput={setInput}
+                                    handleSubmit={handleSubmit}
+                                />
+                            ) : (
+                                messages
+                                    .filter((m) => m.content !== "")
+                                    .map((m, index) => (
+                                        <Response
+                                            key={m.id}
+                                            role={m.role}
+                                            artifact={
+                                                cleanedMessages[index]
+                                                    ?.artifact ||
+                                                currentArtifact
+                                            }
+                                            content={
+                                                m.role === "user"
+                                                    ? m.content
+                                                    : cleanedMessages[index]
+                                                          ?.content || m.content
+                                            }
+                                            onArtifactClick={(identifier) =>
+                                                openArtifact(identifier)
+                                            }
+                                            attachments={
+                                                (m?.experimental_attachments as {
+                                                    contentType: string;
+                                                    name: string;
+                                                    url: string;
+                                                }[]) || undefined
+                                            }
+                                            model={
+                                                cleanedMessages[index]?.model
+                                            }
+                                            tools={m.toolInvocations?.map(
+                                                (tool) => tool.toolName
+                                            )}
+                                            usage={
+                                                data &&
+                                                data.length > 0 &&
+                                                data[index]
+                                                    ? JSON.parse(
+                                                          JSON.stringify(
+                                                              data[index]
+                                                          )
                                                       )
-                                                  )
-                                                : undefined
-                                        }
-                                    />
-                                ))}
+                                                    : undefined
+                                            }
+                                        />
+                                    ))
+                            )}
                             {error && (
                                 <AIResponse
                                     content={`Encountered an Error: ${
