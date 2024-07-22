@@ -137,7 +137,7 @@ export const RefreshIcon = (props: SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const ArrowUpIcon = (props: SVGProps<SVGSVGElement>) => (
+export const ArrowUpIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -152,5 +152,3 @@ const ArrowUpIcon = (props: SVGProps<SVGSVGElement>) => (
         <polyline points="5 12 12 5 19 12" />
     </svg>
 );
-
-export default ArrowUpIcon;

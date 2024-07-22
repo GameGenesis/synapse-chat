@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { supportedFileFormats } from "@/utils/consts";
 import { FileIcon } from "@radix-ui/react-icons";
-import ArrowUpIcon, { XIcon } from "./icons";
+import { XIcon, ArrowUpIcon } from "./icons";
 import toast from "react-hot-toast";
 import AttachmentModal from "./modal";
 import { PaperclipIcon } from "lucide-react";

@@ -2,7 +2,6 @@ import { Artifact } from "@/types";
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
-import { Loader2 } from "lucide-react";
 import AttachmentModal from "./modal";
 import { FileIcon } from "@radix-ui/react-icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
@@ -83,7 +82,6 @@ export const AIResponse = ({
         const elements = parts.map((part, index) => {
             const match = part.match(/\[ARTIFACT:([^\]]+)\]/);
             if (match && match[1] === artifact.identifier) {
-                const isGenerating = !artifact.content;
                 return (
                     <Button
                         key={index}
@@ -92,9 +90,6 @@ export const AIResponse = ({
                         onClick={() => onArtifactClick(artifact.identifier)}
                         className="my-2"
                     >
-                        {isGenerating && (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
                         {artifact.title}
                     </Button>
                 );
