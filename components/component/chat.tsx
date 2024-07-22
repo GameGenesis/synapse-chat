@@ -437,7 +437,7 @@ export function Chat() {
                         className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
-                            {messages.length < 0 ? (
+                            {messages.length === 0 ? (
                                 <DefaultPrompts
                                     setInput={setInput}
                                     handleSubmit={handleSubmit}
