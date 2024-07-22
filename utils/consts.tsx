@@ -22,4 +22,5 @@ export const supportedFileFormats = [
     ".c",
     ".csv"
 ];
+// export const supportedFileFormats = ["image/*", "text/*"];
 export const maxToolRoundtrips = 3;
