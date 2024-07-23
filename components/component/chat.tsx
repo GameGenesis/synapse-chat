@@ -5,7 +5,6 @@ import { useChat } from "ai/react";
 import { Artifact, CombinedMessage } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
-import { maxToolRoundtrips } from "@/utils/consts";
 import { ModelKey } from "@/app/api/chat/model-provider";
 import { SettingsMenu } from "./settings";
 import {
@@ -15,7 +14,8 @@ import {
     DEFAULT_ENABLE_TOOLS,
     DEFAULT_MAX_TOKENS,
     DEFAULT_MODEL,
-    DEFAULT_TEMPERATURE
+    DEFAULT_TEMPERATURE,
+    maxToolRoundtrips
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
 import { generateId } from "ai";
