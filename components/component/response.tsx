@@ -242,7 +242,11 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                 type: attachment.contentType
             })
         );
-        setSelectedFileFallback(atob(attachment.url.split(",")[1]));
+        setSelectedFileFallback(
+            attachment.contentType.includes("image/")
+                ? attachment.url
+                : atob(attachment.url.split(",")[1])
+        );
         setIsModalOpen(true);
     };
 
@@ -268,7 +272,7 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                                     alt={attachment.name}
                                     layout="fill"
                                     objectFit="cover"
-                                    loader={() => attachment.url}
+                                    unoptimized
                                 />
                             </div>
                         ) : (
