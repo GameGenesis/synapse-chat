@@ -1,4 +1,4 @@
-import { Artifact } from "@/types";
+import { Artifact, Data } from "@/types";
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
@@ -23,11 +23,7 @@ interface ResponseProps {
     attachments?: { contentType: string; name: string; url: string }[];
     model?: ModelKey;
     tools?: string[];
-    usage?: {
-        completionTokens?: number;
-        promptTokens?: number;
-        totalTokens?: number;
-    };
+    data?: Data;
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
 }
@@ -40,7 +36,7 @@ export const Response = ({
     attachments,
     model,
     tools,
-    usage,
+    data,
     onRegenerate,
     isLatestResponse
 }: ResponseProps) => {
@@ -57,7 +53,7 @@ export const Response = ({
                     onArtifactClick={onArtifactClick}
                     model={model}
                     tools={tools}
-                    usage={usage}
+                    data={data}
                     onRegenerate={onRegenerate}
                     isLatestResponse={isLatestResponse}
                 />
@@ -65,21 +61,6 @@ export const Response = ({
         </div>
     );
 };
-
-interface AIResponseProps {
-    content: string;
-    artifact?: Artifact;
-    onArtifactClick?: (identifier: string) => void;
-    model?: ModelKey;
-    tools?: string[];
-    usage?: {
-        completionTokens?: number;
-        promptTokens?: number;
-        totalTokens?: number;
-    };
-    onRegenerate?: () => void;
-    isLatestResponse?: boolean;
-}
 
 interface UserResponseProps {
     children: React.ReactNode;
@@ -106,13 +87,24 @@ export const UserResponse = ({ children, attachments }: UserResponseProps) => {
     );
 };
 
+interface AIResponseProps {
+    content: string;
+    artifact?: Artifact;
+    onArtifactClick?: (identifier: string) => void;
+    model?: ModelKey;
+    tools?: string[];
+    data?: Data;
+    onRegenerate?: () => void;
+    isLatestResponse?: boolean;
+}
+
 export const AIResponse = ({
     content,
     artifact,
     onArtifactClick,
     model,
     tools,
-    usage,
+    data,
     onRegenerate,
     isLatestResponse
 }: AIResponseProps) => {
@@ -172,16 +164,16 @@ export const AIResponse = ({
                                         </span>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        {usage && (
+                                        {data && (
                                             <div className="flex flex-col space-y-1">
                                                 <span>
                                                     Output Tokens:{" "}
-                                                    {usage?.completionTokens ||
+                                                    {data?.completionTokens ||
                                                         "N/A"}
                                                 </span>
                                                 <span>
                                                     Context Tokens:{" "}
-                                                    {usage?.promptTokens ||
+                                                    {data?.promptTokens ||
                                                         "N/A"}
                                                 </span>
                                             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
-import { Artifact, CombinedMessage } from "@/types";
+import { Artifact, CombinedMessage, Data } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import { ModelKey } from "@/app/api/chat/model-provider";
@@ -46,6 +46,7 @@ export function Chat() {
     const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
+    const lastDataIndexRef = useRef<number | undefined>();
 
     const [showContinueButton, setShowContinueButton] = useState(false);
 
@@ -221,6 +222,21 @@ export function Chat() {
                 latestMessageIndex
             );
 
+            const {
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                finishReason
+            } =
+                data && data.length > 0
+                    ? (data[data?.length - 1] as Data)
+                    : {
+                          promptTokens: undefined,
+                          completionTokens: undefined,
+                          totalTokens: undefined,
+                          finishReason: undefined
+                      };
+
             let newCombinedMessages = [...combinedMessages];
 
             // Check if we're regenerating a message
@@ -240,7 +256,10 @@ export function Chat() {
                         artifact: artifact || undefined,
                         model,
                         toolInvocations: latestMessage.toolInvocations,
-                        ...(latestMessage.data as object),
+                        promptTokens,
+                        completionTokens,
+                        totalTokens,
+                        finishReason,
                         states: [
                             ...newCombinedMessages[regeneratedIndex].states,
                             {
@@ -269,7 +288,10 @@ export function Chat() {
                         artifact: artifact || undefined,
                         model,
                         toolInvocations: latestMessage.toolInvocations,
-                        ...(latestMessage.data as object),
+                        promptTokens,
+                        completionTokens,
+                        totalTokens,
+                        finishReason,
                         states: [
                             ...newCombinedMessages[
                                 existingMessageIndex
@@ -292,7 +314,10 @@ export function Chat() {
                         artifact: artifact || undefined,
                         model,
                         toolInvocations: latestMessage.toolInvocations,
-                        ...(latestMessage.data as object),
+                        promptTokens,
+                        completionTokens,
+                        totalTokens,
+                        finishReason,
                         states: [
                             {
                                 content: cleanedContent || "",
@@ -311,19 +336,22 @@ export function Chat() {
         const latestMessage = messages[latestMessageIndex];
 
         if (
-            latestMessage &&
-            latestMessage.content !== lastProcessedMessageRef.current
+            (latestMessage &&
+                latestMessage.content !== lastProcessedMessageRef.current) ||
+            (data && lastDataIndexRef.current != data.length)
         ) {
-            console.log("MESSAGES: ", combinedMessages);
             processMessages();
             lastProcessedMessageRef.current = latestMessage.content;
+            lastDataIndexRef.current = data?.length;
+            console.log("MESSAGES: ", combinedMessages);
         }
     }, [
         messages,
         model,
         processMessage,
         combinedMessages,
-        regeneratingMessageId
+        regeneratingMessageId,
+        data
     ]);
 
     // Modify the reload function to set the regeneratingMessageId
@@ -446,11 +474,12 @@ export function Chat() {
                                         tools={m.toolInvocations?.map(
                                             (tool) => tool.toolName
                                         )}
-                                        usage={{
+                                        data={{
                                             completionTokens:
                                                 m.completionTokens,
                                             promptTokens: m.promptTokens,
-                                            totalTokens: m.totalTokens
+                                            totalTokens: m.totalTokens,
+                                            finishReason: m.finishReason
                                         }}
                                         onRegenerate={handleReload}
                                         isLatestResponse={

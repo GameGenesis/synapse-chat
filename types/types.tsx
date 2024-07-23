@@ -16,9 +16,33 @@ export interface CodeProps {
     children?: any;
 }
 
+export interface Data {
+    completionTokens?: number;
+    promptTokens?: number;
+    totalTokens?: number;
+    finishReason?: FinishReason;
+}
+
+export type Role =
+    | "user"
+    | "assistant"
+    | "system"
+    | "function"
+    | "tool"
+    | "data";
+
+export type FinishReason =
+    | "stop"
+    | "length"
+    | "content-filter"
+    | "tool-calls"
+    | "error"
+    | "other"
+    | "unknown";
+
 export type CombinedMessage = {
     id: string;
-    role: "user" | "assistant" | "system" | "function" | "tool" | "data";
+    role: Role;
     originalContent: string;
     processedContent: string;
     attachments: any;
@@ -28,14 +52,7 @@ export type CombinedMessage = {
     completionTokens?: number;
     promptTokens?: number;
     totalTokens?: number;
-    finishReason?:
-        | "stop"
-        | "length"
-        | "content-filter"
-        | "tool-calls"
-        | "error"
-        | "other"
-        | "unknown";
+    finishReason?: FinishReason;
     states: {
         content: string;
         artifact?: Artifact;

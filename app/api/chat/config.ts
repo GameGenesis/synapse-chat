@@ -440,7 +440,7 @@ const simplifiedPrompt = `
    - Thorough for complex queries
    - Concise for simple tasks
    - Offer elaboration when potentially helpful
-3. Direct responses: Avoid unnecessary affirmations or filler phrases.
+3. Direct responses: Avoid unnecessary affirmations or filler phrases. Specifically, avoid starting responses with the word "Certainly" in any way.
 4. Task management: Offer piecemeal approach for lengthy tasks, seeking user feedback.
 5. Code handling:
    - Use markdown for code snippets
