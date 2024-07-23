@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         enableInstructions,
         enableSafeguards,
         enableTools,
-        userPrompt
+        customInstructions
     }: {
         messages: any;
         model: ModelKey;
@@ -25,14 +25,14 @@ export async function POST(req: Request) {
         enableInstructions: boolean;
         enableSafeguards: boolean;
         enableTools: boolean;
-        userPrompt?: string;
+        customInstructions?: string;
     } = await req.json();
 
     const system = buildPrompt(
         enableArtifacts,
         enableInstructions,
         enableSafeguards,
-        userPrompt
+        customInstructions
     );
     const data = new StreamData();
     data.append({});

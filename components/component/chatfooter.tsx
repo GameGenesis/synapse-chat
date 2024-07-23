@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useRef, useState, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { supportedFileFormats } from "@/utils/consts";
@@ -149,15 +147,17 @@ const ChatFooter = ({
                     </div>
                 )}
                 <span className="text-sm truncate flex-grow">{file.name}</span>
-                <button
+                <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={(e) => {
                         e.stopPropagation();
                         removeFile(file);
                     }}
-                    className="ml-2 text-red-500"
+                    className="ml-2 rounded-full"
                 >
                     <XIcon className="w-4 h-4" />
-                </button>
+                </Button>
             </div>
         );
     };

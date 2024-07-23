@@ -37,8 +37,8 @@ interface Props {
     setEnableSafeguards: (value: boolean) => void;
     enableTools: boolean;
     setEnableTools: (value: boolean) => void;
-    systemPrompt: string;
-    setSystemPrompt: (value: string) => void;
+    customInstructions: string;
+    setCustomInstructions: (value: string) => void;
 }
 
 export function SettingsMenu({
@@ -57,8 +57,8 @@ export function SettingsMenu({
     setEnableSafeguards,
     enableTools,
     setEnableTools,
-    systemPrompt,
-    setSystemPrompt
+    customInstructions,
+    setCustomInstructions
 }: Props) {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
     useEffect(() => {
@@ -85,7 +85,6 @@ export function SettingsMenu({
                         Adjust the AI model and conversation parameters.
                     </DialogDescription>
                 </DialogHeader>
-                <Separator className="my-4" />
                 <div className="space-y-6">
                     <div className="space-y-3">
                         <Label className="text-lg font-semibold">
@@ -223,20 +222,27 @@ export function SettingsMenu({
                     <Separator />
                     <div className="space-y-2">
                         <Label
-                            htmlFor="systemPrompt"
+                            htmlFor="customInstructions"
                             className="text-lg font-semibold"
                         >
-                            System Prompt
+                            Custom Instructions
                         </Label>
                         <Textarea
-                            id="systemPrompt"
-                            value={systemPrompt}
-                            onChange={(e) => setSystemPrompt(e.target.value)}
-                            maxLength={1000}
+                            id="customInstructions"
+                            value={customInstructions}
+                            onChange={(e) =>
+                                setCustomInstructions(e.target.value)
+                            }
+                            maxLength={3000}
                             rows={4}
-                            placeholder="Enter system prompt here..."
+                            placeholder="Enter your custom instructions"
                             className="resize-none"
                         />
+                        <div className="flex justify-end mt-1 w-full">
+                            <span className="text-sm text-grey-900 text-right">
+                                {customInstructions.length}/3000
+                            </span>
+                        </div>
                     </div>
                 </div>
             </DialogContent>

@@ -9,7 +9,7 @@ const buildPrompt = (
     enableArtifacts: boolean,
     enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
-    userPrompt?: string
+    customInstructions?: string
 ) => {
     let defaultPrompt = ""
     if (enableDefaultPrompt) {
@@ -20,8 +20,8 @@ const buildPrompt = (
     }
     
     return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}\n${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
-        userPrompt ?
-        `\n---\n<user_system_prompt>${userPrompt}</user_system_prompt>` : ""
+        customInstructions ?
+        `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>` : ""
     }`;
 };
 
