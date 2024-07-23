@@ -254,39 +254,38 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                 file={selectedFile}
                 fallback={selectedFileFallback}
             />
-            <div className="w-full overflow-y-auto flex flex-row items-center space-x-2 row-auto space-y-2">
-                {attachments?.map((attachment, index) =>
-                    attachment?.contentType?.startsWith("image/") ? (
-                        <Image
-                            className="rounded-md cursor-pointer hover:opacity-80 transition-opacity my-2"
-                            width={250}
-                            height={250}
-                            key={index}
-                            src={attachment.url}
-                            alt={attachment.name}
-                            onClick={() => handleAttachmentClick(attachment)}
-                            loader={() => attachment.url}
-                        />
-                    ) : (
-                        <div
-                            className="my-2 flex items-center gap-2 bg-muted rounded-md p-2 hover:bg-muted/80 transition-colors cursor-pointer"
-                            key={index}
-                            onClick={() => handleAttachmentClick(attachment)}
-                        >
-                            <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary/10 rounded-md">
-                                <FileIcon className="h-5 w-5 text-muted-foreground" />
+            <div className="mt-4 space-y-2">
+                {attachments?.map((attachment, index) => (
+                    <div
+                        key={index}
+                        className="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => handleAttachmentClick(attachment)}
+                    >
+                        {attachment.contentType.startsWith("image/") ? (
+                            <div className="relative w-10 h-10 mr-3 rounded overflow-hidden">
+                                <Image
+                                    src={attachment.url}
+                                    alt={attachment.name}
+                                    layout="fill"
+                                    objectFit="cover"
+                                    loader={() => attachment.url}
+                                />
                             </div>
-                            <div className="flex-grow min-w-0">
-                                <div className="text-sm font-medium truncate">
-                                    {attachment.name}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {attachment.contentType}
-                                </div>
+                        ) : (
+                            <div className="w-10 h-10 mr-3 flex items-center justify-center bg-gray-100 rounded">
+                                <FileIcon className="h-5 w-5 text-gray-400" />
                             </div>
+                        )}
+                        <div className="flex-grow min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                                {attachment.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                {attachment.contentType}
+                            </p>
                         </div>
-                    )
-                )}
+                    </div>
+                ))}
             </div>
         </>
     );
