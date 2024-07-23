@@ -341,6 +341,7 @@ export function Chat() {
             (data && lastDataIndexRef.current != data.length)
         ) {
             processMessages();
+
             lastProcessedMessageRef.current = latestMessage.content;
             lastDataIndexRef.current = data?.length;
             console.log("MESSAGES: ", combinedMessages);
@@ -354,6 +355,22 @@ export function Chat() {
         data
     ]);
 
+    useEffect(() => {
+        if (combinedMessages && combinedMessages[combinedMessages.length - 1]) {
+            setShowContinueButton(
+                combinedMessages[combinedMessages.length - 1].finishReason ===
+                    "length"
+            );
+
+            if (
+                combinedMessages[combinedMessages.length - 1].role !==
+                "assistant"
+            ) {
+                setShowContinueButton(false);
+            }
+        }
+    }, [combinedMessages, data]);
+
     // Modify the reload function to set the regeneratingMessageId
     const handleReload = useCallback(() => {
         const lastAssistantMessage = combinedMessages.findLast(
@@ -364,25 +381,6 @@ export function Chat() {
         }
         reload();
     }, [combinedMessages, reload]);
-
-    useEffect(() => {
-        if (messages && messages[messages.length - 1]) {
-            messages[messages.length - 1].data = data &&
-                data.length > 0 && {
-                    ...(messages[messages.length - 1].data as object),
-                    ...(data[data?.length - 1] as object)
-                };
-
-            setShowContinueButton(
-                (messages[messages.length - 1].data as any)?.finishReason ===
-                    "length"
-            );
-
-            if (messages[messages.length - 1].role !== "assistant") {
-                setShowContinueButton(false);
-            }
-        }
-    }, [messages.length, data]);
 
     const getAttributeValue = (attributes: string, attr: string) => {
         const match = attributes.match(new RegExp(`${attr}="([^"]*)"`));
