@@ -67,7 +67,14 @@ const ChatFooter = ({
                 5 * 24 + 16
             );
             textareaRef.current.style.height = `${newHeight}px`;
-            setIsMultiline(textareaRef.current.value.split("\n").length > 1);
+
+            // Check if the content height is greater than the line height
+            const lineHeight = 50; // Adjust this value based on your actual line height
+            const isMulti = textareaRef.current.scrollHeight > lineHeight;
+
+            setIsMultiline(
+                isMulti || textareaRef.current.value.split("\n").length > 1
+            );
         }
     };
 
