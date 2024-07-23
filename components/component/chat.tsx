@@ -3,14 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
 import { Artifact, CombinedMessage } from "@/types";
-import { CustomMarkdown } from "./markdown";
-import { Mermaid } from "./mermaid";
-import { ReactRenderer } from "./reactrenderer";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import { maxToolRoundtrips } from "@/utils/consts";
 import { ModelKey } from "@/app/api/chat/model-provider";
-import ErrorMessage from "./errormessage";
 import { SettingsMenu } from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
@@ -276,7 +272,9 @@ export function Chat() {
                         toolInvocations: latestMessage.toolInvocations,
                         ...(latestMessage.data as object),
                         states: [
-                            ...newCombinedMessages[existingMessageIndex].states,
+                            ...newCombinedMessages[
+                                existingMessageIndex
+                            ].states.slice(0, -1),
                             {
                                 content: cleanedContent || "",
                                 artifact: artifact || undefined,
