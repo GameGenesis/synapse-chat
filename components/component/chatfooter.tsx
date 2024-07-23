@@ -80,25 +80,38 @@ const ChatFooter = ({
         adjustTextareaHeight();
     }, [input, handleInputChange]);
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         if (event.target.files) {
             const newFiles = Array.from(event.target.files);
-            const validFiles = newFiles.filter((file) => {
+            const processedFiles: File[] = [];
+
+            for (const file of newFiles) {
                 const fileExtension = `.${file.name
                     .split(".")
                     .pop()
                     ?.toLowerCase()}`;
                 if (supportedFileFormats.includes(fileExtension)) {
-                    return true;
+                    processedFiles.push(file);
                 } else {
-                    toast.error(`Unsupported file: ${file.name}`);
-                    return false;
+                    try {
+                        const convertedFile = await convertToTextFile(file);
+                        processedFiles.push(convertedFile);
+                        toast.success(
+                            `Unsupported file type: Converted ${file.name} to text file`
+                        );
+                    } catch (error) {
+                        toast.error(
+                            `Unsupported file type - failed to convert file: ${file.name}`
+                        );
+                    }
                 }
-            });
+            }
 
-            if (validFiles.length > 0) {
+            if (processedFiles.length > 0) {
                 const dataTransfer = new DataTransfer();
-                validFiles.forEach((file) => dataTransfer.items.add(file));
+                processedFiles.forEach((file) => dataTransfer.items.add(file));
                 setFiles(dataTransfer.files);
             } else {
                 setFiles(undefined);
@@ -261,5 +274,22 @@ const ChatFooter = ({
 
 export default ChatFooter;
 
-// usage
-// <ChatFooter input={input} handleInputChange={handleInputChange} handleSubmit={handleSubmit} isLoading={isLoading} addToast={addToast} />
+const convertToTextFile = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            if (event.target) {
+                const content = event.target.result as string;
+                const blob = new Blob([content], { type: "text/plain" });
+                const newFile = new File([blob], `${file.name}.txt`, {
+                    type: "text/plain"
+                });
+                resolve(newFile);
+            } else {
+                reject(new Error("Failed to read file"));
+            }
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsText(file);
+    });
+};

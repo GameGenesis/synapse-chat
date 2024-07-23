@@ -28,7 +28,11 @@ export const supportedFileFormats = [
     ".ts",
     ".tsx",
     ".c",
-    ".csv"
+    ".h",
+    ".csv",
+    ".cs",
+    ".cpp",
+    ".hpp",
 ];
 // export const supportedFileFormats = ["image/*", "text/*"];
 export const maxToolRoundtrips = 3;
