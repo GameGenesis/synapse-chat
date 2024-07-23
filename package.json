@@ -29,6 +29,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.408.0",
+    "mammoth": "^1.8.0",
     "mathjs": "^13.0.3",
     "mermaid": "^10.9.1",
     "next": "14.2.5",

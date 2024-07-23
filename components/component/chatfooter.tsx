@@ -8,6 +8,7 @@ import { PaperclipIcon } from "lucide-react";
 import { StopIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { supportedFileFormats } from "@/app/api/chat/config";
+import { extractRawText } from "mammoth";
 
 interface Props {
     input: string;
@@ -105,6 +106,7 @@ const ChatFooter = ({
                         toast.error(
                             `Unsupported file type - failed to convert file: ${file.name}`
                         );
+                        console.error(error);
                     }
                 }
             }
@@ -274,22 +276,35 @@ const ChatFooter = ({
 
 export default ChatFooter;
 
-const convertToTextFile = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            if (event.target) {
-                const content = event.target.result as string;
-                const blob = new Blob([content], { type: "text/plain" });
-                const newFile = new File([blob], `${file.name}.txt`, {
-                    type: "text/plain"
-                });
-                resolve(newFile);
-            } else {
-                reject(new Error("Failed to read file"));
-            }
-        };
-        reader.onerror = () => reject(new Error("Failed to read file"));
-        reader.readAsText(file);
-    });
+const convertToTextFile = async (file: File): Promise<File> => {
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    let content = "";
+
+    try {
+        if (fileExtension === "doc" || fileExtension === "docx") {
+            content = await convertDocToText(file);
+        } else {
+            // For other file types, use the previous method
+            content = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) =>
+                    resolve(event.target?.result as string);
+                reader.onerror = (error) => reject(error);
+                reader.readAsText(file);
+            });
+        }
+
+        const blob = new Blob([content], { type: "text/plain" });
+        return new File([blob], `${file.name}.txt`, { type: "text/plain" });
+    } catch (error) {
+        console.error("Error converting file:", error);
+        throw error;
+    }
+};
+
+const convertDocToText = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await extractRawText({ arrayBuffer });
+    return result.value;
 };
