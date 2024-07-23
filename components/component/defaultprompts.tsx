@@ -83,11 +83,11 @@ const allPrompts: Prompt[] = [
     }
 ];
 
-interface DefaultPromptsProps {
+interface Props {
     addMessage: (message: Message) => void;
 }
 
-const DefaultPrompts: React.FC<DefaultPromptsProps> = ({ addMessage }) => {
+const DefaultPrompts = ({ addMessage }: Props) => {
     const [randomPrompts, setRandomPrompts] = useState<Prompt[]>([]);
 
     useEffect(() => {

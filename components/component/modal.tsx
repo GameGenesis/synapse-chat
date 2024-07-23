@@ -8,19 +8,14 @@ import {
 import { FileIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 
-interface AttachmentModalProps {
+interface Props {
     isOpen: boolean;
     onClose: () => void;
     file: File | null;
     fallback?: string;
 }
 
-const AttachmentModal: React.FC<AttachmentModalProps> = ({
-    isOpen,
-    onClose,
-    file,
-    fallback
-}) => {
+const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
     const [fileText, setFileText] = useState<string | null>(null);
 
     useEffect(() => {

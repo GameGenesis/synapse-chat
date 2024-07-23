@@ -2,11 +2,11 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { NewChatIcon } from "./icons";
 
-interface SidebarProps {
+interface Props {
     onNewChat: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
+const Sidebar = ({ onNewChat }: Props) => {
     return (
         <div className="flex flex-col h-full bg-background mt-2">
             <div className="p-4 border-b">
@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
                 </Button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-                {/* Add your chat history or other sidebar content here */}
+                {/* Add chat history or other sidebar content here */}
                 <div className="text-sm text-muted-foreground">
                     Chat history will appear here
                 </div>

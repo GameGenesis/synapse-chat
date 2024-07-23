@@ -7,13 +7,12 @@ import { useState } from "react";
 import AttachmentModal from "./modal";
 import Image from "next/image";
 
-export const CustomMarkdown = ({
-    children,
-    className = ""
-}: {
+interface Props {
     children: React.ReactNode;
     className?: string;
-}) => {
+}
+
+export const CustomMarkdown = ({ children, className = "" }: Props) => {
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 

@@ -69,7 +69,11 @@ mermaid.initialize({
     }
 });
 
-export const Mermaid = ({ chart }: { chart: string }) => {
+interface Props {
+    chart: string;
+}
+
+export const Mermaid = ({ chart }: Props) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });

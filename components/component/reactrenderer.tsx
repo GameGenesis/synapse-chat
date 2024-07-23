@@ -6,7 +6,11 @@ import * as ShadcnComponents from "@/components/ui";
 import { Runner } from "react-runner";
 import ErrorMessage from "./errormessage";
 
-export const ReactRenderer = ({ code }: { code: string }) => {
+interface Props {
+    code: string;
+}
+
+export const ReactRenderer = ({ code }: Props) => {
     const [error, setError] = useState<string | undefined>("");
 
     const scope = {

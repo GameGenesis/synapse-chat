@@ -15,18 +15,7 @@ import {
 import { RefreshIcon } from "./icons";
 import Image from "next/image";
 
-export const Response = ({
-    content,
-    role,
-    artifact,
-    onArtifactClick,
-    attachments,
-    model,
-    tools,
-    usage,
-    onRegenerate,
-    isLatestResponse
-}: {
+interface ResponseProps {
     content: string;
     role: string;
     artifact?: Artifact;
@@ -41,7 +30,20 @@ export const Response = ({
     };
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
-}) => {
+}
+
+export const Response = ({
+    content,
+    role,
+    artifact,
+    onArtifactClick,
+    attachments,
+    model,
+    tools,
+    usage,
+    onRegenerate,
+    isLatestResponse
+}: ResponseProps) => {
     if (role !== "user" && role !== "assistant") return;
 
     return (
@@ -64,16 +66,7 @@ export const Response = ({
     );
 };
 
-export const AIResponse = ({
-    content,
-    artifact,
-    onArtifactClick,
-    model,
-    tools,
-    usage,
-    onRegenerate,
-    isLatestResponse
-}: {
+interface AIResponseProps {
     content: string;
     artifact?: Artifact;
     onArtifactClick?: (identifier: string) => void;
@@ -86,7 +79,43 @@ export const AIResponse = ({
     };
     onRegenerate?: () => void;
     isLatestResponse?: boolean;
-}) => {
+}
+
+interface UserResponseProps {
+    children: React.ReactNode;
+    attachments?: { contentType: string; name: string; url: string }[];
+}
+
+export const UserResponse = ({ children, attachments }: UserResponseProps) => {
+    return (
+        <div className="flex items-start gap-4">
+            <Avatar className="w-8 h-8 border flex-shrink-0">
+                <AvatarImage src="/placeholder-user.jpg" />
+                <AvatarFallback>YO</AvatarFallback>
+            </Avatar>
+            <div className="grid gap-1 break-words">
+                <div className="font-bold">You</div>
+                <div className="prose text-muted-foreground max-w-full">
+                    <CustomMarkdown>{children?.toString()}</CustomMarkdown>
+                </div>
+                {attachments && attachments.length > 0 && (
+                    <AttachmentPreview attachments={attachments} />
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const AIResponse = ({
+    content,
+    artifact,
+    onArtifactClick,
+    model,
+    tools,
+    usage,
+    onRegenerate,
+    isLatestResponse
+}: AIResponseProps) => {
     const processedContent = useMemo(() => {
         if (!artifact || !onArtifactClick) {
             return <CustomMarkdown>{content}</CustomMarkdown>;
@@ -194,37 +223,11 @@ export const AIResponse = ({
     );
 };
 
-export const UserResponse = ({
-    children,
-    attachments
-}: {
-    children: React.ReactNode;
+interface AttachmentPreviewProps {
     attachments?: { contentType: string; name: string; url: string }[];
-}) => {
-    return (
-        <div className="flex items-start gap-4">
-            <Avatar className="w-8 h-8 border flex-shrink-0">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>YO</AvatarFallback>
-            </Avatar>
-            <div className="grid gap-1 break-words">
-                <div className="font-bold">You</div>
-                <div className="prose text-muted-foreground max-w-full">
-                    <CustomMarkdown>{children?.toString()}</CustomMarkdown>
-                </div>
-                {attachments && attachments.length > 0 && (
-                    <AttachmentPreview attachments={attachments} />
-                )}
-            </div>
-        </div>
-    );
-};
+}
 
-const AttachmentPreview = ({
-    attachments
-}: {
-    attachments?: { contentType: string; name: string; url: string }[];
-}) => {
+const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [selectedFileFallback, setSelectedFileFallback] = useState("");
