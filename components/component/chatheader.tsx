@@ -82,7 +82,7 @@ const ChatHeader = ({
     return (
         <header className="flex align-middle justify-center w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
             <div className="flex container items-center justify-between mx-auto">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetTrigger asChild>
                             <Button variant="default" size="icon">
@@ -104,20 +104,18 @@ const ChatHeader = ({
                     >
                         <NewChatIcon className="h-5 w-5" />
                     </Button>
-                </div>
-                <div className="flex items-center gap-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                variant="ghost"
-                                className="gap-1 rounded-xl px-3 h-10 data-[state=open]:bg-muted text-lg"
+                                variant="outline"
+                                className="gap-1 rounded-md px-3 h-10 data-[state=open]:bg-muted text-lg"
                             >
                                 {getModelDisplayName(selectedModel)}
                                 <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                            align="end"
+                            align="start"
                             className="max-w-[300px]"
                         >
                             {(Object.keys(modelInfo) as ModelKey[]).map(
