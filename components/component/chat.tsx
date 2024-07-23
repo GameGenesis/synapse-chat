@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { Response, AIResponse } from "./response";
 import { useChat } from "ai/react";
 import { Artifact, CombinedMessage } from "@/types";
@@ -18,9 +17,8 @@ import {
     maxToolRoundtrips
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
-import { generateId } from "ai";
-import { FastForwardIcon } from "lucide-react";
 import { ArtifactsWindow } from "./artifactswindow";
+import ContinueButton from "./continuebutton";
 
 export function Chat() {
     const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
@@ -37,6 +35,27 @@ export function Chat() {
     );
     const [enableTools, setEnableTools] = useState(DEFAULT_ENABLE_TOOLS);
     const [customInstructions, setCustomInstructions] = useState("");
+
+    const [activeTab, setActiveTab] = useState("preview");
+    const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+    const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
+
+    const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    const currentArtifactRef = useRef<Artifact | null>(null);
+    const isStreamingArtifactRef = useRef(false);
+    const lastProcessedMessageRef = useRef<string | null>(null);
+
+    const [showContinueButton, setShowContinueButton] = useState(false);
+
+    const [combinedMessages, setCombinedMessages] = useState<CombinedMessage[]>(
+        []
+    );
+
+    const [regeneratingMessageId, setRegeneratingMessageId] = useState<
+        string | null
+    >(null);
 
     const {
         messages,
@@ -76,23 +95,6 @@ export function Chat() {
         async onToolCall({ toolCall }) {}
     });
 
-    const [activeTab, setActiveTab] = useState("preview");
-    const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-    const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
-
-    const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-    const currentArtifactRef = useRef<Artifact | null>(null);
-    const isStreamingArtifactRef = useRef(false);
-    const lastProcessedMessageRef = useRef<string | null>(null);
-
-    const [showContinueButton, setShowContinueButton] = useState(false);
-
-    const [combinedMessages, setCombinedMessages] = useState<CombinedMessage[]>(
-        []
-    );
-
     const processMessage = useCallback(
         (content: string, index: number) => {
             if (!content.includes("<assistant")) {
@@ -106,7 +108,7 @@ export function Chat() {
             let cleanedContent = content;
             let artifact: Artifact | null = null;
 
-            // CLEANING THINKING START
+            // Remove thinking tags
             const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
             const thinkingTagEndRegex = /<\/assistantThinking>/;
             const thinkingTagStartMatch = content.match(thinkingTagStartRegex);
@@ -128,7 +130,6 @@ export function Chat() {
                     .substring(0, thinkingTagStartMatch.index)
                     .trim();
             }
-            // CLEANING THINKING END
 
             const artifactStartRegex = /<assistantArtifact([^>]*)>/;
             const artifactEndRegex = /<\/assistantArtifact>/;
@@ -205,10 +206,6 @@ export function Chat() {
         },
         [artifacts.length, messages.length]
     );
-
-    const [regeneratingMessageId, setRegeneratingMessageId] = useState<
-        string | null
-    >(null);
 
     useEffect(() => {
         const processMessages = () => {
@@ -373,15 +370,6 @@ export function Chat() {
         );
     };
 
-    const handleContinueResponse = () => {
-        append({
-            id: generateId(),
-            role: "system",
-            content: "Continue Response"
-        });
-        setShowContinueButton(false);
-    };
-
     return (
         <div className="flex flex-col h-screen w-full">
             <SettingsMenu
@@ -472,17 +460,11 @@ export function Chat() {
                             )}
                         </div>
                     </div>
-                    {showContinueButton && (
-                        <div className="fixed bottom-20 left-4 z-10">
-                            <Button
-                                onClick={handleContinueResponse}
-                                className="flex items-center space-x-2 shadow-lg"
-                            >
-                                <FastForwardIcon className="w-5 h-5" />
-                                <span>Continue Response</span>
-                            </Button>
-                        </div>
-                    )}
+                    <ContinueButton
+                        show={showContinueButton}
+                        onHide={() => setShowContinueButton(false)}
+                        appendMessage={append}
+                    />
                     <ChatFooter
                         input={input}
                         handleInputChange={handleInputChange}
