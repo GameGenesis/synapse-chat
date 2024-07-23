@@ -2,7 +2,7 @@ import { Artifact } from "@/types";
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
-import AttachmentModal from "./modal";
+import AttachmentModal from "./attachmentmodal";
 import { FileIcon } from "@radix-ui/react-icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
 
@@ -262,29 +262,31 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                 {attachments?.map((attachment, index) => (
                     <div
                         key={index}
-                        className="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center max-w-80 p-2 pr-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                         onClick={() => handleAttachmentClick(attachment)}
                     >
-                        {attachment.contentType.startsWith("image/") ? (
-                            <div className="relative w-10 h-10 mr-3 rounded overflow-hidden">
-                                <Image
-                                    src={attachment.url}
-                                    alt={attachment.name}
-                                    layout="fill"
-                                    objectFit="cover"
-                                    unoptimized
-                                />
-                            </div>
-                        ) : (
-                            <div className="w-10 h-10 mr-3 flex items-center justify-center bg-gray-100 rounded">
-                                <FileIcon className="h-5 w-5 text-gray-400" />
-                            </div>
-                        )}
-                        <div className="flex-grow min-w-0">
+                        <div className="flex-shrink-0 w-10 h-10 mr-3">
+                            {attachment.contentType.startsWith("image/") ? (
+                                <div className="relative w-full h-full rounded overflow-hidden">
+                                    <Image
+                                        src={attachment.url}
+                                        alt={attachment.name}
+                                        layout="fill"
+                                        objectFit="cover"
+                                        unoptimized
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
+                                    <FileIcon className="h-5 w-5 text-gray-400" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-grow min-w-0 overflow-hidden">
                             <p className="text-sm font-medium text-gray-900 truncate">
                                 {attachment.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 truncate">
                                 {attachment.contentType}
                             </p>
                         </div>

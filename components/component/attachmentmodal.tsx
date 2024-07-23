@@ -43,7 +43,9 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
                 </DialogTitle>
                 <DialogDescription className="flex items-center">
                     <FileIcon className="w-6 h-6 text-gray-500 mr-2" />
-                    <span className="text-sm font-medium">{file.name}</span>
+                    <span className="text-sm font-medium truncate">
+                        {file.name}
+                    </span>
                 </DialogDescription>
                 <div className="mt-4 flex-grow overflow-auto">
                     {isImage ? (

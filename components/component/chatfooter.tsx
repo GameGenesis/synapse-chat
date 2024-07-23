@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
 import { XIcon, ArrowUpIcon } from "./icons";
 import toast from "react-hot-toast";
-import AttachmentModal from "./modal";
+import AttachmentModal from "./attachmentmodal";
 import { PaperclipIcon } from "lucide-react";
 import { StopIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";

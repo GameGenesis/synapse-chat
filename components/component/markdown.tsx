@@ -4,7 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import { useState } from "react";
-import AttachmentModal from "./modal";
+import AttachmentModal from "./attachmentmodal";
 import Image from "next/image";
 
 interface Props {
