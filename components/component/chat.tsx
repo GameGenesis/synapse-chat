@@ -57,6 +57,8 @@ export function Chat() {
         string | null
     >(null);
 
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
     const {
         messages,
         setMessages,
@@ -370,6 +372,14 @@ export function Chat() {
         );
     };
 
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [combinedMessages]);
+
     return (
         <div className="flex flex-col h-screen w-full">
             <SettingsMenu
@@ -458,6 +468,7 @@ export function Chat() {
                                     isLatestResponse
                                 />
                             )}
+                            <div ref={messagesEndRef} />
                         </div>
                     </div>
                     <ContinueButton
