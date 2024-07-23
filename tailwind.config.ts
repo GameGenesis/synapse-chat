@@ -14,12 +14,12 @@ const config: Config = {
                     "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))"
             },
             typography: {
-              DEFAULT: {
-                css: {
-                  pre: false,
-                },
-              },
-            },
+                DEFAULT: {
+                    css: {
+                        pre: false
+                    }
+                }
+            }
         },
         colors: {
             transparent: "transparent",
@@ -28,6 +28,17 @@ const config: Config = {
             white: "#fff",
 
             grey: {
+                100: "#f7fafc",
+                200: "#edf2f7",
+                300: "#e2e8f0",
+                400: "#cbd5e0",
+                500: "#a0aec0",
+                600: "#718096",
+                700: "#4a5568",
+                800: "#2d3748",
+                900: "#1a202c"
+            },
+            gray: {
                 100: "#f7fafc",
                 200: "#edf2f7",
                 300: "#e2e8f0",
@@ -60,6 +71,18 @@ const config: Config = {
                 800: "#9c4221",
                 900: "#7b341e"
             },
+            amber: {
+                50: "#fffbeb",
+                100: "#fef3c7",
+                200: "#fde68a",
+                300: "#fcd34d",
+                400: "#fbbf24",
+                500: "#f59e0b",
+                600: "#d97706",
+                700: "#b45309",
+                800: "#92400e",
+                900: "#78350f"
+            },
             yellow: {
                 100: "#fffff0",
                 200: "#fefcbf",
@@ -70,6 +93,18 @@ const config: Config = {
                 700: "#b7791f",
                 800: "#975a16",
                 900: "#744210"
+            },
+            lime: {
+                50: "#f7fee7",
+                100: "#ecfccb",
+                200: "#d9f99d",
+                300: "#bef264",
+                400: "#a3e635",
+                500: "#84cc16",
+                600: "#65a30d",
+                700: "#4d7c0f",
+                800: "#3f6212",
+                900: "#365314"
             },
             green: {
                 100: "#f0fff4",
@@ -82,6 +117,18 @@ const config: Config = {
                 800: "#276749",
                 900: "#22543d"
             },
+            emerald: {
+                50: "#ecfdf5",
+                100: "#d1fae5",
+                200: "#a7f3d0",
+                300: "#6ee7b7",
+                400: "#34d399",
+                500: "#10b981",
+                600: "#059669",
+                700: "#047857",
+                800: "#065f46",
+                900: "#064e3b"
+            },
             teal: {
                 100: "#e6fffa",
                 200: "#b2f5ea",
@@ -92,6 +139,30 @@ const config: Config = {
                 700: "#2c7a7b",
                 800: "#285e61",
                 900: "#234e52"
+            },
+            cyan: {
+                50: "#ecfeff",
+                100: "#cffafe",
+                200: "#a5f3fc",
+                300: "#67e8f9",
+                400: "#22d3ee",
+                500: "#06b6d4",
+                600: "#0891b2",
+                700: "#0e7490",
+                800: "#155e75",
+                900: "#164e63"
+            },
+            sky: {
+                50: "#f0f9ff",
+                100: "#e0f2fe",
+                200: "#bae6fd",
+                300: "#7dd3fc",
+                400: "#38bdf8",
+                500: "#0ea5e9",
+                600: "#0284c7",
+                700: "#0369a1",
+                800: "#075985",
+                900: "#0c4a6e"
             },
             blue: {
                 100: "#ebf8ff",
@@ -115,6 +186,18 @@ const config: Config = {
                 800: "#434190",
                 900: "#3c366b"
             },
+            violet: {
+                50: "#f5f3ff",
+                100: "#ede9fe",
+                200: "#ddd6fe",
+                300: "#c4b5fd",
+                400: "#a78bfa",
+                500: "#8b5cf6",
+                600: "#7c3aed",
+                700: "#6d28d9",
+                800: "#5b21b6",
+                900: "#4c1d95"
+            },
             purple: {
                 100: "#faf5ff",
                 200: "#e9d8fd",
@@ -126,6 +209,18 @@ const config: Config = {
                 800: "#553c9a",
                 900: "#44337a"
             },
+            fuchsia: {
+                50: "#fdf4ff",
+                100: "#fae8ff",
+                200: "#f5d0fe",
+                300: "#f0abfc",
+                400: "#e879f9",
+                500: "#d946ef",
+                600: "#c026d3",
+                700: "#a21caf",
+                800: "#86198f",
+                900: "#701a75"
+            },
             pink: {
                 100: "#fff5f7",
                 200: "#fed7e2",
@@ -136,6 +231,18 @@ const config: Config = {
                 700: "#b83280",
                 800: "#97266d",
                 900: "#702459"
+            },
+            rose: {
+                50: "#fff1f2",
+                100: "#ffe4e6",
+                200: "#fecdd3",
+                300: "#fda4af",
+                400: "#fb7185",
+                500: "#f43f5e",
+                600: "#e11d48",
+                700: "#be123c",
+                800: "#9f1239",
+                900: "#881337"
             },
             border: "hsl(var(--border))",
             input: "hsl(var(--input))",
@@ -173,7 +280,7 @@ const config: Config = {
         },
         borderRadius: {
             full: "9999px",
-            "xl": "0.75rem",
+            xl: "0.75rem",
             "2xl": "1rem",
             lg: "var(--radius)",
             md: "calc(var(--radius) - 2px)",
@@ -198,6 +305,9 @@ const config: Config = {
             }
         }
     },
-    plugins: [require("tailwindcss-animate"),require('@tailwindcss/typography'),]
+    plugins: [
+        require("tailwindcss-animate"),
+        require("@tailwindcss/typography")
+    ]
 };
 export default config;
