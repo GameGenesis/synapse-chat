@@ -3,6 +3,8 @@ import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { useState } from "react";
 import AttachmentModal from "./attachmentmodal";
 import Image from "next/image";
@@ -35,7 +37,8 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
         <div className={`markdown-body prose max-w-full ${className}`}>
             <Markdown
                 className="prose"
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
                 components={{
                     h1: ({ node, ...props }) => (
                         <h1
