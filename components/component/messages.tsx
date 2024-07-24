@@ -21,6 +21,7 @@ import { RefreshIcon } from "./icons";
 import Image from "next/image";
 import { modelInfo } from "./chatheader";
 import { ClipboardCheckIcon, ClipboardCopyIcon } from "lucide-react";
+import { USER_NAME } from "@/app/api/chat/config";
 
 interface MessagesProps {
     messages: CombinedMessage[];
@@ -59,13 +60,18 @@ interface UserMessageProps {
 export const UserMessage = ({ message }: UserMessageProps) => {
     return (
         <div className="flex items-start gap-4">
-            <Avatar className="w-8 h-8 border flex-shrink-0">
-                <AvatarImage src="/placeholder-user.jpg" />
+            <Avatar className="w-9 h-9 border flex-shrink-0">
+                <AvatarImage
+                    src={`https://avatar.oxro.io/avatar.svg?name=${USER_NAME.replace(
+                        " ",
+                        "+"
+                    )}`}
+                />
                 <AvatarFallback>YO</AvatarFallback>
             </Avatar>
             <div className="grid gap-1 break-words w-full">
-                <div className="flex items-center justify-between">
-                    <div className="font-bold">You</div>
+                <div className="flex items-center justify-between align-middle">
+                    <div className="font-bold text-lg">{USER_NAME}</div>
                     <CopyButton content={message.originalContent} />
                 </div>
                 <div className="prose text-muted-foreground max-w-full">
@@ -111,9 +117,12 @@ export const AssistantMessage = ({
                         onClick={() =>
                             onArtifactClick(message.artifact?.identifier || "")
                         }
-                        className="my-2"
+                        className="my-2 inline-flex items-center gap-2"
                     >
-                        {message.artifact?.title}
+                        <span className="text-xs font-semibold uppercase text-gray-500">
+                            {message.artifact?.type}
+                        </span>
+                        <span>{message.artifact?.title}</span>
                     </Button>
                 );
             }
@@ -147,18 +156,18 @@ export const AssistantMessage = ({
 
     return (
         <div className="flex items-start gap-4">
-            <Avatar className="w-8 h-8 border flex-shrink-0">
+            <Avatar className="w-9 h-9 border flex-shrink-0">
                 <AvatarImage src="/placeholder-user.jpg" />
                 <AvatarFallback>OA</AvatarFallback>
             </Avatar>
             <div className="grid gap-1 break-words w-full">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between align-middle">
                     <div className="flex items-center gap-2">
-                        <span className="font-bold">Assistant</span>
+                        <span className="font-bold text-lg">Assistant</span>
                         {typeof message !== "string" && message.model && (
                             <TooltipProvider>
                                 <Tooltip>
-                                    <TooltipTrigger>
+                                    <TooltipTrigger className="flex h-full align-middle">
                                         <Badge>{message.model}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -181,7 +190,7 @@ export const AssistantMessage = ({
                             </TooltipProvider>
                         )}
                     </div>
-                    <div className="flex">
+                    <div className="flex h-full align-middle">
                         {isLatestResponse && onRegenerate && (
                             <Button
                                 variant="ghost"

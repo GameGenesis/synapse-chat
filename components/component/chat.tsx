@@ -25,16 +25,8 @@ import {
 } from "@/app/api/chat/config";
 import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
-import { LoadingSpinner } from "./icons";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
-
-const ArtifactsWindow = dynamic(
-    () => import("./artifactswindow").then((mod) => mod.ArtifactsWindow),
-    {
-        loading: () => <LoadingSpinner />,
-        ssr: false
-    }
-);
+import { ArtifactsWindow } from "./artifactswindow";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -525,17 +517,15 @@ export function Chat() {
                         enablePasteToFile={state.enablePasteToFile}
                     />
                 </div>
-                {isArtifactsOpen && (
-                    <ArtifactsWindow
-                        isOpen={isArtifactsOpen}
-                        onClose={() => setIsArtifactsOpen(false)}
-                        artifacts={artifacts}
-                        currentArtifactIndex={currentArtifactIndex}
-                        setCurrentArtifactIndex={setCurrentArtifactIndex}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                    />
-                )}
+                <ArtifactsWindow
+                    isOpen={isArtifactsOpen}
+                    onClose={() => setIsArtifactsOpen(false)}
+                    artifacts={artifacts}
+                    currentArtifactIndex={currentArtifactIndex}
+                    setCurrentArtifactIndex={setCurrentArtifactIndex}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
             </div>
         </div>
     );

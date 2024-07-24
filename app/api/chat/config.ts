@@ -8,6 +8,7 @@ export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_TOOLS = true;
 export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 
+export const USER_NAME = "User"
 export const ASSISTANT_NAME = "Poe";
 export const date = new Date().toLocaleDateString("en-US", {
     weekday: "long",
