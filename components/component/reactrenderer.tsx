@@ -1,26 +1,17 @@
 import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
 import ErrorMessage from "./errormessage";
+import { LoadingSpinner } from "./icons";
+
+const Runner = dynamic(() => import("react-runner").then((mod) => mod.Runner), {
+    ssr: false
+});
 
 interface Props {
     code: string;
 }
 
-const DynamicRunner = dynamic(
-    () => import("react-runner").then((mod) => mod.Runner),
-    {
-        ssr: false
-    }
-);
-
-const LoadingSpinner: React.FC = () => (
-    <div className="flex justify-center items-center h-32">
-        <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
-    </div>
-);
-
-export const ReactRenderer: React.FC<Props> = ({ code }) => {
+export const ReactRenderer = ({ code }: Props) => {
     const [error, setError] = useState<string | undefined>();
     const [scope, setScope] = useState<any>(null);
 
@@ -85,7 +76,7 @@ export const ReactRenderer: React.FC<Props> = ({ code }) => {
     return (
         <Suspense fallback={<LoadingSpinner />}>
             {scope ? (
-                <DynamicRunner
+                <Runner
                     code={processedCode}
                     scope={scope}
                     onRendered={(e) => setError(e?.message)}

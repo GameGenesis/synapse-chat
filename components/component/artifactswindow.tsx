@@ -9,10 +9,21 @@ import {
 } from "@heroicons/react/24/solid";
 import { Artifact } from "@/types";
 import { CustomMarkdown } from "./markdown";
-import { CopyIcon, DownloadIcon, RefreshIcon, XIcon } from "./icons";
-import { Mermaid } from "./mermaid";
+import {
+    CopyIcon,
+    DownloadIcon,
+    LoadingSpinner,
+    RefreshIcon,
+    XIcon
+} from "./icons";
 import { ReactRenderer } from "./reactrenderer";
 import ErrorMessage from "./errormessage";
+import dynamic from "next/dynamic";
+
+const Mermaid = dynamic(() => import("./mermaid").then((mod) => mod.Mermaid), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
 
 interface Props {
     isOpen: boolean;
@@ -20,7 +31,6 @@ interface Props {
     artifacts: Artifact[];
     currentArtifactIndex: number;
     setCurrentArtifactIndex: (index: number) => void;
-    isStreamingArtifact: boolean;
     activeTab: string;
     setActiveTab: (tab: string) => void;
 }
@@ -31,7 +41,6 @@ export function ArtifactsWindow({
     artifacts,
     currentArtifactIndex,
     setCurrentArtifactIndex,
-    isStreamingArtifact,
     activeTab,
     setActiveTab
 }: Props) {

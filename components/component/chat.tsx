@@ -24,8 +24,17 @@ import {
     maxToolRoundtrips
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
-import { ArtifactsWindow } from "./artifactswindow";
 import ContinueButton from "./continuebutton";
+import dynamic from "next/dynamic";
+import { LoadingSpinner } from "./icons";
+
+const ArtifactsWindow = dynamic(
+    () => import("./artifactswindow").then((mod) => mod.ArtifactsWindow),
+    {
+        loading: () => <LoadingSpinner />,
+        ssr: false
+    }
+);
 
 const reducer = (state: State, action: Action): State => {
     switch (action.type) {
@@ -511,16 +520,17 @@ export function Chat() {
                         enablePasteToFile={state.enablePasteToFile}
                     />
                 </div>
-                <ArtifactsWindow
-                    isOpen={isArtifactsOpen}
-                    onClose={() => setIsArtifactsOpen(false)}
-                    artifacts={artifacts}
-                    currentArtifactIndex={currentArtifactIndex}
-                    setCurrentArtifactIndex={setCurrentArtifactIndex}
-                    isStreamingArtifact={isStreamingArtifactRef.current}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                />
+                {isArtifactsOpen && (
+                    <ArtifactsWindow
+                        isOpen={isArtifactsOpen}
+                        onClose={() => setIsArtifactsOpen(false)}
+                        artifacts={artifacts}
+                        currentArtifactIndex={currentArtifactIndex}
+                        setCurrentArtifactIndex={setCurrentArtifactIndex}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                    />
+                )}
             </div>
         </div>
     );

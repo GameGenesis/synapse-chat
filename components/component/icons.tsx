@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { SVGProps } from "react";
 
 export const CopyIcon = (props: SVGProps<SVGSVGElement>) => {
@@ -168,4 +169,10 @@ export const NewChatIcon = (props: SVGProps<SVGSVGElement>) => (
         <line x1="12" y1="6" x2="12" y2="14" />
         <line x1="8" y1="10" x2="16" y2="10" />
     </svg>
+);
+
+export const LoadingSpinner = () => (
+    <div className="flex justify-center items-center h-32">
+        <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+    </div>
 );
