@@ -21,8 +21,8 @@ interface Props {
     handleStop: () => void;
 }
 
-const convertLargeTextToPaste = true;
-const LARGE_TEXT_THRESHOLD = 500;
+const convertPastedTextToFile = true;
+const LARGE_TEXT_THRESHOLD = 2000;
 
 const ChatFooter = ({
     input,
@@ -201,6 +201,9 @@ const ChatFooter = ({
         const imageItems = Array.from(items).filter(
             (item) => item.type.indexOf("image") !== -1
         );
+        const textItems = Array.from(items).filter(
+            (item) => item.type === "text/plain"
+        );
 
         if (imageItems.length > 0) {
             event.preventDefault();
@@ -214,6 +217,27 @@ const ChatFooter = ({
                     );
                     addFile(file);
                 }
+            });
+        } else if (convertPastedTextToFile && textItems.length > 0) {
+            event.preventDefault();
+            textItems.forEach((item) => {
+                item.getAsString((text) => {
+                    if (text.length > LARGE_TEXT_THRESHOLD) {
+                        const file = new File(
+                            [text],
+                            `pasted-text-${Date.now()}`,
+                            { type: "text/plain" }
+                        );
+                        addFile(file);
+                        toast.success("Pasted text converted to file");
+                    } else {
+                        // If text is smaller than the threshold, paste it normally
+                        const newInput = input + text;
+                        handleInputChange({
+                            target: { value: newInput }
+                        } as React.ChangeEvent<HTMLTextAreaElement>);
+                    }
+                });
             });
         }
     };

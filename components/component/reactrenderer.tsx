@@ -26,6 +26,7 @@ export const ReactRenderer = ({ code }: Props) => {
             "lucide-react": LucideIcons,
             "@radix-ui/react-icons": RadixIcons,
             "@/components/ui": ShadcnComponents,
+            "@/components/ui/accordion": ShadcnComponents,
             "@/components/ui/avatar": ShadcnComponents,
             "@/components/ui/button": ShadcnComponents,
             "@/components/ui/card": ShadcnComponents,
