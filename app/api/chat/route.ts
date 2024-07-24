@@ -10,6 +10,7 @@ export async function POST(req: Request) {
         messages,
         model,
         temperature,
+        topP,
         maxTokens,
         enableArtifacts,
         enableInstructions,
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
         messages: any;
         model: ModelKey;
         temperature: number;
+        topP: number;
         maxTokens: number;
         enableArtifacts: boolean;
         enableInstructions: boolean;
@@ -41,6 +43,7 @@ export async function POST(req: Request) {
         model: getModel(models[model]),
         system,
         temperature,
+        topP,
         maxTokens,
         messages: convertToCoreMessages(messages),
         tools: enableTools ? tools : undefined,

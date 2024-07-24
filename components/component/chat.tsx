@@ -14,6 +14,7 @@ import {
     DEFAULT_MAX_TOKENS,
     DEFAULT_MODEL,
     DEFAULT_TEMPERATURE,
+    DEFAULT_TOPP,
     maxToolRoundtrips
 } from "@/app/api/chat/config";
 import DefaultPrompts from "./defaultprompts";
@@ -23,6 +24,7 @@ import ContinueButton from "./continuebutton";
 export function Chat() {
     const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
     const [temperature, setTemperature] = useState(DEFAULT_TEMPERATURE);
+    const [topP, setTopP] = useState(DEFAULT_TOPP);
     const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
     const [enableArtifacts, setEnableArtifacts] = useState(
         DEFAULT_ENABLE_ARTIFACTS
@@ -76,6 +78,7 @@ export function Chat() {
         body: {
             model,
             temperature,
+            topP,
             maxTokens,
             enableArtifacts,
             enableInstructions,
@@ -414,6 +417,8 @@ export function Chat() {
                 selectedModel={model}
                 temperature={temperature}
                 setTemperature={setTemperature}
+                topP={topP}
+                setTopP={setTopP}
                 maxTokens={maxTokens}
                 setMaxTokens={setMaxTokens}
                 enableArtifacts={enableArtifacts}

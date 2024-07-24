@@ -31,6 +31,8 @@ interface Props {
     selectedModel: ModelKey;
     temperature: number;
     setTemperature: (value: number) => void;
+    topP: number;
+    setTopP: (value: number) => void;
     maxTokens: number;
     setMaxTokens: React.Dispatch<React.SetStateAction<number>>;
     enableArtifacts: boolean;
@@ -51,6 +53,8 @@ export function SettingsMenu({
     selectedModel,
     temperature,
     setTemperature,
+    topP,
+    setTopP,
     maxTokens,
     setMaxTokens,
     enableArtifacts,
@@ -98,7 +102,7 @@ export function SettingsMenu({
                     <AccordionItem value="model-parameters">
                         <AccordionTrigger>Model Parameters</AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 <div className="flex items-center space-x-4">
                                     <Label
                                         htmlFor="temperature"
@@ -157,6 +161,33 @@ export function SettingsMenu({
                                         min={1}
                                         max={maxPossibleOutput}
                                         step={1}
+                                        className="w-20"
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <Label htmlFor="topP" className="w-36">
+                                        Top P
+                                    </Label>
+                                    <Slider
+                                        id="topP"
+                                        min={0}
+                                        max={1}
+                                        step={0.01}
+                                        value={[topP]}
+                                        onValueChange={(value) =>
+                                            setTopP(value[0])
+                                        }
+                                        className="w-full"
+                                    />
+                                    <Input
+                                        type="number"
+                                        value={topP}
+                                        onChange={(e) =>
+                                            setTopP(Number(e.target.value))
+                                        }
+                                        min={0}
+                                        max={1}
+                                        step={0.01}
                                         className="w-20"
                                     />
                                 </div>
