@@ -162,7 +162,7 @@ export const AssistantMessage = ({
                                         <Badge>{message.model}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <div className="flex flex-col space-y-1">
+                                        <div className="flex flex-col space-y-1 max-w-96 overflow-auto">
                                             <span className="font-bold text-sm">
                                                 {modelInfo[message.model]?.name}
                                             </span>
@@ -218,7 +218,7 @@ export const AssistantMessage = ({
                                             </Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <div className="flex flex-col space-y-2">
+                                            <div className="flex flex-col space-y-2 max-w-96 overflow-auto">
                                                 <span className="font-bold text-sm">
                                                     Tool Arguments
                                                 </span>
