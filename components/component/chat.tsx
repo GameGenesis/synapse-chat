@@ -447,6 +447,11 @@ export function Chat() {
                             stop();
                             setMessages([]);
                             setCombinedMessages([]);
+                            setArtifacts([]);
+                            currentArtifactRef.current = null;
+                            setCurrentArtifactIndex(-1);
+                            setIsArtifactsOpen(false);
+                            setShowContinueButton(false);
                         }}
                     />
                     <div
