@@ -18,7 +18,6 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     artifacts: Artifact[];
-    currentArtifactRef: React.MutableRefObject<Artifact | null>;
     currentArtifactIndex: number;
     setCurrentArtifactIndex: (index: number) => void;
     isStreamingArtifact: boolean;
@@ -30,7 +29,6 @@ export function ArtifactsWindow({
     isOpen,
     onClose,
     artifacts,
-    currentArtifactRef,
     currentArtifactIndex,
     setCurrentArtifactIndex,
     isStreamingArtifact,
@@ -40,8 +38,7 @@ export function ArtifactsWindow({
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloaded, setIsDownloaded] = useState(false);
 
-    const currentArtifact =
-        artifacts[currentArtifactIndex] || currentArtifactRef.current;
+    const currentArtifact = artifacts[currentArtifactIndex];
 
     const renderArtifactPreview = useCallback((artifact: Artifact | null) => {
         if (!artifact) return null;
@@ -112,10 +109,7 @@ export function ArtifactsWindow({
 
     const handleNextArtifact = () => {
         setCurrentArtifactIndex(
-            Math.min(
-                currentArtifactIndex + 1,
-                isStreamingArtifact ? artifacts.length : artifacts.length - 1
-            )
+            Math.min(currentArtifactIndex + 1, artifacts.length - 1)
         );
     };
 

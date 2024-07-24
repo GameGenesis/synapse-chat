@@ -1,10 +1,15 @@
-import { Artifact, CombinedMessage, Data } from "@/types";
+import { CombinedMessage } from "@/types";
 import { useMemo, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+    Badge,
+    Button
+} from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
 import AttachmentModal from "./attachmentmodal";
 import { FileIcon } from "@radix-ui/react-icons";
-import { ModelKey } from "@/app/api/chat/model-provider";
 
 import {
     Tooltip,
@@ -141,10 +146,8 @@ export const AssistantMessage = ({
                         {typeof message !== "string" && message.model && (
                             <TooltipProvider>
                                 <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <span className="font-semibold text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                            {message.model}
-                                        </span>
+                                    <TooltipTrigger>
+                                        <Badge>{message.model}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         {(message.completionTokens ||
@@ -185,12 +188,9 @@ export const AssistantMessage = ({
                 {tools && tools.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                         {tools.map((tool, index) => (
-                            <span
-                                key={index}
-                                className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
-                            >
+                            <Badge key={index} variant="outline">
                                 {tool}
-                            </span>
+                            </Badge>
                         ))}
                     </div>
                 )}

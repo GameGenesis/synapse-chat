@@ -73,7 +73,6 @@ export function Chat() {
     const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    const currentArtifactRef = useRef<Artifact | null>(null);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
     const lastDataIndexRef = useRef<number | undefined>();
@@ -192,7 +191,7 @@ export function Chat() {
                     if (isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = false;
                         setArtifacts((prevArtifacts) => [
-                            ...prevArtifacts,
+                            ...prevArtifacts.slice(0, -1),
                             artifact as Artifact
                         ]);
                         setActiveTab("preview");
@@ -220,10 +219,17 @@ export function Chat() {
                         setIsArtifactsOpen(true);
                         setActiveTab("code");
                         setCurrentArtifactIndex(artifacts.length);
+                        setArtifacts((prevArtifacts) => [
+                            ...prevArtifacts,
+                            artifact as Artifact
+                        ]);
+                    } else {
+                        setArtifacts((prevArtifacts) => [
+                            ...prevArtifacts.slice(0, -1),
+                            artifact as Artifact
+                        ]);
                     }
                 }
-
-                currentArtifactRef.current = artifact;
             }
 
             return {
@@ -446,10 +452,7 @@ export function Chat() {
                     } h-full bg-background transition-all duration-300`}
                 >
                     <ChatHeader
-                        artifacts={
-                            (artifacts && artifacts.length > 0) ||
-                            !!currentArtifactRef.current
-                        }
+                        artifacts={artifacts && artifacts.length > 0}
                         isArtifactsOpen={isArtifactsOpen}
                         setIsArtifactsOpen={setIsArtifactsOpen}
                         selectedModel={state.model}
@@ -462,7 +465,6 @@ export function Chat() {
                             setMessages([]);
                             setCombinedMessages([]);
                             setArtifacts([]);
-                            currentArtifactRef.current = null;
                             setCurrentArtifactIndex(-1);
                             setIsArtifactsOpen(false);
                             setShowContinueButton(false);
@@ -511,7 +513,6 @@ export function Chat() {
                     isOpen={isArtifactsOpen}
                     onClose={() => setIsArtifactsOpen(false)}
                     artifacts={artifacts}
-                    currentArtifactRef={currentArtifactRef}
                     currentArtifactIndex={currentArtifactIndex}
                     setCurrentArtifactIndex={setCurrentArtifactIndex}
                     isStreamingArtifact={isStreamingArtifactRef.current}
