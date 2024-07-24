@@ -212,7 +212,7 @@ const DefaultPrompts = ({ addMessage }: Props) => {
                 <h2 className="text-2xl font-semibold mb-6 text-gray-700">
                     Choose a prompt to get started
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 w-full max-w-xl mx-auto">
+                <div className="grid grid-cols-2 gap-4 w-full max-w-xl mx-auto">
                     {randomPrompts.map((item, index) => (
                         <button
                             key={index}
