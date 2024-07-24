@@ -17,69 +17,38 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
-import { ModelKey } from "@/app/api/chat/model-provider";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger
 } from "@/components/ui/accordion";
+import { Action, State } from "@/types";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    selectedModel: ModelKey;
-    temperature: number;
-    setTemperature: (value: number) => void;
-    topP: number;
-    setTopP: (value: number) => void;
-    maxTokens: number;
-    setMaxTokens: React.Dispatch<React.SetStateAction<number>>;
-    enableArtifacts: boolean;
-    setEnableArtifacts: (value: boolean) => void;
-    enableInstructions: boolean;
-    setEnableInstructions: (value: boolean) => void;
-    enableSafeguards: boolean;
-    setEnableSafeguards: (value: boolean) => void;
-    enableTools: boolean;
-    setEnableTools: (value: boolean) => void;
-    customInstructions: string;
-    setCustomInstructions: (value: string) => void;
+    state: State;
+    dispatch: React.Dispatch<Action>;
 }
 
-export function SettingsMenu({
-    isOpen,
-    onClose,
-    selectedModel,
-    temperature,
-    setTemperature,
-    topP,
-    setTopP,
-    maxTokens,
-    setMaxTokens,
-    enableArtifacts,
-    setEnableArtifacts,
-    enableInstructions,
-    setEnableInstructions,
-    enableSafeguards,
-    setEnableSafeguards,
-    enableTools,
-    setEnableTools,
-    customInstructions,
-    setCustomInstructions
-}: Props) {
+export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
+
     useEffect(() => {
-        const newMaxPossibleOutput =
-            selectedModel === "gpt4omini" ? 16384 : 4096;
+        const newMaxPossibleOutput = state.model === "gpt4omini" ? 16384 : 4096;
         setMaxPossibleOutput(newMaxPossibleOutput);
-        setMaxTokens((prevMaxTokens) =>
-            Math.min(prevMaxTokens, newMaxPossibleOutput)
-        );
-    }, [selectedModel, setMaxTokens]);
+        dispatch({
+            type: "SET_MAX_TOKENS",
+            payload: Math.min(state.maxTokens, newMaxPossibleOutput)
+        });
+    }, [state.model, state.maxTokens, dispatch]);
 
     const handleSetMaxTokens = (value: number) => {
-        setMaxTokens(Math.min(Math.max(1, value), maxPossibleOutput));
+        dispatch({
+            type: "SET_MAX_TOKENS",
+            payload: Math.min(Math.max(1, value), maxPossibleOutput)
+        });
     };
 
     return (
@@ -115,19 +84,23 @@ export function SettingsMenu({
                                         min={0}
                                         max={1}
                                         step={0.01}
-                                        value={[temperature]}
+                                        value={[state.temperature]}
                                         onValueChange={(value) =>
-                                            setTemperature(value[0])
+                                            dispatch({
+                                                type: "SET_TEMPERATURE",
+                                                payload: value[0]
+                                            })
                                         }
                                         className="w-full"
                                     />
                                     <Input
                                         type="number"
-                                        value={temperature}
+                                        value={state.temperature}
                                         onChange={(e) =>
-                                            setTemperature(
-                                                Number(e.target.value)
-                                            )
+                                            dispatch({
+                                                type: "SET_TEMPERATURE",
+                                                payload: Number(e.target.value)
+                                            })
                                         }
                                         min={0}
                                         max={1}
@@ -144,15 +117,15 @@ export function SettingsMenu({
                                         min={1}
                                         max={maxPossibleOutput}
                                         step={1}
-                                        value={[maxTokens]}
+                                        value={[state.maxTokens]}
                                         onValueChange={(value) =>
-                                            setMaxTokens(value[0])
+                                            handleSetMaxTokens(value[0])
                                         }
                                         className="w-full"
                                     />
                                     <Input
                                         type="number"
-                                        value={maxTokens}
+                                        value={state.maxTokens}
                                         onChange={(e) =>
                                             handleSetMaxTokens(
                                                 Number(e.target.value)
@@ -173,17 +146,23 @@ export function SettingsMenu({
                                         min={0}
                                         max={1}
                                         step={0.01}
-                                        value={[topP]}
+                                        value={[state.topP]}
                                         onValueChange={(value) =>
-                                            setTopP(value[0])
+                                            dispatch({
+                                                type: "SET_TOP_P",
+                                                payload: value[0]
+                                            })
                                         }
                                         className="w-full"
                                     />
                                     <Input
                                         type="number"
-                                        value={topP}
+                                        value={state.topP}
                                         onChange={(e) =>
-                                            setTopP(Number(e.target.value))
+                                            dispatch({
+                                                type: "SET_TOP_P",
+                                                payload: Number(e.target.value)
+                                            })
                                         }
                                         min={0}
                                         max={1}
@@ -205,8 +184,13 @@ export function SettingsMenu({
                                     </Label>
                                     <Switch
                                         id="enableArtifacts"
-                                        checked={enableArtifacts}
-                                        onCheckedChange={setEnableArtifacts}
+                                        checked={state.enableArtifacts}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_ARTIFACTS",
+                                                payload: checked
+                                            })
+                                        }
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -215,12 +199,18 @@ export function SettingsMenu({
                                     </Label>
                                     <Switch
                                         id="enableInstructions"
-                                        checked={enableInstructions}
+                                        checked={state.enableInstructions}
                                         onCheckedChange={(checked) => {
-                                            setEnableInstructions(checked);
-                                            setEnableSafeguards(
-                                                checked && enableSafeguards
-                                            );
+                                            dispatch({
+                                                type: "SET_ENABLE_INSTRUCTIONS",
+                                                payload: checked
+                                            });
+                                            if (!checked) {
+                                                dispatch({
+                                                    type: "SET_ENABLE_SAFEGUARDS",
+                                                    payload: false
+                                                });
+                                            }
                                         }}
                                     />
                                 </div>
@@ -230,9 +220,14 @@ export function SettingsMenu({
                                     </Label>
                                     <Switch
                                         id="enableSafeguards"
-                                        checked={enableSafeguards}
-                                        onCheckedChange={setEnableSafeguards}
-                                        disabled={!enableInstructions}
+                                        checked={state.enableSafeguards}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_SAFEGUARDS",
+                                                payload: checked
+                                            })
+                                        }
+                                        disabled={!state.enableInstructions}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -258,8 +253,13 @@ export function SettingsMenu({
                                     </div>
                                     <Switch
                                         id="enableTools"
-                                        checked={enableTools}
-                                        onCheckedChange={setEnableTools}
+                                        checked={state.enableTools}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_TOOLS",
+                                                payload: checked
+                                            })
+                                        }
                                     />
                                 </div>
                             </div>
@@ -272,7 +272,7 @@ export function SettingsMenu({
                             <div className="space-y-2 pt-2">
                                 <div
                                     className={`p-1 bg-background rounded-md border relative group overflow-hidden ${
-                                        customInstructions.length >= 3000
+                                        state.customInstructions.length >= 3000
                                             ? "focus:border-red-500 focus-within:border-red-500"
                                             : "focus:border-primary focus-within:border-primary"
                                     }`}
@@ -280,8 +280,8 @@ export function SettingsMenu({
                                     <div className="absolute inset-x-0 bottom-0 h-[1px] bg-transparent transition-all duration-200 group-focus-within:h-[3px] group-focus:h-[3px]">
                                         <div
                                             className={`absolute inset-0 ${
-                                                customInstructions.length >=
-                                                3000
+                                                state.customInstructions
+                                                    .length >= 3000
                                                     ? "bg-red-500"
                                                     : "bg-primary"
                                             }`}
@@ -290,11 +290,12 @@ export function SettingsMenu({
                                     </div>
                                     <textarea
                                         id="customInstructions"
-                                        value={customInstructions}
+                                        value={state.customInstructions}
                                         onChange={(e) =>
-                                            setCustomInstructions(
-                                                e.target.value
-                                            )
+                                            dispatch({
+                                                type: "SET_CUSTOM_INSTRUCTIONS",
+                                                payload: e.target.value
+                                            })
                                         }
                                         maxLength={3000}
                                         rows={4}
@@ -303,7 +304,8 @@ export function SettingsMenu({
                                     />
                                     <div className="flex justify-end pr-1 pb-1 w-full">
                                         <span className="text-sm text-muted-foreground">
-                                            {customInstructions.length}/3000
+                                            {state.customInstructions.length}
+                                            /3000
                                         </span>
                                     </div>
                                 </div>

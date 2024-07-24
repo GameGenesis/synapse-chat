@@ -1,7 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    useReducer
+} from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
-import { Artifact, CombinedMessage, Data } from "@/types";
+import { Action, Artifact, CombinedMessage, Data, State } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import { ModelKey } from "@/app/api/chat/model-provider";
@@ -21,22 +27,43 @@ import DefaultPrompts from "./defaultprompts";
 import { ArtifactsWindow } from "./artifactswindow";
 import ContinueButton from "./continuebutton";
 
+const reducer = (state: State, action: Action): State => {
+    switch (action.type) {
+        case "SET_MODEL":
+            return { ...state, model: action.payload };
+        case "SET_TEMPERATURE":
+            return { ...state, temperature: action.payload };
+        case "SET_TOP_P":
+            return { ...state, topP: action.payload };
+        case "SET_MAX_TOKENS":
+            return { ...state, maxTokens: action.payload };
+        case "SET_ENABLE_ARTIFACTS":
+            return { ...state, enableArtifacts: action.payload };
+        case "SET_ENABLE_INSTRUCTIONS":
+            return { ...state, enableInstructions: action.payload };
+        case "SET_ENABLE_SAFEGUARDS":
+            return { ...state, enableSafeguards: action.payload };
+        case "SET_ENABLE_TOOLS":
+            return { ...state, enableTools: action.payload };
+        case "SET_CUSTOM_INSTRUCTIONS":
+            return { ...state, customInstructions: action.payload };
+        default:
+            return state;
+    }
+};
+
 export function Chat() {
-    const [model, setModel] = useState<ModelKey>(DEFAULT_MODEL);
-    const [temperature, setTemperature] = useState(DEFAULT_TEMPERATURE);
-    const [topP, setTopP] = useState(DEFAULT_TOPP);
-    const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
-    const [enableArtifacts, setEnableArtifacts] = useState(
-        DEFAULT_ENABLE_ARTIFACTS
-    );
-    const [enableInstructions, setEnableInstructions] = useState(
-        DEFAULT_ENABLE_INSTRUCTIONS
-    );
-    const [enableSafeguards, setEnableSafeguards] = useState(
-        DEFAULT_ENABLE_SAFEGUARDS
-    );
-    const [enableTools, setEnableTools] = useState(DEFAULT_ENABLE_TOOLS);
-    const [customInstructions, setCustomInstructions] = useState("");
+    const [state, dispatch] = useReducer(reducer, {
+        model: DEFAULT_MODEL,
+        temperature: DEFAULT_TEMPERATURE,
+        topP: DEFAULT_TOPP,
+        maxTokens: DEFAULT_MAX_TOKENS,
+        enableArtifacts: DEFAULT_ENABLE_ARTIFACTS,
+        enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
+        enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
+        enableTools: DEFAULT_ENABLE_TOOLS,
+        customInstructions: ""
+    });
 
     const [activeTab, setActiveTab] = useState("preview");
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -76,15 +103,7 @@ export function Chat() {
         data
     } = useChat({
         body: {
-            model,
-            temperature,
-            topP,
-            maxTokens,
-            enableArtifacts,
-            enableInstructions,
-            enableSafeguards,
-            enableTools,
-            customInstructions
+            ...state
         },
         onResponse: (response: Response) => {
             console.log("Received response from server:", response);
@@ -107,7 +126,7 @@ export function Chat() {
                 return {
                     cleanedContent: content,
                     artifact: undefined,
-                    model: combinedMessages[index]?.model || model
+                    model: combinedMessages[index]?.model || state.model
                 };
             }
 
@@ -207,7 +226,7 @@ export function Chat() {
             return {
                 cleanedContent,
                 artifact,
-                model: combinedMessages[index]?.model || model
+                model: combinedMessages[index]?.model || state.model
             };
         },
         [artifacts.length, messages.length]
@@ -351,7 +370,7 @@ export function Chat() {
         }
     }, [
         messages,
-        model,
+        state.model,
         processMessage,
         combinedMessages,
         regeneratingMessageId,
@@ -414,23 +433,8 @@ export function Chat() {
             <SettingsMenu
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
-                selectedModel={model}
-                temperature={temperature}
-                setTemperature={setTemperature}
-                topP={topP}
-                setTopP={setTopP}
-                maxTokens={maxTokens}
-                setMaxTokens={setMaxTokens}
-                enableArtifacts={enableArtifacts}
-                setEnableArtifacts={setEnableArtifacts}
-                enableInstructions={enableInstructions}
-                setEnableInstructions={setEnableInstructions}
-                enableSafeguards={enableSafeguards}
-                setEnableSafeguards={setEnableSafeguards}
-                enableTools={enableTools}
-                setEnableTools={setEnableTools}
-                customInstructions={customInstructions}
-                setCustomInstructions={setCustomInstructions}
+                state={state}
+                dispatch={dispatch}
             />
             <div className="flex flex-grow overflow-hidden">
                 <div
@@ -445,8 +449,10 @@ export function Chat() {
                         }
                         isArtifactsOpen={isArtifactsOpen}
                         setIsArtifactsOpen={setIsArtifactsOpen}
-                        selectedModel={model}
-                        onModelSelect={(newModel) => setModel(newModel)}
+                        selectedModel={state.model}
+                        onModelSelect={(newModel) =>
+                            dispatch({ type: "SET_MODEL", payload: newModel })
+                        }
                         onOpenSettings={() => setIsSettingsOpen(true)}
                         onNewChat={() => {
                             stop();
