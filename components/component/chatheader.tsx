@@ -85,7 +85,11 @@ const ChatHeader = ({
                 <div className="flex items-center gap-3">
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetTrigger asChild>
-                            <Button variant="default" size="icon">
+                            <Button
+                                variant="default"
+                                size="icon"
+                                aria-label="Open menu"
+                            >
                                 <MenuIcon className="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
@@ -101,6 +105,7 @@ const ChatHeader = ({
                         size="icon"
                         className="hidden md:flex"
                         onClick={onNewChat}
+                        aria-label="Open new chat"
                     >
                         <NewChatIcon className="h-5 w-5" />
                     </Button>
@@ -169,6 +174,7 @@ const ChatHeader = ({
                         variant="default"
                         size="icon"
                         onClick={onOpenSettings}
+                        aria-label="Open settings"
                     >
                         <SettingsIcon className="h-4 w-4" />
                     </Button>
