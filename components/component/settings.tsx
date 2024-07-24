@@ -71,7 +71,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                     <AccordionItem value="model-parameters">
                         <AccordionTrigger>Model Parameters</AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-2">
+                            <div className="space-y-2 p-1">
                                 <div className="flex items-center space-x-4">
                                     <Label
                                         htmlFor="temperature"
@@ -262,6 +262,36 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                         }
                                     />
                                 </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <Label htmlFor="enablePasteToFile">
+                                            Enable Paste to File
+                                        </Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>
+                                                        Pastes long-form text as
+                                                        a plaintext file
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <Switch
+                                        id="enablePasteToFile"
+                                        checked={state.enablePasteToFile}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_PASTE_TO_FILE",
+                                                payload: checked
+                                            })
+                                        }
+                                    />
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>
@@ -269,7 +299,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                     <AccordionItem value="custom-instructions">
                         <AccordionTrigger>Custom Instructions</AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-2 pt-2">
+                            <div className="pt-2">
                                 <div
                                     className={`p-1 bg-background rounded-md border relative group overflow-hidden ${
                                         state.customInstructions.length >= 3000

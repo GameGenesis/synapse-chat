@@ -6,6 +6,7 @@ export const DEFAULT_ENABLE_ARTIFACTS = true;
 export const DEFAULT_ENABLE_INSTRUCTIONS = true;
 export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_TOOLS = true;
+export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 
 export const ASSISTANT_NAME = "Poe";
 export const date = new Date().toLocaleDateString("en-US", {

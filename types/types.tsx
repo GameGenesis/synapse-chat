@@ -69,6 +69,7 @@ export type State = {
     enableInstructions: boolean;
     enableSafeguards: boolean;
     enableTools: boolean;
+    enablePasteToFile: boolean;
     customInstructions: string;
 };
 
@@ -81,4 +82,5 @@ export type Action =
     | { type: "SET_ENABLE_INSTRUCTIONS"; payload: boolean }
     | { type: "SET_ENABLE_SAFEGUARDS"; payload: boolean }
     | { type: "SET_ENABLE_TOOLS"; payload: boolean }
+    | { type: "SET_ENABLE_PASTE_TO_FILE"; payload: boolean }
     | { type: "SET_CUSTOM_INSTRUCTIONS"; payload: string };

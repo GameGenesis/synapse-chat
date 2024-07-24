@@ -19,9 +19,9 @@ interface Props {
     ) => void;
     isLoading: boolean;
     handleStop: () => void;
+    enablePasteToFile: boolean;
 }
 
-const convertPastedTextToFile = true;
 const LARGE_TEXT_THRESHOLD = 2000;
 
 const ChatFooter = ({
@@ -29,7 +29,8 @@ const ChatFooter = ({
     handleInputChange,
     handleSubmit,
     isLoading,
-    handleStop
+    handleStop,
+    enablePasteToFile
 }: Props) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMultiline, setIsMultiline] = useState(false);
@@ -218,7 +219,7 @@ const ChatFooter = ({
                     addFile(file);
                 }
             });
-        } else if (convertPastedTextToFile && textItems.length > 0) {
+        } else if (enablePasteToFile && textItems.length > 0) {
             event.preventDefault();
             textItems.forEach((item) => {
                 item.getAsString((text) => {

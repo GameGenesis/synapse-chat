@@ -10,11 +10,11 @@ import { useChat } from "ai/react";
 import { Action, Artifact, CombinedMessage, Data, State } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
-import { ModelKey } from "@/app/api/chat/model-provider";
 import { SettingsMenu } from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
     DEFAULT_ENABLE_INSTRUCTIONS,
+    DEFAULT_ENABLE_PASTE_TO_FILE,
     DEFAULT_ENABLE_SAFEGUARDS,
     DEFAULT_ENABLE_TOOLS,
     DEFAULT_MAX_TOKENS,
@@ -62,6 +62,7 @@ export function Chat() {
         enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
         enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
         enableTools: DEFAULT_ENABLE_TOOLS,
+        enablePasteToFile: DEFAULT_ENABLE_PASTE_TO_FILE,
         customInstructions: ""
     });
 
@@ -501,6 +502,7 @@ export function Chat() {
                         handleSubmit={handleSubmit}
                         isLoading={isLoading}
                         handleStop={stop}
+                        enablePasteToFile={state.enablePasteToFile}
                     />
                 </div>
                 <ArtifactsWindow
