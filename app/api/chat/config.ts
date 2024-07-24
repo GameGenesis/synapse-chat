@@ -35,6 +35,7 @@ export const supportedFileFormats = [
     ".cs",
     ".cpp",
     ".hpp",
+    ".py"
 ];
 // export const supportedFileFormats = ["image/*", "text/*"];
 export const maxToolRoundtrips = 3;

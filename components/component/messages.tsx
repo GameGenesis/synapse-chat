@@ -292,7 +292,7 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                                 </div>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
-                                    <FileIcon className="h-5 w-5 text-gray-400" />
+                                    <FileIcon className="h-5 w-5 text-gray-500" />
                                 </div>
                             )}
                         </div>
