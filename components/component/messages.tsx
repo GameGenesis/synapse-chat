@@ -1,5 +1,5 @@
 import { CombinedMessage } from "@/types";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     Avatar,
     AvatarFallback,
@@ -20,6 +20,7 @@ import {
 import { RefreshIcon } from "./icons";
 import Image from "next/image";
 import { modelInfo } from "./chatheader";
+import { ClipboardCheckIcon, ClipboardCopyIcon } from "lucide-react";
 
 interface MessagesProps {
     messages: CombinedMessage[];
@@ -62,8 +63,11 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                 <AvatarImage src="/placeholder-user.jpg" />
                 <AvatarFallback>YO</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words">
-                <div className="font-bold">You</div>
+            <div className="grid gap-1 break-words w-full">
+                <div className="flex items-center justify-between">
+                    <div className="font-bold">You</div>
+                    <CopyButton content={message.originalContent} />
+                </div>
                 <div className="prose text-muted-foreground max-w-full">
                     <CustomMarkdown>{message.processedContent}</CustomMarkdown>
                 </div>
@@ -177,17 +181,26 @@ export const AssistantMessage = ({
                             </TooltipProvider>
                         )}
                     </div>
-                    {isLatestResponse && onRegenerate && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onRegenerate}
-                            className="flex items-center gap-2"
-                        >
-                            <RefreshIcon className="w-4 h-4" />
-                            Regenerate
-                        </Button>
-                    )}
+                    <div className="flex">
+                        {isLatestResponse && onRegenerate && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onRegenerate}
+                                className="flex items-center gap-2"
+                            >
+                                <RefreshIcon className="w-4 h-4" />
+                                Regenerate
+                            </Button>
+                        )}
+                        <CopyButton
+                            content={
+                                typeof message === "string"
+                                    ? message
+                                    : message.originalContent
+                            }
+                        />
+                    </div>
                 </div>
                 <div className="prose text-muted-foreground">
                     {processedContent}
@@ -295,5 +308,36 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                 ))}
             </div>
         </>
+    );
+};
+
+interface CopyButtonProps {
+    content: string;
+}
+
+const CopyButton: React.FC<CopyButtonProps> = ({ content }) => {
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopy = useCallback(() => {
+        navigator.clipboard.writeText(content).then(() => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+    }, [content]);
+
+    return (
+        <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            className="ml-2"
+            aria-label="Copy message content"
+        >
+            {isCopied ? (
+                <ClipboardCheckIcon className="w-4 h-4 text-green-500" />
+            ) : (
+                <ClipboardCopyIcon className="w-4 h-4" />
+            )}
+        </Button>
     );
 };
