@@ -23,10 +23,10 @@ import {
     DEFAULT_TOPP,
     maxToolRoundtrips
 } from "@/app/api/chat/config";
-import DefaultPrompts from "./defaultprompts";
 import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
 import { LoadingSpinner } from "./icons";
+import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 
 const ArtifactsWindow = dynamic(
     () => import("./artifactswindow").then((mod) => mod.ArtifactsWindow),
@@ -35,6 +35,11 @@ const ArtifactsWindow = dynamic(
         ssr: false
     }
 );
+
+const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
+    loading: () => <DefaultPromptsSkeleton />,
+    ssr: false
+});
 
 const reducer = (state: State, action: Action): State => {
     switch (action.type) {

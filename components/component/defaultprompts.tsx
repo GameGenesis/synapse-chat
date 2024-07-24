@@ -17,10 +17,15 @@ import {
     ClockIcon,
     PaintBrushIcon,
     SparklesIcon,
-    DocumentTextIcon,
     CloudIcon,
     CakeIcon,
-    NewspaperIcon
+    NewspaperIcon,
+    CommandLineIcon,
+    ComputerDesktopIcon,
+    GlobeAmericasIcon
+    // RocketLaunchIcon,
+    // DocumentTextIcon,
+    // WrenchScrewdriverIcon
 } from "@heroicons/react/24/outline";
 
 import { generateId, Message } from "ai";
@@ -41,7 +46,7 @@ const prompts: Prompt[] = [
     },
     {
         icon: LightBulbIcon,
-        displayName: "Activities to make friends in new city",
+        displayName: "Activities to make new friends",
         prompt: "Suggest activities or ways to make new friends after moving to a new city.",
         color: "bg-yellow-100 text-yellow-600"
     },
@@ -76,7 +81,7 @@ const prompts: Prompt[] = [
         color: "bg-pink-100 text-pink-600"
     },
     {
-        icon: GlobeAltIcon,
+        icon: GlobeAmericasIcon,
         displayName: "Plan a trip",
         prompt: "Help me plan a 7-day trip to Japan, including must-visit places and local cuisine to try.",
         color: "bg-teal-100 text-teal-600"
@@ -107,18 +112,18 @@ const prompts: Prompt[] = [
     },
     {
         icon: ChartPieIcon,
-        displayName: "Create an interactive Stock Chart",
+        displayName: "Interactive Pie Chart",
         prompt: "Create an interactive Berkshire Hathaway stock pie chart using React. Using historical stock data, visualize the company's portfolio allocation, and implement hover effects for detailed information. Display this in an artifact.",
         color: "bg-purple-200 text-purple-700"
     },
     {
         icon: Square3Stack3DIcon,
-        displayName: "Represent a Mermaid Class Diagram",
+        displayName: "Visualize a Class Diagram",
         prompt: "Generate a comprehensive class diagram using Mermaid for a modern shopping center management system. Include classes for stores, customers, employees, inventory, sales, and facility management. Show relationships, attributes, and methods for each class. Display this in an artifact.",
         color: "bg-yellow-200 text-yellow-700"
     },
     {
-        icon: ChartBarIcon,
+        icon: ComputerDesktopIcon,
         displayName: "Create a Simulation in React",
         prompt: "Create a Double Pendulum Physics Simulator in React with an interactive graph. Implement accurate physics calculations, real-time animation, and a graph showing the pendulum's path over time. Include options to adjust parameters like length, mass, and initial angles. Display this in an artifact.",
         color: "bg-red-200 text-red-700"
@@ -131,18 +136,18 @@ const prompts: Prompt[] = [
     },
     {
         icon: PaintBrushIcon,
-        displayName: "Create an SVG",
-        prompt: "Create an 8-bit style crab SVG artifact. Design a charming and pixelated crab character with attention to detail in the classic 8-bit aesthetic.",
+        displayName: "Draw an SVG",
+        prompt: "Draw an 8-bit style crab SVG artifact. Design a charming and pixelated crab character with attention to detail in the classic 8-bit aesthetic.",
         color: "bg-orange-200 text-orange-700"
     },
     {
         icon: SparklesIcon,
         displayName: "Generate an Image",
         prompt: "Generate an image with the following characteristics: Steampunk Cyborg Yoda with a sparking lightsaber featuring extra swirls of plasma and steam. The richly colored blade should be mostly cybernetic. Set the scene in an old European city with leather and brass details, showcasing full Jules Verne steam era technology. The sparking, spitty cool lightsaber should be prominently featured at dusk.",
-        color: "bg-amber-200 text-amber-700"
+        color: "bg-amber-100 text-amber-600"
     },
     {
-        icon: DocumentTextIcon,
+        icon: CommandLineIcon,
         displayName: "Explain a coding concept",
         prompt: "Create a comprehensive markdown artifact explaining the Array reduce() method in JavaScript. Cover its syntax, use cases, and provide multiple examples demonstrating its versatility. Include comparisons with other array methods, performance considerations, and best practices.",
         color: "bg-teal-200 text-teal-700"
@@ -161,25 +166,25 @@ const prompts: Prompt[] = [
     },
     {
         icon: ChartBarIcon,
-        displayName: "Monthly Temperature Graph",
+        displayName: "Graph Yearly Temperatures",
         prompt: "Create a graph showing the average monthly temperatures in Beirut, Lebanon for a typical year. Use a line chart to display the data, with months on the x-axis and temperature in Celsius on the y-axis. Include a brief analysis of the temperature trends throughout the year in ShadCn cards. Preview this as an artifact.",
         color: "bg-emerald-100 text-emerald-600"
     },
     {
         icon: GlobeAltIcon,
-        displayName: "Wikipedia Article Summary",
+        displayName: "Summarize an Article",
         prompt: "Summarize the key points from Ryan Reynolds' Wikipedia page. Include information about his early life, career highlights, notable films, awards, and any significant personal details. Provide a concise yet comprehensive overview of his life and career. Finally, display his image from the article and provide a link to view the full article.",
         color: "bg-violet-100 text-violet-600"
     },
     {
         icon: CakeIcon,
-        displayName: "Great Cake Recipes",
+        displayName: "List Cake Recipes",
         prompt: "Provide a list of 3 delicious and unique cake recipes that I can create at home. For each recipe, include the name of the cake, a brief description, key ingredients, any special techniques or tips for baking, and a link to the recipe.",
         color: "bg-pink-100 text-pink-600"
     },
     {
         icon: NewspaperIcon,
-        displayName: "Yesterday's News Recap",
+        displayName: "Recap Yesterday's News",
         prompt: "Provide a concise summary of the major news events that occurred yesterday. Cover important stories from various categories such as international affairs, politics, technology, science, and entertainment. Highlight any breaking news or significant developments that made headlines. Provide the links to the articles used.",
         color: "bg-gray-100 text-gray-600"
     }
@@ -207,7 +212,7 @@ const DefaultPrompts = ({ addMessage }: Props) => {
                 <h2 className="text-2xl font-semibold mb-6 text-gray-700">
                     Choose a prompt to get started
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 w-full max-w-xl mx-auto">
                     {randomPrompts.map((item, index) => (
                         <button
                             key={index}
