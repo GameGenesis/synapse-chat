@@ -21,6 +21,9 @@ interface Props {
     handleStop: () => void;
 }
 
+const convertLargeTextToPaste = true;
+const LARGE_TEXT_THRESHOLD = 500;
+
 const ChatFooter = ({
     input,
     handleInputChange,
@@ -193,6 +196,39 @@ const ChatFooter = ({
         }
     };
 
+    const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        const items = event.clipboardData.items;
+        const imageItems = Array.from(items).filter(
+            (item) => item.type.indexOf("image") !== -1
+        );
+
+        if (imageItems.length > 0) {
+            event.preventDefault();
+            imageItems.forEach((item) => {
+                const blob = item.getAsFile();
+                if (blob) {
+                    const file = new File(
+                        [blob],
+                        `pasted-image-${Date.now()}.png`,
+                        { type: "image/png" }
+                    );
+                    addFile(file);
+                }
+            });
+        }
+    };
+
+    const addFile = (file: File) => {
+        setFiles((prevFiles) => {
+            const dataTransfer = new DataTransfer();
+            if (prevFiles) {
+                Array.from(prevFiles).forEach((f) => dataTransfer.items.add(f));
+            }
+            dataTransfer.items.add(file);
+            return dataTransfer.files;
+        });
+    };
+
     return (
         <>
             <AttachmentModal
@@ -235,6 +271,7 @@ const ChatFooter = ({
                             value={input}
                             onChange={handleTextareaChange}
                             onKeyDown={handleKeyDown}
+                            onPaste={handlePaste}
                             rows={1}
                         />
                         <div className="flex-shrink-0 w-12 h-full" />
