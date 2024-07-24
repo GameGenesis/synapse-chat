@@ -178,6 +178,7 @@ export function Chat() {
                                 startMatch.index + startMatch[0].length,
                                 endMatch.index
                             )
+                            .replace(/^```[\w-]*\n|\n```$/g, "")
                             .trim()
                     };
 
@@ -205,6 +206,7 @@ export function Chat() {
                         title: getAttributeValue(attributes, "title"),
                         content: cleanedContent
                             .substring(startMatch.index + startMatch[0].length)
+                            .replace(/^```[\w-]*\n|\n```$/g, "")
                             .trim()
                     };
 
@@ -230,7 +232,7 @@ export function Chat() {
                 model: combinedMessages[index]?.model || state.model
             };
         },
-        [artifacts.length, messages.length]
+        [artifacts.length, messages.length, state.model]
     );
 
     useEffect(() => {
