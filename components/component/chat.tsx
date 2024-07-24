@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Response, AIResponse } from "./response";
+import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
 import { Artifact, CombinedMessage, Data } from "@/types";
 import ChatHeader from "./chatheader";
@@ -458,39 +458,15 @@ export function Chat() {
                                     addMessage={(message) => append(message)}
                                 />
                             ) : (
-                                combinedMessages.map((m, index) => (
-                                    <Response
-                                        key={m.id}
-                                        role={m.role}
-                                        artifact={m.artifact}
-                                        content={m.processedContent}
-                                        onArtifactClick={(identifier) =>
-                                            openArtifact(identifier)
-                                        }
-                                        attachments={m.attachments}
-                                        model={m.model}
-                                        tools={m.toolInvocations?.map(
-                                            (tool) => tool.toolName
-                                        )}
-                                        data={{
-                                            completionTokens:
-                                                m.completionTokens,
-                                            promptTokens: m.promptTokens,
-                                            totalTokens: m.totalTokens,
-                                            finishReason: m.finishReason
-                                        }}
-                                        onRegenerate={handleReload}
-                                        isLatestResponse={
-                                            index ===
-                                                combinedMessages.length - 1 &&
-                                            m.role === "assistant"
-                                        }
-                                    />
-                                ))
+                                <Messages
+                                    messages={combinedMessages}
+                                    onArtifactClick={openArtifact}
+                                    onRegenerate={handleReload}
+                                />
                             )}
                             {error && (
-                                <AIResponse
-                                    content="Encountered an Error"
+                                <AssistantMessage
+                                    message="Encountered an Error"
                                     onRegenerate={reload}
                                     isLatestResponse
                                 />

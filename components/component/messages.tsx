@@ -1,4 +1,4 @@
-import { Artifact, Data } from "@/types";
+import { Artifact, CombinedMessage, Data } from "@/types";
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
@@ -15,59 +15,41 @@ import {
 import { RefreshIcon } from "./icons";
 import Image from "next/image";
 
-interface ResponseProps {
-    content: string;
-    role: string;
-    artifact?: Artifact;
+interface MessagesProps {
+    messages: CombinedMessage[];
     onArtifactClick: (identifier: string) => void;
-    attachments?: { contentType: string; name: string; url: string }[];
-    model?: ModelKey;
-    tools?: string[];
-    data?: Data;
     onRegenerate?: () => void;
-    isLatestResponse?: boolean;
 }
 
-export const Response = ({
-    content,
-    role,
-    artifact,
+export const Messages = ({
+    messages,
     onArtifactClick,
-    attachments,
-    model,
-    tools,
-    data,
-    onRegenerate,
-    isLatestResponse
-}: ResponseProps) => {
-    if (role !== "user" && role !== "assistant") return;
-
+    onRegenerate
+}: MessagesProps) => {
     return (
-        <div>
-            {role === "user" ? (
-                <UserResponse attachments={attachments}>{content}</UserResponse>
-            ) : (
-                <AIResponse
-                    content={content}
-                    artifact={artifact}
-                    onArtifactClick={onArtifactClick}
-                    model={model}
-                    tools={tools}
-                    data={data}
-                    onRegenerate={onRegenerate}
-                    isLatestResponse={isLatestResponse}
-                />
+        <>
+            {messages.map((message, index) =>
+                message.role === "user" ? (
+                    <UserMessage key={message.id} message={message} />
+                ) : message.role === "assistant" ? (
+                    <AssistantMessage
+                        key={message.id}
+                        message={message}
+                        onArtifactClick={onArtifactClick}
+                        onRegenerate={onRegenerate}
+                        isLatestResponse={index === messages.length - 1}
+                    />
+                ) : null
             )}
-        </div>
+        </>
     );
 };
 
-interface UserResponseProps {
-    children: React.ReactNode;
-    attachments?: { contentType: string; name: string; url: string }[];
+interface UserMessageProps {
+    message: CombinedMessage;
 }
 
-export const UserResponse = ({ children, attachments }: UserResponseProps) => {
+export const UserMessage = ({ message }: UserMessageProps) => {
     return (
         <div className="flex items-start gap-4">
             <Avatar className="w-8 h-8 border flex-shrink-0">
@@ -77,55 +59,51 @@ export const UserResponse = ({ children, attachments }: UserResponseProps) => {
             <div className="grid gap-1 break-words">
                 <div className="font-bold">You</div>
                 <div className="prose text-muted-foreground max-w-full">
-                    <CustomMarkdown>{children?.toString()}</CustomMarkdown>
+                    <CustomMarkdown>{message.processedContent}</CustomMarkdown>
                 </div>
-                {attachments && attachments.length > 0 && (
-                    <AttachmentPreview attachments={attachments} />
+                {message.attachments && message.attachments.length > 0 && (
+                    <AttachmentPreview attachments={message.attachments} />
                 )}
             </div>
         </div>
     );
 };
 
-interface AIResponseProps {
-    content: string;
-    artifact?: Artifact;
+interface AssistantMessageProps {
+    message: CombinedMessage | string;
+    isLatestResponse: boolean;
     onArtifactClick?: (identifier: string) => void;
-    model?: ModelKey;
-    tools?: string[];
-    data?: Data;
     onRegenerate?: () => void;
-    isLatestResponse?: boolean;
 }
 
-export const AIResponse = ({
-    content,
-    artifact,
+export const AssistantMessage = ({
+    message,
+    isLatestResponse,
     onArtifactClick,
-    model,
-    tools,
-    data,
-    onRegenerate,
-    isLatestResponse
-}: AIResponseProps) => {
+    onRegenerate
+}: AssistantMessageProps) => {
     const processedContent = useMemo(() => {
-        if (!artifact || !onArtifactClick) {
-            return <CustomMarkdown>{content}</CustomMarkdown>;
+        if (typeof message === "string") return message;
+
+        if (!message.artifact || !onArtifactClick) {
+            return <CustomMarkdown>{message.processedContent}</CustomMarkdown>;
         }
 
-        const parts = content.split(/(\[ARTIFACT:[^\]]+\])/);
+        const parts = message.processedContent.split(/(\[ARTIFACT:[^\]]+\])/);
         const elements = parts.map((part, index) => {
             const match = part.match(/\[ARTIFACT:([^\]]+)\]/);
-            if (match && match[1] === artifact.identifier) {
+            if (match && match[1] === message.artifact?.identifier) {
                 return (
                     <Button
                         key={index}
                         variant="outline"
                         size="sm"
-                        onClick={() => onArtifactClick(artifact.identifier)}
+                        onClick={() =>
+                            onArtifactClick(message.artifact?.identifier || "")
+                        }
                         className="my-2"
                     >
-                        {artifact.title}
+                        {message.artifact?.title}
                     </Button>
                 );
             }
@@ -143,7 +121,12 @@ export const AIResponse = ({
                 )}
             </>
         );
-    }, [content, artifact, onArtifactClick]);
+    }, [message, onArtifactClick]);
+
+    const tools =
+        typeof message === "string"
+            ? undefined
+            : message.toolInvocations?.map((tool) => tool.toolName);
 
     return (
         <div className="flex items-start gap-4">
@@ -155,25 +138,26 @@ export const AIResponse = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="font-bold">Assistant</span>
-                        {model && (
+                        {typeof message !== "string" && message.model && (
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <span className="font-semibold text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                            {model}
+                                            {message.model}
                                         </span>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        {data && (
+                                        {(message.completionTokens ||
+                                            message.promptTokens) && (
                                             <div className="flex flex-col space-y-1">
                                                 <span>
                                                     Output Tokens:{" "}
-                                                    {data?.completionTokens ||
+                                                    {message.completionTokens ||
                                                         "N/A"}
                                                 </span>
                                                 <span>
                                                     Context Tokens:{" "}
-                                                    {data?.promptTokens ||
+                                                    {message.promptTokens ||
                                                         "N/A"}
                                                 </span>
                                             </div>
