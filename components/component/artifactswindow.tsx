@@ -283,12 +283,7 @@ export function ArtifactsWindow({
                         size="icon"
                         className="rounded-full"
                         onClick={handleNextArtifact}
-                        disabled={
-                            currentArtifactIndex >=
-                            (isStreamingArtifact
-                                ? artifacts.length
-                                : artifacts.length - 1)
-                        }
+                        disabled={currentArtifactIndex >= artifacts.length - 1}
                     >
                         <ChevronRightIcon className="w-5 h-5" />
                         <span className="sr-only">Next</span>
