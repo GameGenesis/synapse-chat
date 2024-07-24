@@ -102,7 +102,7 @@ const prompts: Prompt[] = [
     {
         icon: CubeTransparentIcon,
         displayName: "Create a Snake Game",
-        prompt: "Develop a Snake game using HTML, CSS, and JavaScript.",
+        prompt: "Develop a Snake game using HTML, CSS, and JavaScript as an artifact.",
         color: "bg-green-200 text-green-700"
     },
     {
@@ -168,7 +168,7 @@ const prompts: Prompt[] = [
     {
         icon: GlobeAltIcon,
         displayName: "Wikipedia Article Summary",
-        prompt: "Summarize the key points from Ryan Gosling's Wikipedia page. Include information about his early life, career highlights, notable films, awards, and any significant personal details. Provide a concise yet comprehensive overview of his life and career. Finally, display his image from the article and provide a link to view the full article.",
+        prompt: "Summarize the key points from Ryan Reynolds' Wikipedia page. Include information about his early life, career highlights, notable films, awards, and any significant personal details. Provide a concise yet comprehensive overview of his life and career. Finally, display his image from the article and provide a link to view the full article.",
         color: "bg-violet-100 text-violet-600"
     },
     {
