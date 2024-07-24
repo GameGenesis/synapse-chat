@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import { RefreshIcon } from "./icons";
 import Image from "next/image";
+import { modelInfo } from "./chatheader";
 
 interface MessagesProps {
     messages: CombinedMessage[];
@@ -128,10 +129,17 @@ export const AssistantMessage = ({
         );
     }, [message, onArtifactClick]);
 
-    const tools =
-        typeof message === "string"
-            ? undefined
-            : message.toolInvocations?.map((tool) => tool.toolName);
+    const formatToolArgs = (args: Record<string, any>): string => {
+        return Object.entries(args)
+            .map(([key, value]) => {
+                const formattedKey = key.replace(/([A-Z])/g, " $1").trim();
+                const capitalizedKey =
+                    formattedKey.charAt(0).toUpperCase() +
+                    formattedKey.slice(1);
+                return `${capitalizedKey}: ${value}`;
+            })
+            .join("\n");
+    };
 
     return (
         <div className="flex items-start gap-4">
@@ -150,21 +158,20 @@ export const AssistantMessage = ({
                                         <Badge>{message.model}</Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        {(message.completionTokens ||
-                                            message.promptTokens) && (
-                                            <div className="flex flex-col space-y-1">
-                                                <span>
-                                                    Output Tokens:{" "}
-                                                    {message.completionTokens ||
-                                                        "N/A"}
-                                                </span>
-                                                <span>
-                                                    Context Tokens:{" "}
-                                                    {message.promptTokens ||
-                                                        "N/A"}
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div className="flex flex-col space-y-1">
+                                            <span className="font-bold text-sm">
+                                                {modelInfo[message.model]?.name}
+                                            </span>
+                                            <span>
+                                                Output Tokens:{" "}
+                                                {message.completionTokens ||
+                                                    "N/A"}
+                                            </span>
+                                            <span>
+                                                Context Tokens:{" "}
+                                                {message.promptTokens || "N/A"}
+                                            </span>
+                                        </div>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -185,15 +192,33 @@ export const AssistantMessage = ({
                 <div className="prose text-muted-foreground">
                     {processedContent}
                 </div>
-                {tools && tools.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                        {tools.map((tool, index) => (
-                            <Badge key={index} variant="outline">
-                                {tool}
-                            </Badge>
-                        ))}
-                    </div>
-                )}
+                {typeof message !== "string" &&
+                    message.toolInvocations &&
+                    message.toolInvocations.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {message.toolInvocations.map((tool) => (
+                                <TooltipProvider key={tool.toolCallId}>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <Badge variant="outline">
+                                                {tool.toolName}
+                                            </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <div className="flex flex-col space-y-2">
+                                                <span className="font-bold text-sm">
+                                                    Tool Arguments
+                                                </span>
+                                                <div className="whitespace-pre-wrap text-sm">
+                                                    {formatToolArgs(tool.args)}
+                                                </div>
+                                            </div>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ))}
+                        </div>
+                    )}
             </div>
         </div>
     );

@@ -24,7 +24,7 @@ interface Props {
     onNewChat: () => void;
 }
 
-const modelInfo: Partial<
+export const modelInfo: Partial<
     Record<
         ModelKey,
         {
