@@ -22,8 +22,8 @@ import {
     NewspaperIcon,
     CommandLineIcon,
     ComputerDesktopIcon,
-    GlobeAmericasIcon
-    // RocketLaunchIcon,
+    GlobeAmericasIcon,
+    RocketLaunchIcon
     // DocumentTextIcon,
     // WrenchScrewdriverIcon
 } from "@heroicons/react/24/outline";
@@ -36,7 +36,11 @@ interface Prompt {
     prompt: string;
     color: string;
 }
+// 1: cyan, amber, sky, rose, emerald, violet, gray
+// 0: fuchsia, lime
 
+// blue, yellow, green, orange, purple, indigo, indigo, teal, red, cyan, blue, green, purple
+// yellow, red, pink, orange, amber, teal, sky, rose, emerald, violet, pink, gray
 const prompts: Prompt[] = [
     {
         icon: PaperAirplaneIcon,
@@ -66,7 +70,7 @@ const prompts: Prompt[] = [
         icon: BriefcaseIcon,
         displayName: "Prepare for job interview",
         prompt: "Give me tips on how to prepare for a software developer job interview.",
-        color: "bg-purple-100 text-purple-600"
+        color: "bg-violet-200 text-violet-700"
     },
     {
         icon: CodeBracketIcon,
@@ -78,7 +82,7 @@ const prompts: Prompt[] = [
         icon: PencilIcon,
         displayName: "Creative writing prompt",
         prompt: "Give me a creative writing prompt for a short story about time travel.",
-        color: "bg-pink-100 text-pink-600"
+        color: "bg-indigo-100 text-indigo-600"
     },
     {
         icon: GlobeAmericasIcon,
@@ -90,7 +94,7 @@ const prompts: Prompt[] = [
         icon: CalculatorIcon,
         displayName: "Solve a math problem",
         prompt: "Can you help me solve this calculus problem: Find the derivative of f(x) = x^3 + 2x^2 - 5x + 3.",
-        color: "bg-red-100 text-red-600"
+        color: "bg-red-200 text-red-700"
     },
     {
         icon: BeakerIcon,
@@ -99,7 +103,7 @@ const prompts: Prompt[] = [
         color: "bg-cyan-100 text-cyan-600"
     },
     {
-        icon: CodeBracketIcon,
+        icon: ComputerDesktopIcon,
         displayName: "Create a React Dashboard",
         prompt: "Create a comprehensive React dashboard with data visualization, responsive design, and at least three interactive widgets (e.g., line chart, pie chart, and data table). Display this in an artifact.",
         color: "bg-blue-200 text-blue-700"
@@ -120,19 +124,19 @@ const prompts: Prompt[] = [
         icon: Square3Stack3DIcon,
         displayName: "Visualize a Class Diagram",
         prompt: "Generate a comprehensive class diagram using Mermaid for a modern shopping center management system. Include classes for stores, customers, employees, inventory, sales, and facility management. Show relationships, attributes, and methods for each class. Display this in an artifact.",
-        color: "bg-yellow-200 text-yellow-700"
+        color: "bg-lime-100 text-lime-600"
     },
     {
-        icon: ComputerDesktopIcon,
+        icon: RocketLaunchIcon,
         displayName: "Create a Simulation in React",
         prompt: "Create a Double Pendulum Physics Simulator in React with an interactive graph. Implement accurate physics calculations, real-time animation, and a graph showing the pendulum's path over time. Include options to adjust parameters like length, mass, and initial angles. Display this in an artifact.",
-        color: "bg-red-200 text-red-700"
+        color: "bg-fuchsia-100 text-fuchsia-600"
     },
     {
         icon: ClockIcon,
         displayName: "Create a Pomodoro Timer",
         prompt: "Create an aesthetically pleasing Pomodoro timer artifact in React. Include features such as customizable work/break durations, sound notifications, and a visually engaging countdown display. Implement smooth transitions between states and add a productivity tracking feature.",
-        color: "bg-pink-200 text-pink-700"
+        color: "bg-emerald-100 text-emerald-600"
     },
     {
         icon: PaintBrushIcon,
@@ -150,7 +154,7 @@ const prompts: Prompt[] = [
         icon: CommandLineIcon,
         displayName: "Explain a coding concept",
         prompt: "Create a comprehensive markdown artifact explaining the Array reduce() method in JavaScript. Cover its syntax, use cases, and provide multiple examples demonstrating its versatility. Include comparisons with other array methods, performance considerations, and best practices.",
-        color: "bg-teal-200 text-teal-700"
+        color: "bg-gray-200 text-gray-700"
     },
     {
         icon: CloudIcon,
@@ -180,13 +184,13 @@ const prompts: Prompt[] = [
         icon: CakeIcon,
         displayName: "List Cake Recipes",
         prompt: "Provide a list of 3 delicious and unique cake recipes that I can create at home. For each recipe, include the name of the cake, a brief description, key ingredients, any special techniques or tips for baking, and a link to the recipe.",
-        color: "bg-pink-100 text-pink-600"
+        color: "bg-pink-200 text-pink-700"
     },
     {
         icon: NewspaperIcon,
         displayName: "Recap Yesterday's News",
         prompt: "Provide a concise summary of the major news events that occurred yesterday. Cover important stories from various categories such as international affairs, politics, technology, science, and entertainment. Highlight any breaking news or significant developments that made headlines. Provide the links to the articles used.",
-        color: "bg-gray-100 text-gray-600"
+        color: "bg-gray-200 text-gray-700"
     }
 ];
 
