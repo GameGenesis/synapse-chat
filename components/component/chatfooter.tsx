@@ -152,7 +152,7 @@ const ChatFooter = ({
         return (
             <div
                 key={file.name}
-                className="flex items-center bg-gray-100 rounded-md p-2 mb-2 cursor-pointer"
+                className="flex items-center rounded-lg p-2 mb-2 cursor-pointer border border-input"
                 onClick={() => {
                     setIsModalOpen(true);
                     setSelectedFile(file);
@@ -164,12 +164,12 @@ const ChatFooter = ({
                         alt={file.name}
                         width={0}
                         height={0}
-                        className="w-8 h-8 object-cover mr-2"
+                        className="w-8 h-8 rounded-md object-cover mr-2"
                         loader={() => imageSrc}
                     />
                 ) : (
-                    <div className="w-8 h-8 bg-gray-300 flex items-center justify-center mr-2 rounded">
-                        <FileIcon className="w-4 h-4" />
+                    <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md mr-2">
+                        <FileIcon className="h-5 w-5 text-gray-600" />
                     </div>
                 )}
                 <span className="text-sm truncate flex-grow">{file.name}</span>
@@ -275,7 +275,7 @@ const ChatFooter = ({
                     }}
                 >
                     {files && files.length > 0 && (
-                        <div className="mb-2 max-h-32 overflow-y-auto">
+                        <div className="max-h-32 overflow-y-auto px-4">
                             {Array.from(files).map(renderFilePreview)}
                         </div>
                     )}

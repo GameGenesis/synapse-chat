@@ -69,7 +69,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                 />
                 <AvatarFallback>YO</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words w-full">
+            <div className="grid gap-1 break-words w-full mb-2">
                 <div className="flex items-center justify-between align-middle">
                     <div className="font-bold text-lg">{USER_NAME}</div>
                     <CopyButton content={message.originalContent} />
@@ -119,7 +119,7 @@ export const AssistantMessage = ({
                         }
                         className="my-2 inline-flex items-center gap-2"
                     >
-                        <span className="text-xs font-semibold uppercase text-gray-500">
+                        <span className="text-xs font-bold uppercase text-gray-500">
                             {message.artifact?.type}
                         </span>
                         <span>{message.artifact?.title}</span>
@@ -160,7 +160,7 @@ export const AssistantMessage = ({
                 <AvatarImage src="/placeholder-user.jpg" />
                 <AvatarFallback>OA</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words w-full">
+            <div className="grid gap-1 break-words w-full mb-2">
                 <div className="flex items-center justify-between align-middle">
                     <div className="flex items-center gap-2">
                         <span className="font-bold text-lg">Assistant</span>
@@ -281,26 +281,25 @@ const AttachmentPreview = ({ attachments }: AttachmentPreviewProps) => {
                 file={selectedFile}
                 fallback={selectedFileFallback}
             />
-            <div className="mt-4 space-y-2">
+            <div className="mt-2 space-y-2">
                 {attachments?.map((attachment, index) => (
                     <div
                         key={index}
-                        className="flex items-center max-w-80 p-2 pr-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center max-w-80 p-2 pr-4 bg-white border border-input rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                         onClick={() => handleAttachmentClick(attachment)}
                     >
                         <div className="flex-shrink-0 w-10 h-10 mr-3">
                             {attachment.contentType.startsWith("image/") ? (
-                                <div className="relative w-full h-full rounded overflow-hidden">
+                                <div className="relative w-full h-full rounded-md overflow-hidden">
                                     <Image
                                         src={attachment.url}
                                         alt={attachment.name}
                                         layout="fill"
                                         objectFit="cover"
-                                        unoptimized
                                     />
                                 </div>
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
                                     <FileIcon className="h-5 w-5 text-gray-500" />
                                 </div>
                             )}
