@@ -51,6 +51,8 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, enableSafeguards: action.payload };
         case "SET_ENABLE_TOOLS":
             return { ...state, enableTools: action.payload };
+        case "SET_ENABLE_PASTE_TO_FILE":
+            return { ...state, enablePasteToFile: action.payload };
         case "SET_CUSTOM_INSTRUCTIONS":
             return { ...state, customInstructions: action.payload };
         default:
