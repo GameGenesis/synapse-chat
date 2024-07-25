@@ -216,7 +216,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="enableSafeguards">
-                                        Enable Safeguards
+                                        Enable Additional Safeguards
                                     </Label>
                                     <Switch
                                         id="enableSafeguards"

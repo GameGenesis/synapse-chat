@@ -279,6 +279,24 @@ const ChatFooter = ({
                             {Array.from(files).map(renderFilePreview)}
                         </div>
                     )}
+                    <Button
+                        size="icon"
+                        className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer flex items-center justify-center"
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <PaperclipIcon className="w-4 h-4 text-primary-foreground" />
+                        <span className="sr-only">Attach File</span>
+                    </Button>
+                    <input
+                        id="file-upload"
+                        type="file"
+                        ref={fileInputRef}
+                        multiple
+                        accept={supportedFileFormats.join(", ")}
+                        onChange={handleFileUpload}
+                        className="hidden"
+                    />
                     <div
                         className={`${
                             isMultiline ? "rounded-2xl" : "rounded-full"
@@ -301,22 +319,6 @@ const ChatFooter = ({
                         />
                         <div className="flex-shrink-0 w-12 h-full" />
                     </div>
-                    <label
-                        htmlFor="file-upload"
-                        className="absolute w-8 h-8 bottom-2 left-3 rounded-full z-10 bg-black cursor-pointer flex items-center justify-center"
-                    >
-                        <PaperclipIcon className="w-4 h-4 text-primary-foreground" />
-                        <span className="sr-only">Attach File</span>
-                    </label>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        ref={fileInputRef}
-                        multiple
-                        accept={supportedFileFormats.join(", ")}
-                        onChange={handleFileUpload}
-                        className="hidden"
-                    />
                     <Button
                         type={isLoading ? "button" : "submit"}
                         size="icon"
