@@ -47,7 +47,7 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
                         {file.name}
                     </span>
                 </DialogDescription>
-                <div className="mt-4 flex-grow overflow-auto">
+                <div className="flex-grow overflow-auto">
                     {isImage ? (
                         <Image
                             src={fallback || URL.createObjectURL(file)}
