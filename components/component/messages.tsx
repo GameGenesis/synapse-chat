@@ -25,8 +25,7 @@ import {
     ClipboardCopyIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    ExternalLinkIcon,
-    PlayCircleIcon
+    ExternalLinkIcon
 } from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
 import { Card, CardContent } from "@/components/ui/card";
@@ -463,10 +462,27 @@ const SourceItem = ({ source, index }: SourceItemProps) => {
     );
 };
 
-const SourceCard = ({ source }: { source: any }) => {
+interface Source {
+    url?: string;
+    contentUrl?: string;
+    hostPageUrl?: string;
+    name: string;
+    displayUrl?: string;
+    snippet?: string;
+    description?: string;
+    thumbnailUrl?: string;
+    duration?: string;
+    viewCount?: number;
+    datePublished?: string;
+    publisher?: { name: string }[];
+    creator?: { name: string };
+}
+
+const SourceCard = ({ source }: { source: Source }) => {
     const isVideo =
-        source.encodingFormat === "mp4" ||
-        source.hostPageDisplayUrl?.includes("youtube.com");
+        source.contentUrl ||
+        source.hostPageUrl?.includes("video") ||
+        source.thumbnailUrl;
 
     const getFaviconUrl = (url: string) => {
         try {
@@ -478,36 +494,23 @@ const SourceCard = ({ source }: { source: any }) => {
     };
 
     const getSourceUrl = () => {
-        if (isVideo) {
-            return source.contentUrl || source.hostPageUrl;
-        }
-        return source.url;
+        return source.url || source.contentUrl || source.hostPageUrl || "";
     };
 
     const getSourceName = () => {
-        if (isVideo) {
-            return source.name;
-        }
-        return source.name || source.displayUrl;
+        return source.name || source.displayUrl || "";
     };
 
     const getSourceDescription = () => {
-        if (isVideo) {
-            return source.description;
-        }
-        return source.snippet;
+        return source.snippet || source.description || "";
     };
 
-    const getHostName = () => {
-        const url = getSourceUrl();
-        try {
-            return new URL(url).hostname;
-        } catch (error) {
-            console.log(
-                `Encountered an error with getting the URL (${url}) hostname: ${error}`
-            );
-            return null;
-        }
+    const getPublisherName = () => {
+        return (
+            source.publisher?.[0]?.name ||
+            source.creator?.name ||
+            new URL(getSourceUrl()).hostname
+        );
     };
 
     return (
@@ -525,9 +528,7 @@ const SourceCard = ({ source }: { source: any }) => {
                                 <div className="flex items-center mb-2">
                                     <Image
                                         src={getFaviconUrl(getSourceUrl())}
-                                        alt={`${
-                                            source.siteName || "Website"
-                                        } icon`}
+                                        alt={`${getPublisherName()} icon`}
                                         width={16}
                                         height={16}
                                         className="mr-2"
@@ -549,14 +550,14 @@ const SourceCard = ({ source }: { source: any }) => {
                         <div className="flex items-center mb-2">
                             <Image
                                 src={getFaviconUrl(getSourceUrl())}
-                                alt={`${source.siteName || "Website"} icon`}
+                                alt={`${getPublisherName()} icon`}
                                 width={16}
                                 height={16}
                                 className="mr-2"
                                 unoptimized
                             />
                             <span className="text-sm text-gray-500">
-                                {getHostName()}
+                                {getPublisherName()}
                             </span>
                         </div>
                         <a
@@ -568,13 +569,19 @@ const SourceCard = ({ source }: { source: any }) => {
                             {getSourceName()}
                             <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
                         </a>
-                        <p className="text-sm text-gray-700 overflow-auto text-wrap">
+                        <p className="text-sm text-gray-700">
                             {getSourceDescription()}
                         </p>
                         {isVideo && (
                             <p className="text-sm text-gray-500 mt-2">
-                                Duration: {source.duration}, Views:{" "}
-                                {source.viewCount}
+                                {source.duration &&
+                                    `Duration: ${source.duration}`}
+                                {source.viewCount !== undefined &&
+                                    `, Views: ${source.viewCount}`}
+                                {source.datePublished &&
+                                    `, Published: ${new Date(
+                                        source.datePublished
+                                    ).toLocaleDateString()}`}
                             </p>
                         )}
                     </div>
