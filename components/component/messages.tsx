@@ -20,7 +20,13 @@ import {
 import { RefreshIcon } from "./icons";
 import Image from "next/image";
 import { modelInfo } from "./chatheader";
-import { ClipboardCheckIcon, ClipboardCopyIcon } from "lucide-react";
+import {
+    ClipboardCheckIcon,
+    ClipboardCopyIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    ExternalLinkIcon
+} from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
 
 interface MessagesProps {
@@ -98,6 +104,8 @@ export const AssistantMessage = ({
     onArtifactClick,
     onRegenerate
 }: AssistantMessageProps) => {
+    const [showAllSources, setShowAllSources] = useState(false);
+
     const processedContent = useMemo(() => {
         if (typeof message === "string") return message;
 
@@ -152,6 +160,64 @@ export const AssistantMessage = ({
                 return `${capitalizedKey}: ${value}`;
             })
             .join("\n");
+    };
+
+    const renderSources = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const bingSearchInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "bing_web_search"
+        );
+
+        if (
+            !bingSearchInvocation ||
+            bingSearchInvocation.state != "result" ||
+            !bingSearchInvocation.result
+        )
+            return null;
+
+        const { webPages, videos } = bingSearchInvocation.result;
+        const sources = [...(webPages?.value || []), ...(videos?.value || [])];
+
+        if (sources.length === 0) return null;
+
+        const visibleSources = showAllSources ? sources : sources.slice(0, 3);
+
+        return (
+            <div className="mt-4">
+                <h3 className="text-lg font-semibold mb-2">Sources</h3>
+                <div className="space-y-2">
+                    {visibleSources.map((source, index) => (
+                        <SourceItem
+                            key={index}
+                            source={source}
+                            index={index + 1}
+                        />
+                    ))}
+                </div>
+                {sources.length > 3 && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllSources(!showAllSources)}
+                        className="mt-2"
+                    >
+                        {showAllSources ? (
+                            <>
+                                <ChevronUpIcon className="w-4 h-4 mr-2" />
+                                Show less
+                            </>
+                        ) : (
+                            <>
+                                <ChevronDownIcon className="w-4 h-4 mr-2" />
+                                View {sources.length - 3} more
+                            </>
+                        )}
+                    </Button>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -214,6 +280,7 @@ export const AssistantMessage = ({
                 <div className="prose text-muted-foreground">
                     {processedContent}
                 </div>
+                {renderSources()}
                 {typeof message !== "string" &&
                     message.toolInvocations &&
                     message.toolInvocations.length > 0 && (
@@ -347,5 +414,47 @@ const CopyButton: React.FC<CopyButtonProps> = ({ content }) => {
                 <ClipboardCopyIcon className="w-4 h-4" />
             )}
         </Button>
+    );
+};
+
+interface SourceItemProps {
+    source: any;
+    index: number;
+}
+
+const SourceItem = ({ source, index }: SourceItemProps) => {
+    const [showPreview, setShowPreview] = useState(false);
+
+    const getSourceIcon = () => {
+        if (source.publisher && source.publisher[0]?.name === "reddit") {
+            return "🟠"; // Orange circle for Reddit
+        }
+        return "🔵"; // Default blue circle
+    };
+
+    return (
+        <div
+            className="p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
+            onMouseEnter={() => setShowPreview(true)}
+            onMouseLeave={() => setShowPreview(false)}
+        >
+            <div className="flex items-center">
+                <span className="mr-2">{getSourceIcon()}</span>
+                <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-blue-600 hover:underline"
+                >
+                    {source.name}
+                    <ExternalLinkIcon className="w-4 h-4 ml-1" />
+                </a>
+            </div>
+            {showPreview && (
+                <div className="mt-2 text-sm text-gray-600">
+                    {source.snippet || source.description}
+                </div>
+            )}
+        </div>
     );
 };
