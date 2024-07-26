@@ -28,6 +28,7 @@ import {
     ExternalLinkIcon
 } from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface MessagesProps {
     messages: CombinedMessage[];
@@ -187,9 +188,9 @@ export const AssistantMessage = ({
         return (
             <div className="mt-4">
                 <h3 className="text-lg font-semibold mb-2">Sources</h3>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {visibleSources.map((source, index) => (
-                        <SourceItem
+                        <SourceCard
                             key={index}
                             source={source}
                             index={index + 1}
@@ -198,10 +199,10 @@ export const AssistantMessage = ({
                 </div>
                 {sources.length > 3 && (
                     <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => setShowAllSources(!showAllSources)}
-                        className="mt-2"
+                        className="mt-4"
                     >
                         {showAllSources ? (
                             <>
@@ -456,5 +457,54 @@ const SourceItem = ({ source, index }: SourceItemProps) => {
                 </div>
             )}
         </div>
+    );
+};
+
+const SourceCard = ({ source, index }: SourceItemProps) => {
+    const getFaviconUrl = (url: string) => {
+        try {
+            const domain = new URL(url).hostname;
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+        } catch {
+            return "/default-favicon.png"; // Provide a default favicon
+        }
+    };
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Card className="overflow-hidden">
+                        <CardContent className="p-4">
+                            <div className="flex items-center mb-2">
+                                <Image
+                                    src={getFaviconUrl(source.url)}
+                                    alt={`${source.siteName || "Website"} icon`}
+                                    width={16}
+                                    height={16}
+                                    className="mr-2"
+                                    loader={() => getFaviconUrl(source.url)}
+                                />
+                                <a
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium text-blue-600 hover:underline truncate"
+                                >
+                                    {source.name}
+                                </a>
+                            </div>
+
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                                {source.snippet || source.description}
+                            </p>
+                        </CardContent>
+                    </Card>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-sm">
+                    <p>{source.snippet || source.description}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 };
