@@ -474,26 +474,35 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Card className="overflow-hidden cursor-pointer">
-                        <CardContent className="p-4">
-                            <div className="flex items-center mb-2">
-                                <Image
-                                    src={getFaviconUrl(source.url)}
-                                    alt={`${source.siteName || "Website"} icon`}
-                                    width={16}
-                                    height={16}
-                                    className="mr-2"
-                                    unoptimized
-                                />
-                                <span className="text-sm font-medium truncate">
-                                    {source.name}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                                {source.snippet || source.description}
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                    >
+                        <Card className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200">
+                            <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                    <Image
+                                        src={getFaviconUrl(source.url)}
+                                        alt={`${
+                                            source.siteName || "Website"
+                                        } icon`}
+                                        width={16}
+                                        height={16}
+                                        className="mr-2"
+                                        unoptimized
+                                    />
+                                    <span className="text-sm font-medium truncate">
+                                        {source.name}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 line-clamp-2">
+                                    {source.snippet || source.description}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </a>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-80 p-0">
                     <div className="p-4">
@@ -510,14 +519,9 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
                                 {new URL(source.url).hostname}
                             </span>
                         </div>
-                        <a
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-bold text-blue-600 hover:underline block mb-2"
-                        >
+                        <span className="font-bold text-blue-600 block mb-2">
                             {source.name}
-                        </a>
+                        </span>
                         <p className="text-sm text-gray-700 overflow-auto text-wrap">
                             {source.snippet || source.description}
                         </p>
