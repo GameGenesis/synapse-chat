@@ -21,6 +21,7 @@ export interface Data {
     promptTokens?: number;
     totalTokens?: number;
     finishReason?: FinishReason;
+    chatId?: string;
 }
 
 export type Role =
@@ -61,6 +62,7 @@ export type CombinedMessage = {
 };
 
 export type State = {
+    chatId: string | null;
     model: ModelKey;
     temperature: number;
     topP: number;
@@ -74,6 +76,7 @@ export type State = {
 };
 
 export type Action =
+    | { type: "SET_CHAT_ID"; payload: string | null }
     | { type: "SET_MODEL"; payload: ModelKey }
     | { type: "SET_TEMPERATURE"; payload: number }
     | { type: "SET_TOP_P"; payload: number }

@@ -1,13 +1,18 @@
-import { convertToCoreMessages, StreamData, streamText, tool } from "ai";
+import { convertToCoreMessages, StreamData, streamText } from "ai";
 import { getModel, ModelKey, models } from "./model-provider";
 import { tools } from "./tools";
 import buildPrompt from "./prompt-builder";
+import dbConnect from "@/utils/db";
+import Chat from "@/models/chat";
 
 export const maxDuration = 1000;
 
 export async function POST(req: Request) {
+    await dbConnect();
+
+    const { messages, chatId, settings, combinedMessages } = await req.json();
+
     const {
-        messages,
         model,
         temperature,
         topP,
@@ -17,18 +22,7 @@ export async function POST(req: Request) {
         enableSafeguards,
         enableTools,
         customInstructions
-    }: {
-        messages: any;
-        model: ModelKey;
-        temperature: number;
-        topP: number;
-        maxTokens: number;
-        enableArtifacts: boolean;
-        enableInstructions: boolean;
-        enableSafeguards: boolean;
-        enableTools: boolean;
-        customInstructions?: string;
-    } = await req.json();
+    } = settings;
 
     const system = buildPrompt(
         enableArtifacts,
@@ -37,10 +31,35 @@ export async function POST(req: Request) {
         customInstructions
     );
     const data = new StreamData();
-    data.append({});
+
+    let newChatId = chatId;
+
+    // Function to update or create chat in the background
+    const updateChat = async (id: string | null, messages: any, settings: any) => {
+        try {
+            if (id) {
+                await Chat.findByIdAndUpdate(id, {
+                    messages: messages,
+                    settings: settings
+                });
+            } else {
+                const chat = new Chat({
+                    messages: messages,
+                    settings: settings
+                });
+                await chat.save();
+                newChatId = chat._id;
+            }
+        } catch (error) {
+            console.error("Error updating chat:", error);
+        }
+    };
+
+    // Perform initial chat update or creation
+    updateChat(chatId, combinedMessages, settings);
 
     const result = await streamText({
-        model: getModel(models[model]),
+        model: getModel(models[model as ModelKey]),
         system,
         temperature,
         topP,
@@ -48,16 +67,20 @@ export async function POST(req: Request) {
         messages: convertToCoreMessages(messages),
         tools: enableTools ? tools : undefined,
         toolChoice: "auto",
-        onFinish: (result) => {
+        onFinish: async (result) => {
             if (result.text) {
                 data.append({
                     completionTokens: result.usage.completionTokens,
                     promptTokens: result.usage.promptTokens,
                     totalTokens: result.usage.totalTokens,
-                    finishReason: result.finishReason
+                    finishReason: result.finishReason,
+                    chatId: newChatId
                 });
             }
             data.close();
+
+            // Update chat with the latest messages in the background
+            await updateChat(newChatId, combinedMessages, settings);
         }
     });
 

@@ -35,6 +35,8 @@ const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
 
 const reducer = (state: State, action: Action): State => {
     switch (action.type) {
+        case "SET_CHAT_ID":
+            return { ...state, chatId: action.payload };
         case "SET_MODEL":
             return { ...state, model: action.payload };
         case "SET_TEMPERATURE":
@@ -62,6 +64,7 @@ const reducer = (state: State, action: Action): State => {
 
 export function Chat() {
     const [state, dispatch] = useReducer(reducer, {
+        chatId: null,
         model: DEFAULT_MODEL,
         temperature: DEFAULT_TEMPERATURE,
         topP: DEFAULT_TOPP,
@@ -97,6 +100,8 @@ export function Chat() {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const { chatId, ...settings } = state;
+
     const {
         messages,
         setMessages,
@@ -111,7 +116,9 @@ export function Chat() {
         data
     } = useChat({
         body: {
-            ...state
+            chatId,
+            settings,
+            combinedMessages
         },
         onResponse: (response: Response) => {
             console.log("Received response from server:", response);
@@ -267,7 +274,8 @@ export function Chat() {
                 promptTokens,
                 completionTokens,
                 totalTokens,
-                finishReason
+                finishReason,
+                chatId
             } =
                 data && data.length > 0
                     ? (data[data?.length - 1] as Data)
@@ -275,8 +283,13 @@ export function Chat() {
                           promptTokens: undefined,
                           completionTokens: undefined,
                           totalTokens: undefined,
-                          finishReason: undefined
+                          finishReason: undefined,
+                          chatId: null
                       };
+
+            if (!state.chatId && chatId) {
+                dispatch({ type: "SET_CHAT_ID", payload: chatId });
+            }
 
             let newCombinedMessages = [...combinedMessages];
 
@@ -393,7 +406,8 @@ export function Chat() {
         processMessage,
         combinedMessages,
         regeneratingMessageId,
-        data
+        data,
+        state.chatId
     ]);
 
     useEffect(() => {
@@ -478,6 +492,7 @@ export function Chat() {
                             setCurrentArtifactIndex(-1);
                             setIsArtifactsOpen(false);
                             setShowContinueButton(false);
+                            dispatch({ type: "SET_CHAT_ID", payload: null });
                         }}
                     />
                     <div
