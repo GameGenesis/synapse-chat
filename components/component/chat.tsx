@@ -27,6 +27,7 @@ import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
+import saveChat from "@/utils/save-chat";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -98,9 +99,9 @@ export function Chat() {
         string | null
     >(null);
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const { chatId, ...settings } = state;
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {
         messages,
@@ -116,14 +117,14 @@ export function Chat() {
         data
     } = useChat({
         body: {
-            chatId,
-            settings,
-            combinedMessages
+            settings: state
         },
         onResponse: (response: Response) => {
+            save();
             console.log("Received response from server:", response);
         },
         onFinish: (message) => {
+            save();
             console.log("Chat finished:", message);
         },
         onError: (error) => {
@@ -410,6 +411,21 @@ export function Chat() {
         state.chatId
     ]);
 
+    const save = async () => {
+        if (isSaving && !state.chatId) return;
+
+        console.log("# BEFORE: ", state.chatId);
+        setIsSaving(true);
+        const newChatId = await saveChat(state.chatId, combinedMessages, state);
+        if (!newChatId) return;
+        dispatch({
+            type: "SET_CHAT_ID",
+            payload: newChatId
+        });
+        setIsSaving(false);
+        console.log("# AFTER: ", state.chatId, "\n");
+    };
+
     useEffect(() => {
         if (combinedMessages && combinedMessages[combinedMessages.length - 1]) {
             setShowContinueButton(
@@ -465,7 +481,9 @@ export function Chat() {
         <div className="flex flex-col h-screen w-full">
             <SettingsMenu
                 isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
+                onClose={() => {
+                    save().then(() => setIsSettingsOpen(false));
+                }}
                 state={state}
                 dispatch={dispatch}
             />
@@ -486,13 +504,18 @@ export function Chat() {
                         onOpenSettings={() => setIsSettingsOpen(true)}
                         onNewChat={() => {
                             stop();
-                            setMessages([]);
-                            setCombinedMessages([]);
-                            setArtifacts([]);
-                            setCurrentArtifactIndex(-1);
-                            setIsArtifactsOpen(false);
-                            setShowContinueButton(false);
-                            dispatch({ type: "SET_CHAT_ID", payload: null });
+                            save().then(() => {
+                                setMessages([]);
+                                setCombinedMessages([]);
+                                setArtifacts([]);
+                                setCurrentArtifactIndex(-1);
+                                setIsArtifactsOpen(false);
+                                setShowContinueButton(false);
+                                dispatch({
+                                    type: "SET_CHAT_ID",
+                                    payload: null
+                                });
+                            });
                         }}
                     />
                     <div
@@ -530,7 +553,10 @@ export function Chat() {
                         handleInputChange={handleInputChange}
                         handleSubmit={handleSubmit}
                         isLoading={isLoading}
-                        handleStop={stop}
+                        handleStop={() => {
+                            stop();
+                            save();
+                        }}
                         enablePasteToFile={state.enablePasteToFile}
                     />
                 </div>

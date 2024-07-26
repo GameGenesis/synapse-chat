@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { evaluate } from "mathjs";
+import searchReddit from "@/utils/reddit";
 
 const openai = new OpenAI();
 
@@ -18,9 +19,10 @@ export const tools = {
         parameters: z.object({
             timeZone: z
                 .enum(
-                    Intl.supportedValuesOf(
-                        "timeZone"
-                    ) as unknown as readonly [string, ...string[]]
+                    Intl.supportedValuesOf("timeZone") as unknown as readonly [
+                        string,
+                        ...string[]
+                    ]
                 )
                 .describe(
                     "The time zone to get the time for. This can be deduced from the location"
@@ -73,4 +75,4 @@ export const tools = {
         execute: async ({ expression }) => evaluate(expression)
     }),
     ...createAISDKTools(weather, wikipedia, bing)
-}
+};
