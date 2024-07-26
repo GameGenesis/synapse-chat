@@ -5,7 +5,6 @@ import OpenAI from "openai";
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { evaluate } from "mathjs";
-import searchReddit from "@/utils/reddit";
 
 const openai = new OpenAI();
 
