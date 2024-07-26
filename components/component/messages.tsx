@@ -25,7 +25,8 @@ import {
     ClipboardCopyIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    ExternalLinkIcon
+    ExternalLinkIcon,
+    PlayCircleIcon
 } from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
 import { Card, CardContent } from "@/components/ui/card";
@@ -178,7 +179,8 @@ export const AssistantMessage = ({
         )
             return null;
 
-        const { webPages, videos } = bingSearchInvocation.result;
+        const { webPages, videos, relatedSearches } =
+            bingSearchInvocation.result;
         const sources = [...(webPages?.value || []), ...(videos?.value || [])];
 
         if (sources.length === 0) return null;
@@ -186,38 +188,39 @@ export const AssistantMessage = ({
         const visibleSources = showAllSources ? sources : sources.slice(0, 3);
 
         return (
-            <div className="mt-4">
-                <h3 className="text-lg font-semibold mb-2">Sources</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {visibleSources.map((source, index) => (
-                        <SourceCard
-                            key={index}
-                            source={source}
-                            index={index + 1}
-                        />
-                    ))}
+            <>
+                <div className="mt-4">
+                    <h3 className="text-lg font-semibold mb-2">Sources</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {visibleSources.map((source, index) => (
+                            <SourceCard key={index} source={source} />
+                        ))}
+                    </div>
+                    {sources.length > 3 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAllSources(!showAllSources)}
+                            className="mt-4"
+                        >
+                            {showAllSources ? (
+                                <>
+                                    <ChevronUpIcon className="w-4 h-4 mr-2" />
+                                    Show less
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDownIcon className="w-4 h-4 mr-2" />
+                                    View {sources.length - 3} more
+                                </>
+                            )}
+                        </Button>
+                    )}
                 </div>
-                {sources.length > 3 && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowAllSources(!showAllSources)}
-                        className="mt-4"
-                    >
-                        {showAllSources ? (
-                            <>
-                                <ChevronUpIcon className="w-4 h-4 mr-2" />
-                                Show less
-                            </>
-                        ) : (
-                            <>
-                                <ChevronDownIcon className="w-4 h-4 mr-2" />
-                                View {sources.length - 3} more
-                            </>
-                        )}
-                    </Button>
+                {relatedSearches && relatedSearches.value && (
+                    <RelatedSearches searches={relatedSearches.value} />
                 )}
-            </div>
+            </>
         );
     };
 
@@ -460,13 +463,50 @@ const SourceItem = ({ source, index }: SourceItemProps) => {
     );
 };
 
-const SourceCard = ({ source, index }: SourceItemProps) => {
+const SourceCard = ({ source }: { source: any }) => {
+    const isVideo =
+        source.encodingFormat === "mp4" ||
+        source.hostPageDisplayUrl?.includes("youtube.com");
+
     const getFaviconUrl = (url: string) => {
         try {
             const domain = new URL(url).hostname;
             return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
         } catch {
-            return "/default-favicon.png"; // Provide a default favicon
+            return "/default-favicon.png";
+        }
+    };
+
+    const getSourceUrl = () => {
+        if (isVideo) {
+            return source.contentUrl || source.hostPageUrl;
+        }
+        return source.url;
+    };
+
+    const getSourceName = () => {
+        if (isVideo) {
+            return source.name;
+        }
+        return source.name || source.displayUrl;
+    };
+
+    const getSourceDescription = () => {
+        if (isVideo) {
+            return source.description;
+        }
+        return source.snippet;
+    };
+
+    const getHostName = () => {
+        const url = getSourceUrl();
+        try {
+            return new URL(url).hostname;
+        } catch (error) {
+            console.log(
+                `Encountered an error with getting the URL (${url}) hostname: ${error}`
+            );
+            return null;
         }
     };
 
@@ -475,7 +515,7 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <a
-                        href={source.url}
+                        href={getSourceUrl()}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block"
@@ -484,7 +524,7 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
                             <CardContent className="p-4">
                                 <div className="flex items-center mb-2">
                                     <Image
-                                        src={getFaviconUrl(source.url)}
+                                        src={getFaviconUrl(getSourceUrl())}
                                         alt={`${
                                             source.siteName || "Website"
                                         } icon`}
@@ -494,11 +534,11 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
                                         unoptimized
                                     />
                                     <span className="text-sm font-medium truncate">
-                                        {source.name}
+                                        {getSourceName()}
                                     </span>
                                 </div>
                                 <p className="text-sm text-gray-600 line-clamp-2">
-                                    {source.snippet || source.description}
+                                    {getSourceDescription()}
                                 </p>
                             </CardContent>
                         </Card>
@@ -508,7 +548,7 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
                     <div className="p-4">
                         <div className="flex items-center mb-2">
                             <Image
-                                src={getFaviconUrl(source.url)}
+                                src={getFaviconUrl(getSourceUrl())}
                                 alt={`${source.siteName || "Website"} icon`}
                                 width={16}
                                 height={16}
@@ -516,18 +556,51 @@ const SourceCard = ({ source, index }: SourceItemProps) => {
                                 unoptimized
                             />
                             <span className="text-sm text-gray-500">
-                                {new URL(source.url).hostname}
+                                {getHostName()}
                             </span>
                         </div>
-                        <span className="font-bold text-blue-600 block mb-2">
-                            {source.name}
-                        </span>
+                        <a
+                            href={getSourceUrl()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-blue-600 hover:underline block mb-2"
+                        >
+                            {getSourceName()}
+                            <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
+                        </a>
                         <p className="text-sm text-gray-700 overflow-auto text-wrap">
-                            {source.snippet || source.description}
+                            {getSourceDescription()}
                         </p>
+                        {isVideo && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                Duration: {source.duration}, Views:{" "}
+                                {source.viewCount}
+                            </p>
+                        )}
                     </div>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
+    );
+};
+
+const RelatedSearches = ({ searches }: { searches: any[] }) => {
+    return (
+        <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-2">Related Searches</h3>
+            <div className="flex flex-wrap gap-2">
+                {searches.map((search, index) => (
+                    <a
+                        key={index}
+                        href={search.webSearchUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline"
+                    >
+                        {search.displayText}
+                    </a>
+                ))}
+            </div>
+        </div>
     );
 };
