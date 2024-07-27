@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { evaluate } from "mathjs";
+import { ArxivResult, searchArxiv } from "@/utils/arxiv-search";
 
 const openai = new OpenAI();
 
@@ -72,6 +73,36 @@ export const tools = {
             "'1.2 * (2 + 4.5)', '12.7 cm to inch', 'sin(45 deg) ^ 2'.",
         parameters: z.object({ expression: z.string() }),
         execute: async ({ expression }) => evaluate(expression)
+    }),
+    arxiv_search: tool({
+        description:
+            "Search for scientific papers on arXiv. Use this for academic or research purposes",
+        parameters: z.object({
+            query: z.string().describe("The search query for arXiv"),
+            maxResults: z
+                .number()
+                .min(1)
+                .max(10)
+                .default(5)
+                .describe("The maximum number of results to return (1-10)")
+        }),
+        execute: async ({ query, maxResults }) => {
+            try {
+                const results = await searchArxiv(query, maxResults);
+                return {
+                    results: results.map((result: ArxivResult) => ({
+                        title: result.title,
+                        summary: result.summary,
+                        authors: result.authors.join(", "),
+                        published: result.published,
+                        url: result.id
+                    }))
+                };
+            } catch (error) {
+                console.error("Error searching arXiv:", error);
+                return { error: "Failed to search arXiv" };
+            }
+        }
     }),
     ...createAISDKTools(weather, wikipedia, bing)
 };

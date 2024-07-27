@@ -601,7 +601,7 @@ const SourceCard = ({ source }: { source: Source }) => {
                                         {formatDuration(source.duration)}
                                     </span>
                                 )}
-                                {source.viewCount && (
+                                {source.viewCount !== undefined && (
                                     <span>
                                         Views:{" "}
                                         {source.viewCount.toLocaleString()}
