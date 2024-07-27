@@ -97,7 +97,10 @@ const ChatHeader = ({
                             side="left"
                             className="w-[300px] sm:w-[400px] p-0"
                         >
-                            <Sidebar onNewChat={onNewChat} />
+                            <Sidebar
+                                onNewChat={onNewChat}
+                                onClose={() => setIsSidebarOpen(false)}
+                            />
                         </SheetContent>
                     </Sheet>
                     <Button
