@@ -594,17 +594,27 @@ const SourceCard = ({ source }: { source: Source }) => {
                             {getSourceDescription()}
                         </p>
                         {isVideo && (
-                            <p className="text-sm text-gray-500 mt-2">
-                                {source.duration &&
-                                    `Duration: ${formatDuration(
-                                        source.duration
-                                    )}`}
-                                {source.viewCount !== undefined &&
-                                    `, Views: ${source.viewCount.toLocaleString()}`}
-                                {source.datePublished &&
-                                    `, Published: ${new Date(
-                                        source.datePublished
-                                    ).toLocaleDateString()}`}
+                            <p className="text-sm text-gray-500 mt-2 flex flex-col">
+                                {source.duration && (
+                                    <span>
+                                        Duration:{" "}
+                                        {formatDuration(source.duration)}
+                                    </span>
+                                )}
+                                {source.viewCount && (
+                                    <span>
+                                        Views:{" "}
+                                        {source.viewCount.toLocaleString()}
+                                    </span>
+                                )}
+                                {source.datePublished && (
+                                    <span>
+                                        Published:{" "}
+                                        {new Date(
+                                            source.datePublished
+                                        ).toLocaleDateString()}
+                                    </span>
+                                )}
                             </p>
                         )}
                     </div>
