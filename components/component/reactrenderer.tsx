@@ -23,13 +23,15 @@ export const ReactRenderer = ({ code }: Props) => {
                     Recharts,
                     LucideIcons,
                     RadixIcons,
-                    ShadcnComponents
+                    ShadcnComponents,
+                    Mathjs
                 ] = await Promise.all([
                     import("react"),
                     import("recharts"),
                     import("lucide-react"),
                     import("@radix-ui/react-icons"),
-                    import("@/components/ui")
+                    import("@/components/ui"),
+                    import("mathjs")
                 ]);
 
                 const IMPORT_MAP: { [key: string]: any } = {
@@ -37,7 +39,8 @@ export const ReactRenderer = ({ code }: Props) => {
                     recharts: Recharts,
                     "lucide-react": LucideIcons,
                     "@radix-ui/react-icons": RadixIcons,
-                    "@/components/ui": ShadcnComponents
+                    "@/components/ui": ShadcnComponents,
+                    mathjs: Mathjs
                 };
 
                 // Add specific ShadcnComponents imports
@@ -53,6 +56,7 @@ export const ReactRenderer = ({ code }: Props) => {
                     ...LucideIcons,
                     ...RadixIcons,
                     ...ShadcnComponents,
+                    ...Mathjs,
                     import: IMPORT_MAP
                 });
             } catch (err) {
