@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { xonokai } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -16,9 +16,22 @@ import {
     RefreshIcon,
     XIcon
 } from "./icons";
-import { ReactRenderer } from "./reactrenderer";
 import ErrorMessage from "./errormessage";
 import dynamic from "next/dynamic";
+import { captureConsoleLogs } from "@/utils/capture-logs";
+
+const ReactRenderer = dynamic(
+    () => import("./reactrenderer").then((mod) => mod.ReactRenderer),
+    {
+        loading: () => <LoadingSpinner />,
+        ssr: false
+    }
+);
+
+const Console = dynamic(() => import("./console").then((mod) => mod.Console), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
 
 const Mermaid = dynamic(() => import("./mermaid").then((mod) => mod.Mermaid), {
     loading: () => <LoadingSpinner />,
@@ -49,68 +62,99 @@ export function ArtifactsWindow({
 
     const currentArtifact = artifacts[currentArtifactIndex];
 
-    const renderArtifactPreview = useCallback((artifact: Artifact | null) => {
-        if (!artifact) return null;
+    const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
-        switch (artifact.type) {
-            case "image/svg+xml":
-                return (
-                    <div
-                        dangerouslySetInnerHTML={{
-                            __html: artifact.content || ""
-                        }}
-                    />
-                );
-            case "text/html":
-                return (
-                    <iframe
-                        srcDoc={artifact.content}
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            border: "none"
-                        }}
-                        title={artifact.title || "Preview"}
-                        sandbox="allow-scripts"
-                    />
-                );
-            case "application/react":
-                try {
-                    return <ReactRenderer code={artifact.content || ""} />;
-                } catch (error) {
-                    return (
-                        <ErrorMessage
-                            title="React Component Error"
-                            message="An error occurred while trying to display the React component. Please check the component code for any issues."
-                        />
-                    );
-                }
-            case "application/mermaid":
-                try {
-                    return <Mermaid chart={artifact.content || ""} />;
-                } catch (error) {
-                    return (
-                        <ErrorMessage
-                            title="Diagram Error"
-                            message="An error occurred while trying to display the Mermaid diagram. Please verify the diagram syntax."
-                        />
-                    );
-                }
-            case "text/markdown":
-                return (
-                    <CustomMarkdown className="h-full px-4 overflow-y-auto">
-                        {artifact.content || ""}
-                    </CustomMarkdown>
-                );
-            default:
-                return (
-                    <ErrorMessage
-                        title="Unsupported Artifact"
-                        message={`The artifact type "${artifact.type}" is not supported.`}
-                    />
-                );
-        }
+    useEffect(() => {
+        setConsoleLogs([]);
+    }, [currentArtifactIndex]);
+
+    const handleClearConsole = useCallback(() => {
+        setConsoleLogs([]);
     }, []);
+
+    const renderArtifactPreview = useCallback(
+        (artifact: Artifact | null) => {
+            if (!artifact) return null;
+
+            const PreviewComponent = () => {
+                switch (artifact.type) {
+                    case "image/svg+xml":
+                        return (
+                            <div
+                                dangerouslySetInnerHTML={{
+                                    __html: artifact.content || ""
+                                }}
+                            />
+                        );
+                    case "text/html":
+                        return (
+                            <iframe
+                                ref={iframeRef}
+                                srcDoc={artifact.content}
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    border: "none"
+                                }}
+                                title={artifact.title || "Preview"}
+                                sandbox="allow-scripts allow-same-origin"
+                            />
+                        );
+                    case "application/react":
+                        try {
+                            return (
+                                <ReactRenderer
+                                    code={artifact.content || ""}
+                                    setConsoleLogs={setConsoleLogs}
+                                />
+                            );
+                        } catch (error) {
+                            return (
+                                <ErrorMessage
+                                    title="React Component Error"
+                                    message="An error occurred while trying to display the React component. Please check the component code for any issues."
+                                />
+                            );
+                        }
+                    case "application/mermaid":
+                        try {
+                            return <Mermaid chart={artifact.content || ""} />;
+                        } catch (error) {
+                            return (
+                                <ErrorMessage
+                                    title="Diagram Error"
+                                    message="An error occurred while trying to display the Mermaid diagram. Please verify the diagram syntax."
+                                />
+                            );
+                        }
+                    case "text/markdown":
+                        return (
+                            <CustomMarkdown className="h-full px-4 overflow-y-auto">
+                                {artifact.content || ""}
+                            </CustomMarkdown>
+                        );
+                    default:
+                        return (
+                            <ErrorMessage
+                                title="Unsupported Artifact"
+                                message={`The artifact type "${artifact.type}" is not supported.`}
+                            />
+                        );
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-full">
+                    <div className="flex-grow overflow-auto">
+                        <PreviewComponent />
+                    </div>
+                    <Console logs={consoleLogs} onClear={handleClearConsole} />
+                </div>
+            );
+        },
+        [consoleLogs, handleClearConsole]
+    );
 
     const handlePreviousArtifact = () => {
         setCurrentArtifactIndex(Math.max(currentArtifactIndex - 1, 0));
@@ -140,7 +184,10 @@ export function ArtifactsWindow({
         if (currentArtifact && currentArtifact.content) {
             const fileName = `${
                 currentArtifact.identifier || "artifact"
-            }${getFileExtension(currentArtifact.type)}`;
+            }${getFileExtension(
+                currentArtifact.type,
+                currentArtifact.language
+            )}`;
             const blob = new Blob([currentArtifact.content], {
                 type: "text/plain"
             });
@@ -164,6 +211,35 @@ export function ArtifactsWindow({
         }
     }, [currentArtifact, setActiveTab]);
 
+    useEffect(() => {
+        if (iframeRef.current && currentArtifact?.type === "text/html") {
+            const iframe = iframeRef.current;
+            const captureConsole = () => {
+                captureConsoleLogs(iframe, (log) => {
+                    setConsoleLogs((prev) => [...prev, log]);
+                });
+            };
+
+            if (iframe.contentDocument?.readyState === "complete") {
+                captureConsole();
+            } else {
+                iframe.addEventListener("load", captureConsole);
+            }
+
+            return () => {
+                iframe.removeEventListener("load", captureConsole);
+            };
+        }
+    }, [
+        currentArtifact,
+        currentArtifactIndex,
+        activeTab,
+        consoleLogs,
+        setConsoleLogs,
+        artifacts,
+        isOpen
+    ]);
+
     if (!isOpen) return null;
 
     return (
@@ -173,32 +249,34 @@ export function ArtifactsWindow({
                     {currentArtifact?.title || "Artifacts"}
                 </h3>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={`px-3 py-1 rounded-full ${
-                                activeTab === "preview"
-                                    ? "bg-background text-foreground hover:bg-white"
-                                    : "text-muted-foreground"
-                            }`}
-                            onClick={() => setActiveTab("preview")}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={`px-3 py-1 rounded-full ${
-                                activeTab === "code"
-                                    ? "bg-background text-foreground hover:bg-white"
-                                    : "text-muted-foreground"
-                            }`}
-                            onClick={() => setActiveTab("code")}
-                        >
-                            Code
-                        </Button>
-                    </div>
+                    {currentArtifact?.type !== "application/code" && (
+                        <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`px-3 py-1 rounded-full ${
+                                    activeTab === "preview"
+                                        ? "bg-background text-foreground hover:bg-white"
+                                        : "text-muted-foreground"
+                                }`}
+                                onClick={() => setActiveTab("preview")}
+                            >
+                                Preview
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`px-3 py-1 rounded-full ${
+                                    activeTab === "code"
+                                        ? "bg-background text-foreground hover:bg-white"
+                                        : "text-muted-foreground"
+                                }`}
+                                onClick={() => setActiveTab("code")}
+                            >
+                                Code
+                            </Button>
+                        </div>
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"
@@ -211,29 +289,32 @@ export function ArtifactsWindow({
                 </div>
             </div>
             <div className="flex-grow overflow-hidden">
-                {activeTab === "preview" && (
-                    <div className="h-full overflow-y-auto">
-                        {renderArtifactPreview(currentArtifact!)}
-                    </div>
-                )}
-                {activeTab === "code" && currentArtifact && (
-                    <SyntaxHighlighter
-                        language={currentArtifact.language || "javascript"}
-                        style={xonokai}
-                        customStyle={{
-                            margin: 0,
-                            height: "100%",
-                            overflow: "auto"
-                        }}
-                        showLineNumbers={true}
-                        lineNumberContainerStyle={{
-                            paddingRight: "5px"
-                        }}
-                        className="h-full bg-gray-900"
-                    >
-                        {currentArtifact.content || ""}
-                    </SyntaxHighlighter>
-                )}
+                {activeTab === "preview" &&
+                    currentArtifact?.type !== "application/code" && (
+                        <div className="h-full overflow-y-auto">
+                            {renderArtifactPreview(currentArtifact!)}
+                        </div>
+                    )}
+                {(activeTab === "code" ||
+                    currentArtifact.type === "application/code") &&
+                    currentArtifact && (
+                        <SyntaxHighlighter
+                            language={currentArtifact.language || "javascript"}
+                            style={xonokai}
+                            customStyle={{
+                                margin: 0,
+                                height: "100%",
+                                overflow: "auto"
+                            }}
+                            showLineNumbers={true}
+                            lineNumberContainerStyle={{
+                                paddingRight: "5px"
+                            }}
+                            className="h-full bg-gray-900"
+                        >
+                            {currentArtifact.content || ""}
+                        </SyntaxHighlighter>
+                    )}
             </div>
             <div className="border-t flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -303,12 +384,53 @@ export function ArtifactsWindow({
     );
 }
 
-const getFileExtension = (artifactType: string): string => {
+const getFileExtension = (artifactType: string, language?: string): string => {
+    if (artifactType === "application/code" && language) {
+        switch (language.toLowerCase()) {
+            case "python":
+                return ".py";
+            case "javascript":
+                return ".js";
+            case "typescript":
+                return ".ts";
+            case "java":
+                return ".java";
+            case "c":
+                return ".c";
+            case "cpp":
+            case "c++":
+                return ".cpp";
+            case "csharp":
+            case "c#":
+                return ".cs";
+            case "ruby":
+                return ".rb";
+            case "go":
+                return ".go";
+            case "rust":
+                return ".rs";
+            case "php":
+                return ".php";
+            case "swift":
+                return ".swift";
+            case "kotlin":
+                return ".kt";
+            case "scala":
+                return ".scala";
+            default:
+                return ".txt";
+        }
+    }
+
     switch (artifactType) {
         case "application/javascript":
             return ".js";
+        case "application/typescript":
+            return ".ts";
         case "application/react":
-            return ".jsx";
+            return language && language.toLowerCase() === "typescript"
+                ? ".tsx"
+                : ".jsx";
         case "text/html":
             return ".html";
         case "text/css":

@@ -1,19 +1,32 @@
-import React, { useState, useEffect, Suspense } from "react";
-import dynamic from "next/dynamic";
+import React, { useState, useEffect, Suspense, useCallback } from "react";
 import ErrorMessage from "./errormessage";
 import { LoadingSpinner } from "./icons";
-
-const Runner = dynamic(() => import("react-runner").then((mod) => mod.Runner), {
-    ssr: false
-});
+import { Runner } from "react-runner";
 
 interface Props {
     code: string;
+    setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export const ReactRenderer = ({ code }: Props) => {
+export const ReactRenderer = ({ code, setConsoleLogs }: Props) => {
     const [error, setError] = useState<string | undefined>();
     const [scope, setScope] = useState<any>(null);
+
+    const customConsole = useCallback(
+        (type: string) =>
+            (...args: any[]) => {
+                const formattedLog = `[${type.toUpperCase()}] ${args
+                    .map((arg) =>
+                        typeof arg === "object"
+                            ? JSON.stringify(arg)
+                            : String(arg)
+                    )
+                    .join(" ")}`;
+                setConsoleLogs((prev) => [...prev, formattedLog]);
+                (console as any)[type.toLowerCase()](...args);
+            },
+        [setConsoleLogs]
+    );
 
     useEffect(() => {
         const loadDependencies = async () => {
@@ -57,7 +70,12 @@ export const ReactRenderer = ({ code }: Props) => {
                     ...RadixIcons,
                     ...ShadcnComponents,
                     ...Mathjs,
-                    import: IMPORT_MAP
+                    import: IMPORT_MAP,
+                    console: {
+                        log: customConsole("LOG"),
+                        warn: customConsole("WARN"),
+                        error: customConsole("ERROR")
+                    }
                 });
             } catch (err) {
                 setError("Failed to load dependencies");
@@ -66,7 +84,7 @@ export const ReactRenderer = ({ code }: Props) => {
         };
 
         loadDependencies();
-    }, []);
+    }, [customConsole]);
 
     // Remove backticks and language tag only if they're at the start or end of the code
     const processedCode = code.replace(/^```[\w-]*\n|\n```$/g, "").trim();
