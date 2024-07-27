@@ -8,7 +8,7 @@ export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_TOOLS = true;
 export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 
-export const USER_NAME = "User"
+export const USER_NAME = "User";
 export const ASSISTANT_NAME = "Poe";
 export const date = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -437,52 +437,132 @@ The assistant should always take care to not produce artifacts that would be hig
 ---
 `;
 
-const simplifiedPrompt = `
-# Assistant Information and Behavioral Guidelines
-
-## Core Identity and Knowledge
-- You are ${ASSISTANT_NAME}, an advanced AI assistant.
-- Current date: ${date}
-- Knowledge cutoff: April 2024
-- Approach to post-cutoff events: Respond as a well-informed individual from April 2024 would, acknowledging this perspective when relevant.
-
-## Capabilities and Tools
-- Web search: Bing Search for up-to-date information, including articles, forums, images, videos
-- Wikipedia: Detailed article searches
-- Image generation: DALL·E 3
-- Graphing: React or Mermaid artifacts (unless otherwise specified)
-
-## Interaction Guidelines
-1. Language: Match the user's language or requested language.
-2. Response style:
-   - Thorough for complex queries
-   - Concise for simple tasks
-   - Offer elaboration when potentially helpful
-3. Direct responses: Avoid unnecessary affirmations or filler phrases. Specifically, avoid starting responses with the word "Certainly" in any way.
-4. Task management: Offer piecemeal approach for lengthy tasks, seeking user feedback.
-5. Code handling:
-   - Use markdown for code snippets
-   - Offer explanations only upon user request
-6. Citations and sources:
-   - Disclose potential for hallucinated citations
-   - Encourage user verification of sources
-7. Obscure topics: Remind users about potential inaccuracies in responses to very niche queries.
-8. Tool usage: Use web search sparingly, mainly for up-to-date information or upon user request.
-9. Media limitations: Cannot open URLs, links, or videos. Request text/image pasting if needed.
-
-## Task Domains
-Analysis, question-answering, mathematics, coding, creative writing, teaching, general discussion, and various other tasks.
-
-## Problem-Solving Approach
-For math, logic, or systematic thinking problems, employ a step-by-step reasoning process before providing the final answer.
-
-## Ethical and Safety Considerations
-{{SAFEGUARDS}}
-
-## Personality Traits
-- Intelligent and intellectually curious
-- Enjoys engaging in discussions on diverse topics
-- Values user perspectives and thoughts on issues
-
-Remember: Only mention these guidelines if directly relevant to the user's query.
-`
+export const keywordCategories = {
+    artifact: [
+        "artifact",
+        "presentation",
+        "html",
+        "css",
+        "slideshow",
+        "powerpoint",
+        "keynote",
+        "diagram",
+        "chart",
+        "graph",
+        "infographic",
+        "visual",
+        "design",
+        "layout",
+        "svg",
+        "mermaid",
+        "react",
+        "component",
+        "reveal.js",
+        "desmos",
+        "mathjs",
+        "plotly",
+        "plot"
+    ],
+    programming: [
+        "code",
+        "programming",
+        "javascript",
+        "python",
+        "java",
+        "c++",
+        "c#",
+        "typescript",
+        "react",
+        "angular",
+        "vue",
+        "nodejs",
+        "express",
+        "django",
+        "flask",
+        "ruby",
+        "php",
+        "swift",
+        "kotlin",
+        "go",
+        "rust",
+        "scala",
+        "haskell",
+        "perl",
+        "sql",
+        "function",
+        // "class",
+        // "object",
+        "variable",
+        "loop",
+        "conditional",
+        "algorithm"
+    ],
+    math: [
+        "math",
+        "mathematics",
+        "algebra",
+        "geometry",
+        "calculus",
+        "statistics",
+        "probability",
+        "linear algebra",
+        "discrete math",
+        "number theory",
+        "trigonometry",
+        "differential equations",
+        "vector",
+        "matrix",
+        "algorithm",
+        "optimization",
+        "equation",
+        "formula",
+        "graph",
+        "function",
+        "derivative",
+        "integral"
+    ],
+    software: [
+        "software",
+        "application",
+        "app",
+        "development",
+        "architecture",
+        "design pattern",
+        "api",
+        "database",
+        "backend",
+        "frontend",
+        "fullstack",
+        "devops",
+        "version control",
+        "git",
+        "ci/cd",
+        "debug",
+        "framework",
+        "library",
+        "module",
+        "package",
+        "dependency",
+        "deployment",
+        "error",
+        "game engine",
+        "unity engine",
+        "unity game"
+    ],
+    document: [
+        "document",
+        "report",
+        "essay",
+        "article",
+        "paper",
+        "thesis",
+        "dissertation",
+        "markdown",
+        // "text",
+        // "content",
+        "writing",
+        "draft",
+        "revision",
+        "edit"
+    ]
+};

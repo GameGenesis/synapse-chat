@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
-import { MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
+import { AutoIcon, MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
 import { useState } from "react";
 import Sidebar from "./sidebar";
@@ -49,6 +49,11 @@ export const modelInfo: Partial<
         name: "GPT-4o Mini",
         description: "Fast and efficient for most everyday tasks.",
         icon: ZapIcon
+    },
+    auto: {
+        name: "Auto",
+        description: "Automatically selects the best model for your task.",
+        icon: AutoIcon
     }
 };
 
