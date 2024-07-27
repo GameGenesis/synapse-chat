@@ -106,6 +106,8 @@ export const AssistantMessage = ({
     onRegenerate
 }: AssistantMessageProps) => {
     const [showAllSources, setShowAllSources] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
 
     const processedContent = useMemo(() => {
         if (typeof message === "string") return message;
@@ -223,96 +225,164 @@ export const AssistantMessage = ({
         );
     };
 
+    const handleOpenTranscript = (transcript: string) => {
+        const file = new File([transcript], "transcript.txt", {
+            type: "text/plain"
+        });
+        setTranscriptFile(file);
+        setIsModalOpen(true);
+    };
+
+    const renderTranscriptPreview = (message: CombinedMessage) => {
+        const transcriptTool = message.toolInvocations?.find(
+            (tool) => tool.toolName === "get_youtube_video_transcript"
+        );
+
+        if (
+            transcriptTool &&
+            transcriptTool.state === "result" &&
+            transcriptTool.result?.transcript
+        ) {
+            return (
+                <div className="mt-4">
+                    <h3 className="text-lg font-semibold mb-2">
+                        Video Transcript
+                    </h3>
+                    <div
+                        className="flex items-center max-w-80 p-2 pr-4 bg-white border border-input rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() =>
+                            handleOpenTranscript(
+                                transcriptTool.result.transcript
+                            )
+                        }
+                    >
+                        <div className="flex-shrink-0 w-10 h-10 mr-3">
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                                <FileIcon className="h-5 w-5 text-gray-500" />
+                            </div>
+                        </div>
+                        <div className="flex-grow min-w-0 overflow-hidden">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                                transcript.txt
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                                text/plain
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
     return (
-        <div className="flex items-start gap-4">
-            <Avatar className="w-9 h-9 border flex-shrink-0">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>OA</AvatarFallback>
-            </Avatar>
-            <div className="grid gap-1 break-words w-full mb-2">
-                <div className="flex items-center justify-between align-middle">
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">Assistant</span>
-                        {typeof message !== "string" && message.model && (
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger className="flex h-full align-middle">
-                                        <Badge>{message.model}</Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <div className="flex flex-col space-y-1 max-w-96 overflow-auto">
-                                            <span className="font-bold text-sm">
-                                                {modelInfo[message.model]?.name}
-                                            </span>
-                                            <span>
-                                                Output Tokens:{" "}
-                                                {message.completionTokens ||
-                                                    "N/A"}
-                                            </span>
-                                            <span>
-                                                Context Tokens:{" "}
-                                                {message.promptTokens || "N/A"}
-                                            </span>
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        )}
-                    </div>
-                    <div className="flex h-full align-middle">
-                        {isLatestResponse && onRegenerate && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={onRegenerate}
-                                className="flex items-center gap-2"
-                            >
-                                <RefreshIcon className="w-4 h-4" />
-                                Regenerate
-                            </Button>
-                        )}
-                        <CopyButton
-                            content={
-                                typeof message === "string"
-                                    ? message
-                                    : message.originalContent
-                            }
-                        />
-                    </div>
-                </div>
-                <div className="prose text-muted-foreground">
-                    {processedContent}
-                </div>
-                {renderSources()}
-                {typeof message !== "string" &&
-                    message.toolInvocations &&
-                    message.toolInvocations.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {message.toolInvocations.map((tool) => (
-                                <TooltipProvider key={tool.toolCallId}>
+        <>
+            <div className="flex items-start gap-4">
+                <Avatar className="w-9 h-9 border flex-shrink-0">
+                    <AvatarImage src="/placeholder-user.jpg" />
+                    <AvatarFallback>OA</AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1 break-words w-full mb-2">
+                    <div className="flex items-center justify-between align-middle">
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-lg">Assistant</span>
+                            {typeof message !== "string" && message.model && (
+                                <TooltipProvider>
                                     <Tooltip>
-                                        <TooltipTrigger>
-                                            <Badge variant="outline">
-                                                {tool.toolName}
-                                            </Badge>
+                                        <TooltipTrigger className="flex h-full align-middle">
+                                            <Badge>{message.model}</Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <div className="flex flex-col space-y-2 max-w-96 overflow-auto">
+                                            <div className="flex flex-col space-y-1 max-w-96 overflow-auto">
                                                 <span className="font-bold text-sm">
-                                                    Tool Arguments
+                                                    {
+                                                        modelInfo[message.model]
+                                                            ?.name
+                                                    }
                                                 </span>
-                                                <div className="whitespace-pre-wrap text-sm">
-                                                    {formatToolArgs(tool.args)}
-                                                </div>
+                                                <span>
+                                                    Output Tokens:{" "}
+                                                    {message.completionTokens ||
+                                                        "N/A"}
+                                                </span>
+                                                <span>
+                                                    Context Tokens:{" "}
+                                                    {message.promptTokens ||
+                                                        "N/A"}
+                                                </span>
                                             </div>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
-                            ))}
+                            )}
                         </div>
-                    )}
+                        <div className="flex h-full align-middle">
+                            {isLatestResponse && onRegenerate && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={onRegenerate}
+                                    className="flex items-center gap-2"
+                                >
+                                    <RefreshIcon className="w-4 h-4" />
+                                    Regenerate
+                                </Button>
+                            )}
+                            <CopyButton
+                                content={
+                                    typeof message === "string"
+                                        ? message
+                                        : message.originalContent
+                                }
+                            />
+                        </div>
+                    </div>
+                    <div className="prose text-muted-foreground">
+                        {processedContent}
+                    </div>
+                    {renderSources()}
+                    {typeof message !== "string" &&
+                        renderTranscriptPreview(message)}
+                    {typeof message !== "string" &&
+                        message.toolInvocations &&
+                        message.toolInvocations.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {message.toolInvocations.map((tool) => (
+                                    <TooltipProvider key={tool.toolCallId}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Badge variant="outline">
+                                                    {tool.toolName}
+                                                </Badge>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <div className="flex flex-col space-y-2 max-w-96 overflow-auto">
+                                                    <span className="font-bold text-sm">
+                                                        Tool Arguments
+                                                    </span>
+                                                    <div className="whitespace-pre-wrap text-sm">
+                                                        {formatToolArgs(
+                                                            tool.args
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ))}
+                            </div>
+                        )}
+                </div>
             </div>
-        </div>
+            <AttachmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                file={transcriptFile}
+                fallback={transcriptFile ? undefined : ""}
+            />
+        </>
     );
 };
 
@@ -417,48 +487,6 @@ const CopyButton: React.FC<CopyButtonProps> = ({ content }) => {
                 <ClipboardCopyIcon className="w-4 h-4" />
             )}
         </Button>
-    );
-};
-
-interface SourceItemProps {
-    source: any;
-    index: number;
-}
-
-const SourceItem = ({ source, index }: SourceItemProps) => {
-    const [showPreview, setShowPreview] = useState(false);
-
-    const getSourceIcon = () => {
-        if (source.publisher && source.publisher[0]?.name === "reddit") {
-            return "🟠"; // Orange circle for Reddit
-        }
-        return "🔵"; // Default blue circle
-    };
-
-    return (
-        <div
-            className="p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
-            onMouseEnter={() => setShowPreview(true)}
-            onMouseLeave={() => setShowPreview(false)}
-        >
-            <div className="flex items-center">
-                <span className="mr-2">{getSourceIcon()}</span>
-                <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-blue-600 hover:underline"
-                >
-                    {source.name}
-                    <ExternalLinkIcon className="w-4 h-4 ml-1" />
-                </a>
-            </div>
-            {showPreview && (
-                <div className="mt-2 text-sm text-gray-600">
-                    {source.snippet || source.description}
-                </div>
-            )}
-        </div>
     );
 };
 

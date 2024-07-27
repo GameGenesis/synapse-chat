@@ -6,6 +6,7 @@ import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { evaluate } from "mathjs";
 import { ArxivResult, searchArxiv } from "@/utils/arxiv-search";
+import { YoutubeTranscript } from 'youtube-transcript';
 
 const openai = new OpenAI();
 
@@ -101,6 +102,18 @@ export const tools = {
             } catch (error) {
                 console.error("Error searching arXiv:", error);
                 return { error: "Failed to search arXiv" };
+            }
+        }
+    }),
+    get_youtube_video_transcript: tool({
+        description: "Retrieve the complete transcript of a YouTube video using its video ID",
+        parameters: z.object({
+            videoId: z.string().describe("The unique identifier of the YouTube video. For example, the video ID for 'https://www.youtube.com/watch?v=jNQXAC9IVRw' is 'jNQXAC9IVRw'.")
+        }),
+        execute: async ({videoId}) => {
+            const data = await YoutubeTranscript.fetchTranscript(videoId);
+            return {
+                transcript: data.map((line) => line.text).join("").replaceAll("&amp;#39;", "'")
             }
         }
     }),
