@@ -513,6 +513,27 @@ const SourceCard = ({ source }: { source: Source }) => {
         );
     };
 
+    const formatDuration = (duration: string): string => {
+        const durationPattern = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+        const match = duration.match(durationPattern);
+
+        if (!match) {
+            throw new Error("Invalid duration format");
+        }
+
+        const hours = match[1] ? parseInt(match[1], 10) : 0;
+        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+        const seconds = match[3] ? parseInt(match[3], 10) : 0;
+
+        const parts = [];
+        if (hours) parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
+        if (minutes) parts.push(`${minutes} minute${minutes !== 1 ? "s" : ""}`);
+        if (seconds || (!hours && !minutes))
+            parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+
+        return parts.join(", ");
+    };
+
     return (
         <TooltipProvider>
             <Tooltip>
@@ -575,9 +596,11 @@ const SourceCard = ({ source }: { source: Source }) => {
                         {isVideo && (
                             <p className="text-sm text-gray-500 mt-2">
                                 {source.duration &&
-                                    `Duration: ${source.duration}`}
+                                    `Duration: ${formatDuration(
+                                        source.duration
+                                    )}`}
                                 {source.viewCount !== undefined &&
-                                    `, Views: ${source.viewCount}`}
+                                    `, Views: ${source.viewCount.toLocaleString()}`}
                                 {source.datePublished &&
                                     `, Published: ${new Date(
                                         source.datePublished
