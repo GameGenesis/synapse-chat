@@ -197,6 +197,7 @@ const prompts: Prompt[] = [
 // Add: Create a presentation in reveal.js about TOPIC
 // Add: Summarize this youtube video
 // Add: List research articles about this topic
+// Add: Search for Lebanon images
 
 interface Props {
     addMessage: (message: Message) => void;
