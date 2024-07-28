@@ -15,6 +15,7 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import { ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 interface Props {
     children: React.ReactNode;
@@ -186,7 +187,7 @@ const CustomLink = ({
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <a
+                    <Link
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -194,7 +195,7 @@ const CustomLink = ({
                     >
                         {children}
                         <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
-                    </a>
+                    </Link>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-80 p-0">
                     <div className="p-4">
@@ -210,7 +211,7 @@ const CustomLink = ({
                                 {domain}
                             </span>
                         </div>
-                        <a
+                        <Link
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -218,7 +219,7 @@ const CustomLink = ({
                         >
                             {href}
                             <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
-                        </a>
+                        </Link>
                     </div>
                 </TooltipContent>
             </Tooltip>

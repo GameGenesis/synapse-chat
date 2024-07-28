@@ -27,21 +27,26 @@ import {
     ChevronUpIcon,
     ExternalLinkIcon,
     ChevronLeftIcon,
-    ChevronRightIcon
+    ChevronRightIcon,
+    SearchIcon
 } from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { generateId, Message } from "ai";
 
 interface MessagesProps {
     messages: CombinedMessage[];
     onArtifactClick: (identifier: string) => void;
     onRegenerate?: () => void;
+    addMessage?: (message: Message) => void;
 }
 
 export const Messages = ({
     messages,
     onArtifactClick,
-    onRegenerate
+    onRegenerate,
+    addMessage
 }: MessagesProps) => {
     return (
         <>
@@ -55,6 +60,7 @@ export const Messages = ({
                         onArtifactClick={onArtifactClick}
                         onRegenerate={onRegenerate}
                         isLatestResponse={index === messages.length - 1}
+                        addMessage={addMessage}
                     />
                 ) : null
             )}
@@ -99,13 +105,15 @@ interface AssistantMessageProps {
     isLatestResponse: boolean;
     onArtifactClick?: (identifier: string) => void;
     onRegenerate?: () => void;
+    addMessage?: (message: Message) => void;
 }
 
 export const AssistantMessage = ({
     message,
     isLatestResponse,
     onArtifactClick,
-    onRegenerate
+    onRegenerate,
+    addMessage
 }: AssistantMessageProps) => {
     const [showAllSources, setShowAllSources] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -221,7 +229,10 @@ export const AssistantMessage = ({
                     )}
                 </div>
                 {relatedSearches && relatedSearches.value && (
-                    <RelatedSearches searches={relatedSearches.value} />
+                    <RelatedSearches
+                        searches={relatedSearches.value}
+                        addMessage={addMessage ? addMessage : () => {}}
+                    />
                 )}
             </>
         );
@@ -593,7 +604,7 @@ const SourceCard = ({ source }: { source: Source }) => {
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <a
+                    <Link
                         href={getSourceUrl()}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -619,7 +630,7 @@ const SourceCard = ({ source }: { source: Source }) => {
                                 </p>
                             </CardContent>
                         </Card>
-                    </a>
+                    </Link>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-80 p-0">
                     <div className="p-4">
@@ -636,7 +647,7 @@ const SourceCard = ({ source }: { source: Source }) => {
                                 {getPublisherName()}
                             </span>
                         </div>
-                        <a
+                        <Link
                             href={getSourceUrl()}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -644,7 +655,7 @@ const SourceCard = ({ source }: { source: Source }) => {
                         >
                             {getSourceName()}
                             <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
-                        </a>
+                        </Link>
                         <p className="text-sm text-gray-700">
                             {getSourceDescription()}
                         </p>
@@ -679,21 +690,49 @@ const SourceCard = ({ source }: { source: Source }) => {
     );
 };
 
-const RelatedSearches = ({ searches }: { searches: any[] }) => {
+interface RelatedSearchesProps {
+    searches: Array<{ displayText: string; webSearchUrl: string }>;
+    addMessage: (message: Message) => void;
+}
+
+const RelatedSearches: React.FC<RelatedSearchesProps> = ({
+    searches,
+    addMessage
+}) => {
     return (
-        <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-2">Related Searches</h3>
-            <div className="flex flex-wrap gap-2">
+        <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Related Searches</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {searches.map((search, index) => (
-                    <a
+                    <Card
                         key={index}
-                        href={search.webSearchUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:underline"
+                        className="hover:shadow-md transition-shadow duration-200 cursor-pointer group"
+                        onClick={() =>
+                            addMessage({
+                                id: generateId(),
+                                role: "user",
+                                content: search.displayText
+                            })
+                        }
                     >
-                        {search.displayText}
-                    </a>
+                        <div className="p-3 flex items-center justify-between">
+                            <div className="flex items-center flex-grow overflow-hidden">
+                                <SearchIcon className="w-4 h-4 mr-2 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
+                                <span className="text-sm truncate">
+                                    {search.displayText}
+                                </span>
+                            </div>
+                            <Link
+                                href={search.webSearchUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 p-1 text-gray-500 hover:text-gray-700"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <ExternalLinkIcon className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </Card>
                 ))}
             </div>
         </div>
@@ -740,7 +779,7 @@ const ImageGallery = ({ images }: { images: any[] }) => {
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="flex-shrink-0 max-h-32">
-                                        <a
+                                        <Link
                                             key={index}
                                             href={image.hostPageUrl}
                                             target="_blank"
@@ -758,7 +797,7 @@ const ImageGallery = ({ images }: { images: any[] }) => {
                                                     image.thumbnailUrl
                                                 }
                                             />
-                                        </a>
+                                        </Link>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent

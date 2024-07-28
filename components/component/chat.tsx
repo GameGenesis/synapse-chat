@@ -523,14 +523,13 @@ export function Chat() {
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
                             {combinedMessages.length === 0 ? (
-                                <DefaultPrompts
-                                    addMessage={(message) => append(message)}
-                                />
+                                <DefaultPrompts addMessage={append} />
                             ) : (
                                 <Messages
                                     messages={combinedMessages}
                                     onArtifactClick={openArtifact}
                                     onRegenerate={handleReload}
+                                    addMessage={append}
                                 />
                             )}
                             {error && (
