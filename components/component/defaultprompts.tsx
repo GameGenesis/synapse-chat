@@ -183,7 +183,7 @@ const prompts: Prompt[] = [
     {
         icon: CakeIcon,
         displayName: "List Cake Recipes",
-        prompt: "Provide a list of 3 delicious and unique cake recipes that I can create at home. For each recipe, include the name of the cake, a brief description, key ingredients, any special techniques or tips for baking, and a link to the recipe.",
+        prompt: "Search the web for and provide a list of 3 delicious and unique cake recipes that I can create at home. For each recipe, include the name of the cake, a brief description, key ingredients, any special techniques or tips for baking, and a link to the recipe.",
         color: "bg-pink-200 text-pink-700"
     },
     {

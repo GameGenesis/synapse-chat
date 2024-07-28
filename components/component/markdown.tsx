@@ -179,7 +179,6 @@ const CustomLink = ({
     try {
         domain = new URL(href).hostname;
     } catch {
-        // If the URL is invalid, just use the href as is
         domain = href;
     }
 
@@ -199,13 +198,12 @@ const CustomLink = ({
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-80 p-0">
                     <div className="p-4">
-                        <div className="flex items-center mb-2">
+                        <div className="flex items-center mb-2 space-x-2 max-h-4">
                             <Image
-                                src={`https://www.google.com/s2/favicons?domain=${domain}`}
+                                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
                                 alt={`${domain} icon`}
                                 width={16}
                                 height={16}
-                                className="mr-2"
                                 unoptimized
                             />
                             <span className="text-sm text-gray-500">
@@ -216,14 +214,11 @@ const CustomLink = ({
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-bold text-blue-600 hover:underline block mb-2"
+                            className="font-bold text-blue-600 hover:underline block"
                         >
                             {href}
                             <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
                         </a>
-                        <p className="text-sm text-gray-700">
-                            Link to external website
-                        </p>
                     </div>
                 </TooltipContent>
             </Tooltip>
