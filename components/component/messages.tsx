@@ -28,7 +28,8 @@ import {
     ExternalLinkIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    SearchIcon
+    SearchIcon,
+    ClockIcon
 } from "lucide-react";
 import { USER_NAME } from "@/app/api/chat/config";
 import { Card, CardContent } from "@/components/ui/card";
@@ -200,7 +201,7 @@ export const AssistantMessage = ({
 
         return (
             <>
-                <div className="mt-4">
+                <div>
                     <h3 className="text-lg font-semibold mb-2">Sources</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {visibleSources.map((source, index) => (
@@ -257,7 +258,7 @@ export const AssistantMessage = ({
             transcriptTool.result?.transcript
         ) {
             return (
-                <div className="mt-4">
+                <div>
                     <h3 className="text-lg font-semibold mb-2">
                         Video Transcript
                     </h3>
@@ -312,6 +313,85 @@ export const AssistantMessage = ({
         if (images.length === 0) return null;
 
         return <ImageGallery images={images} />;
+    };
+
+    const renderWikipediaSummary = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const wikipediaSummaryInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "wikipedia_get_page_summary"
+        );
+
+        if (
+            !wikipediaSummaryInvocation ||
+            wikipediaSummaryInvocation.state !== "result" ||
+            !wikipediaSummaryInvocation.result
+        )
+            return null;
+
+        const summary = wikipediaSummaryInvocation.result;
+
+        return <WikipediaSummaryCard summary={summary} />;
+    };
+
+    const renderWikipediaSearch = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const wikipediaSummaryInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "wikipedia_search"
+        );
+
+        if (
+            !wikipediaSummaryInvocation ||
+            wikipediaSummaryInvocation.state !== "result" ||
+            !wikipediaSummaryInvocation.result
+        )
+            return null;
+
+        const searchResults = wikipediaSummaryInvocation.result.pages;
+
+        return <WikipediaSearchCard results={searchResults} />;
+    };
+
+    const renderTimeCard = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const timeInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "get_current_time"
+        );
+
+        if (
+            !timeInvocation ||
+            timeInvocation.state !== "result" ||
+            !timeInvocation.result
+        )
+            return null;
+
+        const { time } = timeInvocation.result;
+        const { timeZone } = timeInvocation.args;
+
+        return <TimeCard time={time} timeZone={timeZone} />;
+    };
+
+    const renderWeatherCard = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const weatherInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "get_current_weather"
+        );
+
+        if (
+            !weatherInvocation ||
+            weatherInvocation.state !== "result" ||
+            !weatherInvocation.result
+        )
+            return null;
+
+        return <WeatherCard weather={weatherInvocation.result} />;
     };
 
     return (
@@ -379,10 +459,16 @@ export const AssistantMessage = ({
                     <div className="prose text-muted-foreground">
                         {processedContent}
                     </div>
-                    {renderImages()}
-                    {renderSources()}
-                    {typeof message !== "string" &&
-                        renderTranscriptPreview(message)}
+                    <div className="flex flex-col space-y-4">
+                        {renderTimeCard()}
+                        {renderWeatherCard()}
+                        {renderWikipediaSearch()}
+                        {renderWikipediaSummary()}
+                        {renderImages()}
+                        {renderSources()}
+                        {typeof message !== "string" &&
+                            renderTranscriptPreview(message)}
+                    </div>
                     {typeof message !== "string" &&
                         message.toolInvocations &&
                         message.toolInvocations.length > 0 && (
@@ -811,7 +897,7 @@ const ImageGallery = ({ images }: { images: any[] }) => {
     };
 
     return (
-        <div className="mt-4">
+        <div>
             <h3 className="text-lg font-semibold mb-2">Images</h3>
             <div className="relative">
                 <div
@@ -882,5 +968,251 @@ const ImageGallery = ({ images }: { images: any[] }) => {
                 )}
             </div>
         </div>
+    );
+};
+
+interface WikipediaSummaryCardProps {
+    summary: {
+        title: string;
+        extract: string;
+        thumbnail?: {
+            source: string;
+        };
+        content_urls: {
+            desktop: {
+                page: string;
+            };
+        };
+    };
+}
+
+const WikipediaSummaryCard: React.FC<WikipediaSummaryCardProps> = ({
+    summary
+}) => {
+    return (
+        <Card className="w-full">
+            <CardContent className="p-4">
+                <div className="flex items-start space-x-4">
+                    <Avatar className="w-16 h-16">
+                        {summary.thumbnail ? (
+                            <AvatarImage
+                                src={summary.thumbnail.source}
+                                alt={summary.title}
+                            />
+                        ) : (
+                            <AvatarFallback>
+                                {summary.title.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                        )}
+                    </Avatar>
+                    <div className="flex-grow">
+                        <h3 className="text-lg font-semibold mb-2">
+                            {summary.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                            {summary.extract}
+                        </p>
+                        <Link
+                            href={summary.content_urls.desktop.page}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline flex items-center"
+                        >
+                            Read more on Wikipedia
+                            <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
+                        </Link>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+interface WikipediaSearchResult {
+    id: number;
+    key: string;
+    title: string;
+    excerpt: string;
+    description?: string;
+    thumbnail?: {
+        url: string;
+    };
+}
+
+interface WikipediaSearchCardProps {
+    results: WikipediaSearchResult[];
+}
+
+const WikipediaSearchCard: React.FC<WikipediaSearchCardProps> = ({
+    results
+}) => {
+    const [showAll, setShowAll] = useState(false);
+    const visibleResults = showAll ? results : results.slice(0, 2);
+
+    return (
+        <Card className="w-full">
+            <CardContent className="p-4">
+                <h3 className="text-lg font-semibold mb-3">
+                    Wikipedia Search Results
+                </h3>
+                {visibleResults.map((result, index) => (
+                    <div
+                        key={result.id}
+                        className={`flex items-start space-x-4 ${
+                            index > 0 ? "mt-4" : ""
+                        }`}
+                    >
+                        <Avatar className="w-12 h-12">
+                            {result.thumbnail ? (
+                                <AvatarImage
+                                    src={result.thumbnail.url}
+                                    alt={result.title}
+                                />
+                            ) : (
+                                <AvatarFallback>
+                                    {result.title.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                            )}
+                        </Avatar>
+                        <div className="flex-grow">
+                            <h4 className="text-md font-semibold">
+                                {result.title}
+                            </h4>
+                            {result.description && (
+                                <p className="text-sm text-gray-500 mb-1">
+                                    {result.description}
+                                </p>
+                            )}
+                            <p
+                                className="text-sm text-gray-600 mb-2"
+                                dangerouslySetInnerHTML={{
+                                    __html: result.excerpt
+                                }}
+                            />
+                            <Link
+                                href={`https://en.wikipedia.org/wiki/${result.key}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:underline flex items-center"
+                            >
+                                Read more
+                                <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
+                            </Link>
+                        </div>
+                    </div>
+                ))}
+                {results.length > 2 && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAll(!showAll)}
+                        className="mt-4 w-full"
+                    >
+                        {showAll ? (
+                            <>
+                                <ChevronUpIcon className="w-4 h-4 mr-2" />
+                                Show less
+                            </>
+                        ) : (
+                            <>
+                                <ChevronDownIcon className="w-4 h-4 mr-2" />
+                                View {results.length - 2} more results
+                            </>
+                        )}
+                    </Button>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
+interface TimeCardProps {
+    time: string;
+    timeZone: string;
+}
+
+const TimeCard: React.FC<TimeCardProps> = ({ time, timeZone }) => {
+    return (
+        <Card className="w-full">
+            <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                    <div className="bg-gray-100 rounded-full p-3">
+                        <ClockIcon className="w-6 h-6 text-gray-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                            {time}
+                        </h3>
+                        <p className="text-sm text-gray-500">{timeZone}</p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+interface WeatherCardProps {
+    weather: {
+        location: {
+            name: string;
+            region: string;
+            country: string;
+        };
+        current: {
+            temp_c: number;
+            temp_f: number;
+            condition: {
+                text: string;
+                icon: string;
+            };
+            humidity: number;
+            wind_kph: number;
+            wind_dir: string;
+        };
+    };
+}
+
+const WeatherCard: React.FC<WeatherCardProps> = ({ weather }) => {
+    return (
+        <Card className="w-full">
+            <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-1">
+                            {weather.location.name}, {weather.location.region}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-4">
+                            {weather.location.country}
+                        </p>
+                        <div className="flex items-center">
+                            <Image
+                                src={`https:${weather.current.condition.icon}`}
+                                alt={weather.current.condition.text}
+                                width={64}
+                                height={64}
+                                unoptimized
+                            />
+                            <div className="ml-4">
+                                <p className="text-3xl font-bold">
+                                    {weather.current.temp_c}°C
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    {weather.current.condition.text}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm text-gray-600">
+                            Humidity: {weather.current.humidity}%
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            Wind: {weather.current.wind_kph} km/h{" "}
+                            {weather.current.wind_dir}
+                        </p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
