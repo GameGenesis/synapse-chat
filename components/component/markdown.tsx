@@ -190,7 +190,7 @@ const CustomLink = ({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 no-underline hover:underline inline-flex items-center"
                     >
                         {children}
                         <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
@@ -214,7 +214,7 @@ const CustomLink = ({
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-bold text-blue-600 hover:underline block"
+                            className="font-bold text-blue-600 no-underline hover:underline block"
                         >
                             {href}
                             <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
