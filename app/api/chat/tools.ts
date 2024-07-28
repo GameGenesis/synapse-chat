@@ -67,44 +67,6 @@ export const tools = {
             ).data[0].url
         })
     }),
-    // evaluate_math_expression: tool({
-    //     description:
-    //         "A tool for evaluating mathematical expressions. " +
-    //         "Example expressions: " +
-    //         "'1.2 * (2 + 4.5)', '12.7 cm to inch', 'sin(45 deg) ^ 2'.",
-    //     parameters: z.object({ expression: z.string() }),
-    //     execute: async ({ expression }) => evaluate(expression)
-    // }),
-    arxiv_search: tool({
-        description:
-            "Search for scientific papers on arXiv. Use this for academic or research purposes",
-        parameters: z.object({
-            query: z.string().describe("The search query for arXiv"),
-            maxResults: z
-                .number()
-                .min(1)
-                .max(10)
-                .default(5)
-                .describe("The maximum number of results to return (1-10)")
-        }),
-        execute: async ({ query, maxResults }) => {
-            try {
-                const results = await searchArxiv(query, maxResults);
-                return {
-                    results: results.map((result: ArxivResult) => ({
-                        title: result.title,
-                        summary: result.summary,
-                        authors: result.authors.join(", "),
-                        published: result.published,
-                        url: result.id
-                    }))
-                };
-            } catch (error) {
-                console.error("Error searching arXiv:", error);
-                return { error: "Failed to search arXiv" };
-            }
-        }
-    }),
     get_youtube_video_transcript: tool({
         description: "Retrieve the complete transcript of a YouTube video using its video ID",
         parameters: z.object({
@@ -117,5 +79,43 @@ export const tools = {
             }
         }
     }),
+    // evaluate_math_expression: tool({
+    //     description:
+    //         "A tool for evaluating mathematical expressions. " +
+    //         "Example expressions: " +
+    //         "'1.2 * (2 + 4.5)', '12.7 cm to inch', 'sin(45 deg) ^ 2'.",
+    //     parameters: z.object({ expression: z.string() }),
+    //     execute: async ({ expression }) => evaluate(expression)
+    // }),
+    // arxiv_search: tool({
+    //     description:
+    //         "Search for scientific papers on arXiv. Use this for academic or research purposes",
+    //     parameters: z.object({
+    //         query: z.string().describe("The search query for arXiv"),
+    //         maxResults: z
+    //             .number()
+    //             .min(1)
+    //             .max(10)
+    //             .default(5)
+    //             .describe("The maximum number of results to return (1-10)")
+    //     }),
+    //     execute: async ({ query, maxResults }) => {
+    //         try {
+    //             const results = await searchArxiv(query, maxResults);
+    //             return {
+    //                 results: results.map((result: ArxivResult) => ({
+    //                     title: result.title,
+    //                     summary: result.summary,
+    //                     authors: result.authors.join(", "),
+    //                     published: result.published,
+    //                     url: result.id
+    //                 }))
+    //             };
+    //         } catch (error) {
+    //             console.error("Error searching arXiv:", error);
+    //             return { error: "Failed to search arXiv" };
+    //         }
+    //     }
+    // }),
     ...createAISDKTools(weather, wikipedia, bing)
 };
