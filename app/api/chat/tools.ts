@@ -4,9 +4,9 @@ import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
-import { evaluate } from "mathjs";
 import { ArxivResult, searchArxiv } from "@/utils/arxiv-search";
 import { YoutubeTranscript } from 'youtube-transcript';
+import formatTime from "@/utils/format";
 
 const openai = new OpenAI();
 
@@ -113,7 +113,7 @@ export const tools = {
         execute: async ({videoId}) => {
             const data = await YoutubeTranscript.fetchTranscript(videoId);
             return {
-                transcript: data.map((line) => line.text).join("").replaceAll("&amp;#39;", "'")
+                transcript: data.map((line) => `[${formatTime(Math.floor(line.offset))}] ${line.text}`).join("\n").replaceAll("&amp;#39;", "'")
             }
         }
     }),
