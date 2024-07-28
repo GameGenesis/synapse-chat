@@ -705,7 +705,6 @@ const SourceCard = ({ source }: { source: Source }) => {
                                         width={16}
                                         height={16}
                                         className="mr-2"
-                                        unoptimized
                                     />
                                     <span className="text-sm font-medium truncate">
                                         {getSourceName()}
@@ -727,7 +726,6 @@ const SourceCard = ({ source }: { source: Source }) => {
                                 width={16}
                                 height={16}
                                 className="mr-2"
-                                unoptimized
                             />
                             <span className="text-sm text-gray-500">
                                 {getPublisherName()}
@@ -924,9 +922,6 @@ const ImageGallery = ({ images }: { images: any[] }) => {
                                                 objectFit="contain"
                                                 style={{ maxHeight: "128px" }}
                                                 className="rounded-lg object-cover cursor-pointer max-h-32"
-                                                loader={() =>
-                                                    image.thumbnailUrl
-                                                }
                                             />
                                         </Link>
                                     </div>
@@ -993,7 +988,7 @@ const WikipediaSummaryCard: React.FC<WikipediaSummaryCardProps> = ({
         <Card className="w-full">
             <CardContent className="p-4">
                 <div className="flex items-start space-x-4">
-                    <Avatar className="w-16 h-16">
+                    {/* <Avatar className="w-16 h-16">
                         {summary.thumbnail ? (
                             <AvatarImage
                                 src={summary.thumbnail.source}
@@ -1004,7 +999,20 @@ const WikipediaSummaryCard: React.FC<WikipediaSummaryCardProps> = ({
                                 {summary.title.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                         )}
-                    </Avatar>
+                    </Avatar> */}
+                    <div className="relative h-16 w-16 flex-shrink-0 mt-1">
+                        <Image
+                            className="rounded-lg object-cover h-16"
+                            src={
+                                summary.thumbnail?.source ||
+                                "/placeholder-user.jpg"
+                            }
+                            alt={summary.title}
+                            width={64}
+                            height={64}
+                            style={{ maxHeight: "64px", maxWidth: "64px" }}
+                        />
+                    </div>
                     <div className="flex-grow">
                         <h3 className="text-lg font-semibold mb-2">
                             {summary.title}
@@ -1062,18 +1070,19 @@ const WikipediaSearchCard: React.FC<WikipediaSearchCardProps> = ({
                             index > 0 ? "mt-4" : ""
                         }`}
                     >
-                        <Avatar className="w-12 h-12">
-                            {result.thumbnail ? (
-                                <AvatarImage
-                                    src={result.thumbnail.url}
-                                    alt={result.title}
-                                />
-                            ) : (
-                                <AvatarFallback>
-                                    {result.title.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            )}
-                        </Avatar>
+                        <div className="relative h-16 w-16 flex-shrink-0 mt-1">
+                            <Image
+                                className="rounded-lg object-cover h-16"
+                                src={
+                                    result.thumbnail?.url ||
+                                    "/placeholder-user.jpg"
+                                }
+                                alt={result.title}
+                                width={64}
+                                height={64}
+                                style={{ maxHeight: "64px", maxWidth: "64px" }}
+                            />
+                        </div>
                         <div className="flex-grow">
                             <h4 className="text-md font-semibold">
                                 {result.title}
@@ -1190,7 +1199,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather }) => {
                                 alt={weather.current.condition.text}
                                 width={64}
                                 height={64}
-                                unoptimized
                             />
                             <div className="ml-4">
                                 <p className="text-3xl font-bold">

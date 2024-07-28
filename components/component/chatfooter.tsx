@@ -165,7 +165,6 @@ const ChatFooter = ({
                         width={0}
                         height={0}
                         className="w-8 h-8 rounded-md object-cover mr-2"
-                        loader={() => imageSrc}
                     />
                 ) : (
                     <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md mr-2">

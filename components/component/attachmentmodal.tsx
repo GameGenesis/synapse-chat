@@ -56,7 +56,6 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
                             height={0}
                             className="max-w-full max-h-[calc(90vh-10rem)] object-contain mx-auto"
                             style={{ width: "auto", height: "auto" }}
-                            loader={() => fallback || URL.createObjectURL(file)}
                         />
                     ) : (
                         <div className="flex flex-col h-full w-full">

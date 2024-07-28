@@ -92,7 +92,6 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
                                         : parseInt(height || "", 10) || 0
                                 }
                                 layout="responsive"
-                                loader={() => src || ""}
                             />
                         );
                     },
@@ -205,7 +204,6 @@ const CustomLink = ({
                                 alt={`${domain} icon`}
                                 width={16}
                                 height={16}
-                                unoptimized
                             />
                             <span className="text-sm text-gray-500">
                                 {domain}
