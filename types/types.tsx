@@ -70,9 +70,9 @@ export type State = {
     enableArtifacts: boolean;
     enableInstructions: boolean;
     enableSafeguards: boolean;
-    enableTools: boolean;
     enablePasteToFile: boolean;
     customInstructions: string;
+    toolChoice: ToolChoice;
 };
 
 export type Action =
@@ -86,7 +86,8 @@ export type Action =
     | { type: "SET_ENABLE_SAFEGUARDS"; payload: boolean }
     | { type: "SET_ENABLE_TOOLS"; payload: boolean }
     | { type: "SET_ENABLE_PASTE_TO_FILE"; payload: boolean }
-    | { type: "SET_CUSTOM_INSTRUCTIONS"; payload: string };
+    | { type: "SET_CUSTOM_INSTRUCTIONS"; payload: string }
+    | { type: "SET_TOOL_CHOICE"; payload: ToolChoice };
 
 export interface WikipediaSearchResult {
     id: number;
@@ -98,3 +99,9 @@ export interface WikipediaSearchResult {
         url: string;
     };
 }
+
+export type ToolChoice =
+    | "auto"
+    | "required"
+    | "none"
+    | { type: "tool"; toolName: string };

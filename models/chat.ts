@@ -38,7 +38,6 @@ const settingsSchema: Schema = new Schema({
     enableArtifacts: { type: Boolean, required: true },
     enableInstructions: { type: Boolean, required: true },
     enableSafeguards: { type: Boolean, required: true },
-    enableTools: { type: Boolean, required: true },
     enablePasteToFile: { type: Boolean, required: true },
     customInstructions: { type: String }
 });

@@ -23,7 +23,14 @@ import {
     AccordionItem,
     AccordionTrigger
 } from "@/components/ui/accordion";
-import { Action, State } from "@/types";
+import { Action, State, ToolChoice } from "@/types";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui";
 
 interface Props {
     isOpen: boolean;
@@ -34,6 +41,8 @@ interface Props {
 
 export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
+    const [toolChoice, setToolChoice] = useState<ToolChoice>("auto");
+    const [specificToolName, setSpecificToolName] = useState("");
 
     useEffect(() => {
         const newMaxPossibleOutput = state.model === "gpt4omini" ? 16384 : 4096;
@@ -48,6 +57,27 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
         dispatch({
             type: "SET_MAX_TOKENS",
             payload: Math.min(Math.max(1, value), maxPossibleOutput)
+        });
+    };
+
+    const handleToolChoiceChange = (value: string) => {
+        if (value === "specific") {
+            setToolChoice({ type: "tool", toolName: specificToolName });
+        } else {
+            setToolChoice(value as ToolChoice);
+        }
+        dispatch({ type: "SET_TOOL_CHOICE", payload: toolChoice });
+    };
+
+    const handleSpecificToolNameChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const newToolName = e.target.value;
+        setSpecificToolName(newToolName);
+        setToolChoice({ type: "tool", toolName: newToolName });
+        dispatch({
+            type: "SET_TOOL_CHOICE",
+            payload: { type: "tool", toolName: newToolName }
         });
     };
 
@@ -230,7 +260,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                         disabled={!state.enableInstructions}
                                     />
                                 </div>
-                                <div className="flex items-center justify-between">
+                                {/* <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <Label htmlFor="enableTools">
                                             Enable Tools
@@ -261,7 +291,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                             })
                                         }
                                     />
-                                </div>
+                                </div> */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <Label htmlFor="enablePasteToFile">
@@ -293,6 +323,69 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                     />
                                 </div>
                             </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <Label htmlFor="toolChoice">
+                                        Tool Choice
+                                    </Label>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <InfoIcon className="h-4 w-4 text-gray-500" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>
+                                                    Choose how the AI model uses
+                                                    tools
+                                                </p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                                <Select
+                                    onValueChange={handleToolChoiceChange}
+                                    value={
+                                        typeof toolChoice === "string"
+                                            ? toolChoice
+                                            : "specific"
+                                    }
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select tool choice" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="auto">
+                                            Auto
+                                        </SelectItem>
+                                        <SelectItem value="required">
+                                            Required
+                                        </SelectItem>
+                                        <SelectItem value="none">
+                                            None
+                                        </SelectItem>
+                                        <SelectItem value="specific">
+                                            Specific Tool
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {typeof toolChoice === "object" &&
+                                toolChoice.type === "tool" && (
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="specificToolName">
+                                            Specific Tool Name
+                                        </Label>
+                                        <Input
+                                            id="specificToolName"
+                                            value={specificToolName}
+                                            onChange={
+                                                handleSpecificToolNameChange
+                                            }
+                                            className="w-[180px]"
+                                            placeholder="Enter tool name"
+                                        />
+                                    </div>
+                                )}
                         </AccordionContent>
                     </AccordionItem>
 

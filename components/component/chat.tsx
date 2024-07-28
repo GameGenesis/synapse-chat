@@ -16,10 +16,10 @@ import {
     DEFAULT_ENABLE_INSTRUCTIONS,
     DEFAULT_ENABLE_PASTE_TO_FILE,
     DEFAULT_ENABLE_SAFEGUARDS,
-    DEFAULT_ENABLE_TOOLS,
     DEFAULT_MAX_TOKENS,
     DEFAULT_MODEL,
     DEFAULT_TEMPERATURE,
+    DEFAULT_TOOL_CHOICE,
     DEFAULT_TOPP,
     maxToolRoundtrips
 } from "@/app/api/chat/config";
@@ -52,12 +52,12 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, enableInstructions: action.payload };
         case "SET_ENABLE_SAFEGUARDS":
             return { ...state, enableSafeguards: action.payload };
-        case "SET_ENABLE_TOOLS":
-            return { ...state, enableTools: action.payload };
         case "SET_ENABLE_PASTE_TO_FILE":
             return { ...state, enablePasteToFile: action.payload };
         case "SET_CUSTOM_INSTRUCTIONS":
             return { ...state, customInstructions: action.payload };
+        case "SET_TOOL_CHOICE":
+            return { ...state, toolChoice: action.payload };
         default:
             return state;
     }
@@ -73,8 +73,8 @@ export function Chat() {
         enableArtifacts: DEFAULT_ENABLE_ARTIFACTS,
         enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
         enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
-        enableTools: DEFAULT_ENABLE_TOOLS,
         enablePasteToFile: DEFAULT_ENABLE_PASTE_TO_FILE,
+        toolChoice: DEFAULT_TOOL_CHOICE,
         customInstructions: ""
     });
 

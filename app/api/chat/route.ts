@@ -23,8 +23,8 @@ export async function POST(req: Request) {
         enableArtifacts,
         enableInstructions,
         enableSafeguards,
-        enableTools,
-        customInstructions
+        customInstructions,
+        toolChoice
     } = settings;
 
     const system = buildPrompt(
@@ -57,8 +57,8 @@ export async function POST(req: Request) {
         topP,
         maxTokens,
         messages: convertToCoreMessages(messages),
-        tools: enableTools ? tools : undefined,
-        toolChoice: "auto",
+        tools,
+        toolChoice,
         onFinish: async (result) => {
             if (result.text) {
                 data.append({
