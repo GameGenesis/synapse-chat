@@ -87,3 +87,14 @@ export type Action =
     | { type: "SET_ENABLE_TOOLS"; payload: boolean }
     | { type: "SET_ENABLE_PASTE_TO_FILE"; payload: boolean }
     | { type: "SET_CUSTOM_INSTRUCTIONS"; payload: string };
+
+export interface WikipediaSearchResult {
+    id: number;
+    key: string;
+    title: string;
+    excerpt: string;
+    description?: string;
+    thumbnail?: {
+        url: string;
+    };
+}
