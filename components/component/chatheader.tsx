@@ -34,15 +34,15 @@ export const modelInfo: Partial<
         }
     >
 > = {
-    gpt4o: {
-        name: "GPT-4o",
-        description: "Most capable GPT-4 model for a wide range of tasks.",
-        icon: SparkleIcon
-    },
     claude35sonnet: {
         name: "Claude 3.5 Sonnet",
         description:
             "Anthropic's latest model, great for various applications.",
+        icon: SparkleIcon
+    },
+    gpt4o: {
+        name: "GPT-4o",
+        description: "Most capable GPT-4 model for a wide range of tasks.",
         icon: SparkleIcon
     },
     gpt4omini: {
@@ -136,7 +136,9 @@ const ChatHeader = ({
                                     const Icon = getModelIcon(modelKey);
                                     return (
                                         <div key={modelKey}>
-                                            {index > 0 && (
+                                            {index ===
+                                                Object.keys(modelInfo).length -
+                                                    1 && (
                                                 <DropdownMenuSeparator />
                                             )}
                                             <DropdownMenuItem
