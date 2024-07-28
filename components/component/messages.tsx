@@ -1081,6 +1081,7 @@ const WikipediaSearchCard: React.FC<WikipediaSearchCardProps> = ({
                                 width={64}
                                 height={64}
                                 style={{ maxHeight: "64px", maxWidth: "64px" }}
+                                unoptimized
                             />
                         </div>
                         <div className="flex-grow">
