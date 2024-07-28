@@ -8,6 +8,13 @@ import rehypeKatex from "rehype-katex";
 import { useState } from "react";
 import AttachmentModal from "./attachmentmodal";
 import Image from "next/image";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip";
+import { ExternalLinkIcon } from "lucide-react";
 
 interface Props {
     children: React.ReactNode;
@@ -131,7 +138,12 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
                                 {children}
                             </code>
                         );
-                    }
+                    },
+                    a: ({ node, href, children, ...props }) => (
+                        <CustomLink href={href} {...props}>
+                            {children}
+                        </CustomLink>
+                    )
                 }}
             >
                 {typeof children === "string" ? children : children?.toString()}
@@ -149,5 +161,72 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
                 fallback={selectedImage || ""}
             />
         </div>
+    );
+};
+
+const CustomLink = ({
+    href,
+    children
+}: {
+    href?: string;
+    children: React.ReactNode;
+}) => {
+    if (!href) {
+        return <span>{children}</span>;
+    }
+
+    let domain;
+    try {
+        domain = new URL(href).hostname;
+    } catch {
+        // If the URL is invalid, just use the href as is
+        domain = href;
+    }
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                    >
+                        {children}
+                        <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
+                    </a>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="w-80 p-0">
+                    <div className="p-4">
+                        <div className="flex items-center mb-2">
+                            <Image
+                                src={`https://www.google.com/s2/favicons?domain=${domain}`}
+                                alt={`${domain} icon`}
+                                width={16}
+                                height={16}
+                                className="mr-2"
+                                unoptimized
+                            />
+                            <span className="text-sm text-gray-500">
+                                {domain}
+                            </span>
+                        </div>
+                        <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-blue-600 hover:underline block mb-2"
+                        >
+                            {href}
+                            <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
+                        </a>
+                        <p className="text-sm text-gray-700">
+                            Link to external website
+                        </p>
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 };
