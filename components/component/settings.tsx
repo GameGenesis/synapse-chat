@@ -426,7 +426,7 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                     <AccordionItem value="custom-instructions">
                         <AccordionTrigger>Custom Instructions</AccordionTrigger>
                         <AccordionContent>
-                            <div className="pt-2">
+                            <div className="pt-1">
                                 <div
                                     className={`p-1 bg-background rounded-md border relative group overflow-hidden ${
                                         state.customInstructions.length >= 3000

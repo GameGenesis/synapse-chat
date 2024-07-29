@@ -6,7 +6,6 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { useState } from "react";
-import AttachmentModal from "./attachmentmodal";
 import Image from "next/image";
 import {
     Tooltip,
@@ -16,6 +15,11 @@ import {
 } from "@/components/ui/tooltip";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
+    ssr: false
+});
 
 interface Props {
     children: React.ReactNode;

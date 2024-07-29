@@ -8,7 +8,6 @@ import {
     Button
 } from "@/components/ui";
 import { CustomMarkdown } from "./markdown";
-import AttachmentModal from "./attachmentmodal";
 import { FileIcon } from "@radix-ui/react-icons";
 import {
     Tooltip,
@@ -28,28 +27,40 @@ import { USER_NAME } from "@/app/api/chat/config";
 import { Message } from "ai";
 import dynamic from "next/dynamic";
 
-const ImageGallery = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.ImageGallery)
+const ImageGallery = dynamic(
+    () => import("@/components/tools").then((mod) => mod.ImageGallery),
+    { ssr: false }
 );
-const RelatedSearches = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.RelatedSearches)
+const RelatedSearches = dynamic(
+    () => import("@/components/tools").then((mod) => mod.RelatedSearches),
+    { ssr: false }
 );
-const SourceCard = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.SourceCard)
+const SourceCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.SourceCard),
+    { ssr: false }
 );
-const TimeCard = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.TimeCard)
+const TimeCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.TimeCard),
+    { ssr: false }
 );
-const WeatherCard = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.WeatherCard)
+const WeatherCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.WeatherCard),
+    { ssr: false }
 );
-const WikipediaSearchCard = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.WikipediaSearchCard)
+const WikipediaSearchCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.WikipediaSearchCard),
+    { ssr: false }
 );
-const WikipediaSummaryCard = dynamic(() =>
-    import("@/components/tools").then((mod) => mod.WikipediaSummaryCard)
+const WikipediaSummaryCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.WikipediaSummaryCard),
+    { ssr: false }
 );
-const AttachmentPreview = dynamic(() => import("./attachmentpreview"));
+const AttachmentPreview = dynamic(() => import("./attachmentpreview"), {
+    ssr: false
+});
+const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
+    ssr: false
+});
 
 interface MessagesProps {
     messages: CombinedMessage[];

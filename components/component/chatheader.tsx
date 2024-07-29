@@ -12,7 +12,9 @@ import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
 import { AutoIcon, MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/app/api/chat/model-provider";
 import { useState } from "react";
-import Sidebar from "./sidebar";
+import dynamic from "next/dynamic";
+
+const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
 
 interface Props {
     artifacts: boolean;

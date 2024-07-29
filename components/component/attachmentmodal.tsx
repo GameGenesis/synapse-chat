@@ -54,6 +54,8 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
                             alt={file.name}
                             width={0}
                             height={0}
+                            sizes="100vw"
+                            objectFit="contain"
                             className="max-w-full max-h-[calc(90vh-10rem)] object-contain mx-auto"
                             style={{ width: "auto", height: "auto" }}
                         />

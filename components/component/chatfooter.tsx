@@ -162,8 +162,8 @@ const ChatFooter = ({
                     <Image
                         src={imageSrc}
                         alt={file.name}
-                        width={0}
-                        height={0}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-md object-cover mr-2"
                     />
                 ) : (
@@ -265,7 +265,8 @@ const ChatFooter = ({
                     className="relative max-w-[650px] w-full"
                     onSubmit={(event) => {
                         handleSubmit(event, {
-                            experimental_attachments: files
+                            experimental_attachments: files,
+                            allowEmptySubmit: true
                         });
                         setFiles(undefined);
                         if (fileInputRef.current) {

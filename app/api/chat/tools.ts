@@ -4,7 +4,6 @@ import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
-import { ArxivResult, searchArxiv } from "@/utils/arxiv-search";
 import { YoutubeTranscript } from 'youtube-transcript';
 import formatTime from "@/utils/format";
 
@@ -39,7 +38,7 @@ export const tools = {
             })
         })
     }),
-    dalle_image_generation: tool({
+    generate_dalle_image: tool({
         description: "Generate an image (using DALLE)",
         parameters: z.object({
             prompt: z

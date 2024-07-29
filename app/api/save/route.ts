@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/utils/db';
-import Chat from '@/models/chat';
+import { NextResponse } from "next/server";
+import dbConnect from "@/utils/db";
+import Chat from "@/models/chat";
 
 export async function POST(req: Request) {
     await dbConnect();
@@ -9,12 +9,15 @@ export async function POST(req: Request) {
     try {
         const body = await req.text();
         if (!body) {
-            return NextResponse.json({ success: false, error: 'Request body is empty' });
+            return NextResponse.json({
+                success: false,
+                error: "Request body is empty"
+            });
         }
         request = JSON.parse(body);
     } catch (error) {
         console.error("Error parsing JSON:", error);
-        return NextResponse.json({ success: false, error: 'Invalid JSON' });
+        return NextResponse.json({ success: false, error: "Invalid JSON" });
     }
 
     const { chatId, messages, settings } = request;

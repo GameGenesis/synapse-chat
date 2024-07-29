@@ -198,6 +198,8 @@ const prompts: Prompt[] = [
 // Add: Summarize this youtube video
 // Add: List research articles about this topic
 // Add: Search for Lebanon images
+// Add: Create an image: An antique anthropological drawing of a victorian-style house. Sketches labelled with handwriting.
+// Add: DALLE - Japanese landscape during daytime, a samurai on a motorcycle in the middle with their back to the camera, in anime style
 
 interface Props {
     addMessage: (message: Message) => void;
