@@ -149,6 +149,8 @@ export const AssistantMessage = ({
     const processedContent = useMemo(() => {
         if (typeof message === "string") return message;
 
+        if (!message.originalContent || !message.processedContent) return null;
+
         if (!message.artifact || !onArtifactClick) {
             return <CustomMarkdown>{message.processedContent}</CustomMarkdown>;
         }
