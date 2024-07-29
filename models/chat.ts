@@ -17,7 +17,7 @@ const stateSchema: Schema = new Schema({
 const messageSchema: Schema = new Schema({
     id: { type: String, required: true },
     role: { type: String, required: true },
-    originalContent: { type: String, },
+    originalContent: { type: String },
     processedContent: { type: String },
     attachments: { type: Schema.Types.Mixed },
     artifact: { type: artifactSchema },
@@ -39,6 +39,7 @@ const settingsSchema: Schema = new Schema({
     enableInstructions: { type: Boolean, required: true },
     enableSafeguards: { type: Boolean, required: true },
     enablePasteToFile: { type: Boolean, required: true },
+    toolChoice: { type: Schema.Types.Mixed, required: true },
     customInstructions: { type: String }
 });
 

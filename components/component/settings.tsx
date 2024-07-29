@@ -16,7 +16,6 @@ import {
     TooltipProvider,
     TooltipTrigger
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
 import {
     Accordion,
     AccordionContent,
@@ -30,7 +29,24 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue
-} from "@/components/ui";
+} from "@/components/ui/select";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { InfoIcon, Check, ChevronsUpDown } from "lucide-react";
+import { tools } from "@/app/api/chat/config";
 
 interface Props {
     isOpen: boolean;
@@ -42,7 +58,10 @@ interface Props {
 export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
     const [toolChoice, setToolChoice] = useState<ToolChoice>("auto");
-    const [specificToolName, setSpecificToolName] = useState("");
+    const [openCombobox, setOpenCombobox] = useState(false);
+    const [selectedTool, setSelectedTool] = useState<string>(
+        typeof state.toolChoice === "object" ? state.toolChoice.toolName : ""
+    );
 
     useEffect(() => {
         const newMaxPossibleOutput = state.model === "gpt4omini" ? 16384 : 4096;
@@ -62,23 +81,24 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
 
     const handleToolChoiceChange = (value: string) => {
         if (value === "specific") {
-            setToolChoice({ type: "tool", toolName: specificToolName });
+            const newToolChoice: ToolChoice = {
+                type: "tool",
+                toolName: selectedTool || tools[0]
+            };
+            setToolChoice(newToolChoice);
+            dispatch({ type: "SET_TOOL_CHOICE", payload: newToolChoice });
         } else {
             setToolChoice(value as ToolChoice);
+            dispatch({ type: "SET_TOOL_CHOICE", payload: value as ToolChoice });
         }
-        dispatch({ type: "SET_TOOL_CHOICE", payload: toolChoice });
     };
 
-    const handleSpecificToolNameChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const newToolName = e.target.value;
-        setSpecificToolName(newToolName);
-        setToolChoice({ type: "tool", toolName: newToolName });
-        dispatch({
-            type: "SET_TOOL_CHOICE",
-            payload: { type: "tool", toolName: newToolName }
-        });
+    const handleSpecificToolChange = (tool: string) => {
+        setSelectedTool(tool);
+        const newToolChoice: ToolChoice = { type: "tool", toolName: tool };
+        setToolChoice(newToolChoice);
+        dispatch({ type: "SET_TOOL_CHOICE", payload: newToolChoice });
+        setOpenCombobox(false);
     };
 
     return (
@@ -260,38 +280,6 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                         disabled={!state.enableInstructions}
                                     />
                                 </div>
-                                {/* <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <Label htmlFor="enableTools">
-                                            Enable Tools
-                                        </Label>
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>
-                                                        Available Tools:
-                                                        DALLE-3, Bing, Weather,
-                                                        Wikipedia, Calculator,
-                                                        Time
-                                                    </p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </div>
-                                    <Switch
-                                        id="enableTools"
-                                        checked={state.enableTools}
-                                        onCheckedChange={(checked) =>
-                                            dispatch({
-                                                type: "SET_ENABLE_TOOLS",
-                                                payload: checked
-                                            })
-                                        }
-                                    />
-                                </div> */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <Label htmlFor="enablePasteToFile">
@@ -323,72 +311,118 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
                                     />
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                    <Label htmlFor="toolChoice">
-                                        Tool Choice
-                                    </Label>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger>
-                                                <InfoIcon className="h-4 w-4 text-gray-500" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>
-                                                    Choose how the AI model uses
-                                                    tools
-                                                </p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                                <Select
-                                    onValueChange={handleToolChoiceChange}
-                                    value={
-                                        typeof toolChoice === "string"
-                                            ? toolChoice
-                                            : "specific"
-                                    }
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Select tool choice" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="auto">
-                                            Auto
-                                        </SelectItem>
-                                        <SelectItem value="required">
-                                            Required
-                                        </SelectItem>
-                                        <SelectItem value="none">
-                                            None
-                                        </SelectItem>
-                                        <SelectItem value="specific">
-                                            Specific Tool
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {typeof toolChoice === "object" &&
-                                toolChoice.type === "tool" && (
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="specificToolName">
-                                            Specific Tool Name
-                                        </Label>
-                                        <Input
-                                            id="specificToolName"
-                                            value={specificToolName}
-                                            onChange={
-                                                handleSpecificToolNameChange
-                                            }
-                                            className="w-[180px]"
-                                            placeholder="Enter tool name"
-                                        />
-                                    </div>
-                                )}
                         </AccordionContent>
                     </AccordionItem>
-
+                    <AccordionItem value="tools">
+                        <AccordionTrigger>Tools</AccordionTrigger>
+                        <AccordionContent>
+                            <div className="space-y-4 p-1">
+                                <div className="flex flex-col space-y-2">
+                                    <Label htmlFor="toolChoice">
+                                        Tool Choice Mode
+                                    </Label>
+                                    <Select
+                                        onValueChange={handleToolChoiceChange}
+                                        value={
+                                            typeof toolChoice === "string"
+                                                ? toolChoice
+                                                : "specific"
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select tool choice" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="auto">
+                                                Auto
+                                            </SelectItem>
+                                            <SelectItem value="required">
+                                                Required
+                                            </SelectItem>
+                                            <SelectItem value="none">
+                                                None
+                                            </SelectItem>
+                                            <SelectItem value="specific">
+                                                Specific Tool
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {typeof toolChoice === "object" &&
+                                    toolChoice.type === "tool" && (
+                                        <div className="flex flex-col space-y-2">
+                                            <Label htmlFor="specificTool">
+                                                Specific Tool
+                                            </Label>
+                                            <Popover
+                                                open={openCombobox}
+                                                onOpenChange={setOpenCombobox}
+                                            >
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        aria-expanded={
+                                                            openCombobox
+                                                        }
+                                                        className="w-full justify-between"
+                                                    >
+                                                        {selectedTool ||
+                                                            "Select tool..."}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-full p-0">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search tool..." />
+                                                        <CommandEmpty>
+                                                            No tool found.
+                                                        </CommandEmpty>
+                                                        <CommandList>
+                                                            <CommandGroup>
+                                                                {tools.map(
+                                                                    (tool) => (
+                                                                        <CommandItem
+                                                                            key={
+                                                                                tool
+                                                                            }
+                                                                            value={
+                                                                                tool
+                                                                            }
+                                                                            onSelect={() => {
+                                                                                handleSpecificToolChange(
+                                                                                    tool
+                                                                                );
+                                                                                setOpenCombobox(
+                                                                                    false
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            <Check
+                                                                                className={cn(
+                                                                                    "mr-2 h-4 w-4",
+                                                                                    selectedTool ===
+                                                                                        tool
+                                                                                        ? "opacity-100"
+                                                                                        : "opacity-0"
+                                                                                )}
+                                                                            />
+                                                                            {
+                                                                                tool
+                                                                            }
+                                                                        </CommandItem>
+                                                                    )
+                                                                )}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                    )}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
                     <AccordionItem value="custom-instructions">
                         <AccordionTrigger>Custom Instructions</AccordionTrigger>
                         <AccordionContent>

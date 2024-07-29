@@ -48,8 +48,16 @@ export const supportedFileFormats = [
     ".ics",
     ".mjs"
 ];
-// export const supportedFileFormats = ["image/*", "text/*"];
 export const maxToolRoundtrips = 3;
+export const tools = [
+  "get_current_time",
+  "generate_dalle_image",
+  "get_youtube_video_transcript",
+  "get_current_weather",
+  "wikipedia_search",
+  "wikipedia_get_page_summary",
+  "bing_web_search"
+];
 
 export const assistantPrompt = `
 <assistant_info>
