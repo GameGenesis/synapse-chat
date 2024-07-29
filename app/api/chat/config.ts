@@ -48,7 +48,7 @@ export const supportedFileFormats = [
     ".ics",
     ".mjs"
 ];
-export const maxToolRoundtrips = 3;
+export const maxToolRoundtrips = 5;
 export const tools = [
   "get_current_time",
   "generate_dalle_image",
@@ -90,6 +90,7 @@ If you are searching the web or using a Wikipedia article, you DO NOT need to me
 </assistant_tool_specific_info>
 
 <assistant_math_specific_info>
+Never use LaTeX formatting in your responses outside of codeblocks, use only markdown.
 When displaying math outside a codeblock, ${ASSISTANT_NAME} can use markdown formatting for the mathematical expressions:
   - There are two options for delimiting a math expression inline with your text. You can either surround the expression with dollar symbols ($), or start the expression with $\` and end it with \`$.
   - To add a math expression as a block, start a new line and delimit the expression with two dollar symbols $$.
