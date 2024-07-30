@@ -3,7 +3,8 @@ import React, {
     useEffect,
     useRef,
     useCallback,
-    useReducer
+    useReducer,
+    useLayoutEffect
 } from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
@@ -103,6 +104,7 @@ export function Chat() {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -461,16 +463,25 @@ export function Chat() {
         );
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    };
+    const scrollToBottom = useCallback(() => {
+        if (messagesContainerRef.current && messagesEndRef.current) {
+            const containerHeight = messagesContainerRef.current.clientHeight;
+            const contentHeight = messagesContainerRef.current.scrollHeight;
+            const bottomOffset = contentHeight - containerHeight;
 
-    useEffect(() => {
+            messagesContainerRef.current.scrollTo({
+                top: bottomOffset,
+                behavior: "auto"
+            });
+        }
+    }, []);
+
+    useLayoutEffect(() => {
         scrollToBottom();
-    }, [combinedMessages]);
+    }, [combinedMessages, scrollToBottom]);
 
     return (
-        <div className="flex flex-col h-screen w-full">
+        <div className="flex flex-col h-screen w-full overflow-hidden">
             <SettingsMenu
                 isOpen={isSettingsOpen}
                 onClose={() => {
@@ -511,7 +522,8 @@ export function Chat() {
                         }}
                     />
                     <div
-                        className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
+                        ref={messagesContainerRef}
+                        className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
                             {combinedMessages.length === 0 ? (

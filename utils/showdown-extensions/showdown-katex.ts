@@ -1,3 +1,4 @@
+// Source: https://obedm503.github.io/showdown-katex/
 import katex from "katex";
 
 const showdownKatex = (options = {}) => {
