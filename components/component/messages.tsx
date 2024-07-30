@@ -117,7 +117,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                     <CopyButton content={message.originalContent} />
                 </div>
                 <div className="prose text-muted-foreground max-w-full">
-                    <CustomMarkdown>{message.processedContent}</CustomMarkdown>
+                    <CustomMarkdown html={message.processedContent} />
                 </div>
                 {message.attachments && message.attachments.length > 0 && (
                     <AttachmentPreview attachments={message.attachments} />
@@ -152,7 +152,7 @@ export const AssistantMessage = ({
         if (!message.originalContent || !message.processedContent) return null;
 
         if (!message.artifact || !onArtifactClick) {
-            return <CustomMarkdown>{message.processedContent}</CustomMarkdown>;
+            return <CustomMarkdown html={message.processedContent} />;
         }
 
         const parts = message.processedContent.split(/(\[ARTIFACT:[^\]]+\])/);
@@ -183,7 +183,7 @@ export const AssistantMessage = ({
             <>
                 {elements.map((element, index) =>
                     typeof element === "string" ? (
-                        <CustomMarkdown key={index}>{element}</CustomMarkdown>
+                        <CustomMarkdown key={index} html={element} />
                     ) : (
                         element
                     )

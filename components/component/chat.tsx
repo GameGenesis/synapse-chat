@@ -28,6 +28,8 @@ import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/utils/save-chat";
+import { Converter } from "showdown";
+import { showdownKatex, showdownFootnotes } from "@/utils/showdown-extensions";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -141,7 +143,7 @@ export function Chat() {
         (content: string, index: number) => {
             if (!state.enableArtifacts || !content.includes("<assistant")) {
                 return {
-                    cleanedContent: content,
+                    cleanedContent: markdownToHtml(content),
                     artifact: undefined,
                     model: combinedMessages[index]?.model || state.model
                 };
@@ -252,7 +254,7 @@ export function Chat() {
             }
 
             return {
-                cleanedContent,
+                cleanedContent: markdownToHtml(cleanedContent),
                 artifact,
                 model: combinedMessages[index]?.model || state.model
             };
@@ -562,3 +564,25 @@ export function Chat() {
         </div>
     );
 }
+
+const markdownToHtml = (markdown: string) => {
+    const converter = new Converter({
+        tables: true,
+        ghCodeBlocks: true,
+        strikethrough: true,
+        tasklists: true,
+        ghMentions: true,
+        smoothLivePreview: true,
+        smartIndentationFix: true,
+        disableForced4SpacesIndentedSublists: true,
+        simpleLineBreaks: true,
+        requireSpaceBeforeHeadingText: true,
+        omitExtraWLInCodeBlocks: true,
+        openLinksInNewWindow: true,
+        simplifiedAutoLink: true,
+        emoji: true,
+        extensions: [showdownKatex, showdownFootnotes]
+    });
+    converter.setFlavor("github");
+    return converter.makeHtml(markdown);
+};

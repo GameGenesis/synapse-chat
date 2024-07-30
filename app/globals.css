@@ -67,3 +67,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+.katex {
+  overflow: hidden; /* Prevent KaTeX from causing scroll */
+}
+
+.katex .katex-mathml {
+  clip: auto; /* Adjust the clipping to avoid issues */
+  height: auto; /* Ensure height is appropriate */
+  width: auto; /* Ensure width is appropriate */
+}

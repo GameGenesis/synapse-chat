@@ -130,9 +130,10 @@ export function ArtifactsWindow({
                         }
                     case "text/markdown":
                         return (
-                            <CustomMarkdown className="h-full px-4 overflow-y-auto">
-                                {artifact.content || ""}
-                            </CustomMarkdown>
+                            <CustomMarkdown
+                                className="h-full px-4 overflow-y-auto"
+                                html={artifact.content || ""}
+                            />
                         );
                     default:
                         return (
