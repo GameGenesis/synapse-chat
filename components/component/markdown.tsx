@@ -10,6 +10,7 @@ import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import "katex/dist/katex.min.css";
+import "highlight.js/styles/github.css";
 
 const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
     ssr: false

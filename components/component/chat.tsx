@@ -29,9 +29,7 @@ import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/utils/save-chat";
-import { Converter } from "showdown";
-import { showdownKatex, showdownFootnotes } from "@/utils/showdown-extensions";
-import purify from "dompurify";
+import markdownToHtml from "@/utils/markdown-to-html";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -143,10 +141,10 @@ export function Chat() {
     });
 
     const processMessage = useCallback(
-        (content: string, index: number) => {
+        async (content: string, index: number) => {
             if (!state.enableArtifacts || !content.includes("<assistant")) {
                 return {
-                    cleanedContent: markdownToHtml(content),
+                    cleanedContent: await markdownToHtml(content),
                     artifact: undefined,
                     model: combinedMessages[index]?.model || state.model
                 };
@@ -257,7 +255,7 @@ export function Chat() {
             }
 
             return {
-                cleanedContent: markdownToHtml(cleanedContent),
+                cleanedContent: await markdownToHtml(cleanedContent),
                 artifact,
                 model: combinedMessages[index]?.model || state.model
             };
@@ -266,13 +264,13 @@ export function Chat() {
     );
 
     useEffect(() => {
-        const processMessages = () => {
+        const processMessages = async () => {
             const latestMessageIndex = messages.length - 1;
             const latestMessage = messages[latestMessageIndex];
 
             if (!latestMessage) return;
 
-            const { cleanedContent, artifact, model } = processMessage(
+            const { cleanedContent, artifact, model } = await processMessage(
                 latestMessage.content,
                 latestMessageIndex
             );
@@ -577,26 +575,3 @@ export function Chat() {
         </div>
     );
 }
-
-const markdownToHtml = (markdown: string) => {
-    const converter = new Converter({
-        tables: true,
-        ghCodeBlocks: true,
-        strikethrough: true,
-        tasklists: true,
-        ghMentions: true,
-        smoothLivePreview: true,
-        smartIndentationFix: true,
-        disableForced4SpacesIndentedSublists: true,
-        simpleLineBreaks: true,
-        requireSpaceBeforeHeadingText: true,
-        omitExtraWLInCodeBlocks: true,
-        openLinksInNewWindow: true,
-        simplifiedAutoLink: true,
-        emoji: true,
-        extensions: [showdownKatex, showdownFootnotes]
-    });
-    converter.setFlavor("github");
-    const html = converter.makeHtml(markdown);
-    return purify.sanitize(html);
-};
