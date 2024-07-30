@@ -30,7 +30,13 @@ import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/utils/save-chat";
 import { Converter } from "showdown";
-import { showdownKatex, showdownFootnotes } from "@/utils/showdown-extensions";
+import {
+    showdownKatex,
+    showdownFootnotes,
+    showdownImage,
+    showdownCode,
+    showdownLink
+} from "@/utils/showdown-extensions";
 import purify from "dompurify";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
@@ -594,7 +600,12 @@ const markdownToHtml = (markdown: string) => {
         openLinksInNewWindow: true,
         simplifiedAutoLink: true,
         emoji: true,
-        extensions: [showdownKatex, showdownFootnotes]
+        extensions: [
+            showdownKatex,
+            showdownFootnotes,
+            // showdownLink,
+            showdownImage
+        ]
     });
     converter.setFlavor("github");
     const html = converter.makeHtml(markdown);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import {
     Tooltip,
@@ -39,23 +39,101 @@ export const CustomMarkdown = ({ html, className = "" }: Props) => {
         setSelectedImage(null);
     };
 
+    const parsedContent = useMemo(() => {
+        const regex = /___CUSTOM_(LINK|IMAGE)_(.+?)___(?:(.+?)___)?/g;
+        let lastIndex = 0;
+        const result = [];
+
+        let match;
+        while ((match = regex.exec(html)) !== null) {
+            if (lastIndex < match.index) {
+                result.push(
+                    <span
+                        key={`text-${lastIndex}`}
+                        className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
+                        dangerouslySetInnerHTML={{
+                            __html: html.slice(lastIndex, match.index)
+                        }}
+                    />
+                );
+            }
+
+            const type = match[1];
+            const src = decodeURIComponent(match[2]);
+            const content = match[3] ? decodeURIComponent(match[3]) : null;
+
+            if (type === "LINK") {
+                result.push(
+                    <CustomLink
+                        key={`link-${match.index}`}
+                        href={src}
+                        className="inline-flex m-0 p-0"
+                    >
+                        {content || src}
+                    </CustomLink>
+                );
+            } else if (type === "IMAGE") {
+                result.push(
+                    <Image
+                        src={src || ""}
+                        alt="Image"
+                        onClick={() => openImageModal(src || "")}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                        width={0}
+                        height={0}
+                        layout="responsive"
+                    />
+                );
+            }
+
+            lastIndex = regex.lastIndex;
+        }
+
+        if (lastIndex < html.length) {
+            result.push(
+                <span
+                    key={`text-${lastIndex}`}
+                    className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
+                    dangerouslySetInnerHTML={{ __html: html.slice(lastIndex) }}
+                />
+            );
+        }
+
+        return result;
+    }, [className, html]);
+
     return (
-        <div
-            className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
-            dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <>
+            {parsedContent}
+            {selectedImage && (
+                <AttachmentModal
+                    isOpen={!!selectedImage}
+                    onClose={closeImageModal}
+                    file={
+                        selectedImage
+                            ? new File([selectedImage], "image.png", {
+                                  type: "image/png"
+                              })
+                            : null
+                    }
+                    fallback={selectedImage || ""}
+                />
+            )}
+        </>
     );
 };
 
 const CustomLink = ({
     href,
-    children
+    children,
+    className
 }: {
     href?: string;
     children: React.ReactNode;
+    className?: string;
 }) => {
     if (!href) {
-        return <span>{children}</span>;
+        return <span className={className}>{children}</span>;
     }
 
     let domain;
@@ -73,7 +151,7 @@ const CustomLink = ({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 no-underline hover:underline inline-flex items-center"
+                        className={`text-blue-600 no-underline hover:underline inline-flex items-center ${className}`}
                     >
                         {children}
                         <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
