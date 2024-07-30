@@ -131,6 +131,7 @@ export function Chat() {
             console.error("Chat error:", error);
         },
         maxToolRoundtrips,
+        keepLastMessageOnError: true,
 
         // run client-side tools that are automatically executed:
         async onToolCall({ toolCall }) {}
@@ -138,7 +139,7 @@ export function Chat() {
 
     const processMessage = useCallback(
         (content: string, index: number) => {
-            if (!content.includes("<assistant")) {
+            if (!state.enableArtifacts || !content.includes("<assistant")) {
                 return {
                     cleanedContent: content,
                     artifact: undefined,
@@ -256,7 +257,7 @@ export function Chat() {
                 model: combinedMessages[index]?.model || state.model
             };
         },
-        [artifacts.length, combinedMessages, state.model]
+        [artifacts.length, combinedMessages, state.enableArtifacts, state.model]
     );
 
     useEffect(() => {
@@ -287,6 +288,10 @@ export function Chat() {
                           finishReason: undefined,
                           chatId: null
                       };
+
+            setShowContinueButton(
+                finishReason === "length" && latestMessage.role === "assistant"
+            );
 
             if (!state.chatId && chatId) {
                 dispatch({ type: "SET_CHAT_ID", payload: chatId });
@@ -399,6 +404,7 @@ export function Chat() {
 
             lastProcessedMessageRef.current = latestMessage.content;
             lastDataIndexRef.current = data?.length;
+
             console.log("MESSAGES: ", combinedMessages);
         }
     }, [
@@ -425,22 +431,6 @@ export function Chat() {
         setIsSaving(false);
         console.log("# AFTER: ", state.chatId, "\n");
     };
-
-    useEffect(() => {
-        if (combinedMessages && combinedMessages[combinedMessages.length - 1]) {
-            setShowContinueButton(
-                combinedMessages[combinedMessages.length - 1].finishReason ===
-                    "length"
-            );
-
-            if (
-                combinedMessages[combinedMessages.length - 1].role !==
-                "assistant"
-            ) {
-                setShowContinueButton(false);
-            }
-        }
-    }, [combinedMessages, data]);
 
     // Modify the reload function to set the regeneratingMessageId
     const handleReload = useCallback(() => {

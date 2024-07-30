@@ -48,7 +48,7 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
     return (
         <div className={`markdown-body prose max-w-full ${className}`}>
             <Markdown
-                className="prose"
+                className="prose flex-wrap text-wrap overflow-auto"
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex]}
                 components={{
