@@ -31,6 +31,7 @@ import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/utils/save-chat";
 import { Converter } from "showdown";
 import { showdownKatex, showdownFootnotes } from "@/utils/showdown-extensions";
+import purify from "dompurify";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -596,5 +597,6 @@ const markdownToHtml = (markdown: string) => {
         extensions: [showdownKatex, showdownFootnotes]
     });
     converter.setFlavor("github");
-    return converter.makeHtml(markdown);
+    const html = converter.makeHtml(markdown);
+    return purify.sanitize(html);
 };
