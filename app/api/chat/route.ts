@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         topP,
         maxTokens,
         messages: convertToCoreMessages(messages),
-        tools,
+        tools: toolChoice === "none" ? undefined : tools,
         toolChoice,
         onFinish: async (result) => {
             if (result.text) {
@@ -69,6 +69,10 @@ export async function POST(req: Request) {
                 });
             }
             data.close();
+
+            if (result.warnings) {
+                console.log(JSON.stringify(result.warnings));
+            }
         }
     });
 
