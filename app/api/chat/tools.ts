@@ -3,7 +3,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
-import { BingClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
+import { BingClient, JinaClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { YoutubeTranscript } from 'youtube-transcript';
 import formatTime from "@/utils/format";
 
@@ -12,20 +12,19 @@ const openai = new OpenAI();
 const weather = new WeatherClient();
 const bing = new BingClient();
 const wikipedia = new WikipediaClient();
+const jina = new JinaClient();
+// const wolframAlpha = new WolframAlphaClient();
+
+console.log(JSON.stringify(createAISDKTools(weather, wikipedia, bing, jina)));
 
 export const tools = {
     get_current_time: tool({
         description: "Get the current time",
         parameters: z.object({
             timeZone: z
-                .enum(
-                    Intl.supportedValuesOf("timeZone") as unknown as readonly [
-                        string,
-                        ...string[]
-                    ]
-                )
+                .string()
                 .describe(
-                    "The time zone to get the time for. This can be deduced from the location"
+                    "The time zone to get the time for. This can be deduced from the location. Format: IANA Time Zone Database / Olson Time Zone Database / TZ Database (e.g. Asia/Beirut)."
                 )
                 .default("America/New_York")
         }),
@@ -116,5 +115,5 @@ export const tools = {
     //         }
     //     }
     // }),
-    ...createAISDKTools(weather, wikipedia, bing)
+    ...createAISDKTools(weather, wikipedia, bing, jina)
 };
