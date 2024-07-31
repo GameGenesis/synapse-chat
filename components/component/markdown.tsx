@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
     Tooltip,
@@ -23,107 +23,87 @@ interface Props {
 export const CustomMarkdown = ({ html, className = "" }: Props) => {
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const copyToClipboard = (code: string) => {
         navigator.clipboard.writeText(code).then(() => {
             setCopiedCode(code);
-            setTimeout(() => setCopiedCode(null), 3000);
+            setTimeout(() => setCopiedCode(null), 2000);
         });
     };
 
-    const openImageModal = (src: string) => {
-        setSelectedImage(src);
-    };
+    const openImageModal = useCallback((src: string) => {
+        // Extract the original image URL from the Next.js Image component srcset
+        const match = src.match(/url=([^&]+)/);
+        if (match && match[1]) {
+            const decodedUrl = decodeURIComponent(match[1]);
+            const originalUrlMatch = decodedUrl.match(/url=([^&]+)/);
+            if (originalUrlMatch && originalUrlMatch[1]) {
+                setSelectedImage(decodeURIComponent(originalUrlMatch[1]));
+            } else {
+                setSelectedImage(decodedUrl);
+            }
+        } else {
+            setSelectedImage(src);
+        }
+    }, []);
 
     const closeImageModal = () => {
         setSelectedImage(null);
     };
 
-    const parsedContent = useMemo(() => {
-        const regex = /___CUSTOM_(LINK|IMAGE)_(.+?)___(?:(.+?)___)?/g;
-        let lastIndex = 0;
-        const result = [];
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
 
-        let match;
-        while ((match = regex.exec(html)) !== null) {
-            if (lastIndex < match.index) {
-                result.push(
-                    <span
-                        key={`text-${lastIndex}`}
-                        className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
-                        dangerouslySetInnerHTML={{
-                            __html: html.slice(lastIndex, match.index)
-                        }}
-                    />
-                );
+        const handleImageClick = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.tagName === "IMG") {
+                event.preventDefault();
+                event.stopPropagation();
+                const srcset = target.getAttribute("srcset");
+                if (srcset) {
+                    // Use the highest resolution image from srcset
+                    const srcsetParts = srcset.split(",");
+                    const lastSrc = srcsetParts[srcsetParts.length - 1]
+                        .trim()
+                        .split(" ")[0];
+                    openImageModal(lastSrc);
+                } else {
+                    const src = target.getAttribute("src");
+                    if (src) {
+                        openImageModal(src);
+                    }
+                }
             }
+        };
 
-            const type = match[1];
-            const src = decodeURIComponent(match[2]);
-            const content = match[3] ? decodeURIComponent(match[3]) : null;
+        container.addEventListener("click", handleImageClick);
 
-            if (type === "LINK") {
-                result.push(
-                    <CustomLink
-                        key={`link-${match.index}`}
-                        href={src}
-                        className="inline-flex m-0 p-0"
-                    >
-                        {content || src}
-                    </CustomLink>
-                );
-            } else if (type === "IMAGE") {
-                result.push(
-                    <Image
-                        src={src || ""}
-                        alt="Image"
-                        onClick={() => openImageModal(src || "")}
-                        className="cursor-pointer hover:opacity-80 transition-opacity"
-                        width={0}
-                        height={0}
-                        layout="responsive"
-                    />
-                );
-            }
-
-            lastIndex = regex.lastIndex;
-        }
-
-        if (lastIndex < html.length) {
-            result.push(
-                <span
-                    key={`text-${lastIndex}`}
-                    className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
-                    dangerouslySetInnerHTML={{ __html: html.slice(lastIndex) }}
-                />
-            );
-        }
-
-        return result;
-    }, [className, html]);
+        return () => {
+            container.removeEventListener("click", handleImageClick);
+        };
+    }, [openImageModal]);
 
     return (
         <>
-            {parsedContent}
-            {selectedImage && (
-                <AttachmentModal
-                    isOpen={!!selectedImage}
-                    onClose={closeImageModal}
-                    file={
-                        selectedImage
-                            ? new File([selectedImage], "image.png", {
-                                  type: "image/png"
-                              })
-                            : null
-                    }
-                    fallback={selectedImage || ""}
-                />
-            )}
+            <div
+                ref={containerRef}
+                className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
+                dangerouslySetInnerHTML={{ __html: html }}
+            />
+            <AttachmentModal
+                isOpen={!!selectedImage}
+                onClose={closeImageModal}
+                file={null}
+                fallback={selectedImage || ""}
+                image
+            />
         </>
     );
 };
 
-const CustomLink = ({
+export const CustomLink = ({
     href,
     children,
     className
