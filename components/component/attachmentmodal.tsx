@@ -13,9 +13,10 @@ interface Props {
     onClose: () => void;
     file: File | null;
     fallback?: string;
+    image?: boolean;
 }
 
-const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
+const AttachmentModal = ({ isOpen, onClose, file, fallback, image }: Props) => {
     const [fileText, setFileText] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,9 +32,11 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
         readFileText();
     }, [file]);
 
-    if (!file) return null;
+    if (!file && !fallback) return null;
 
-    const isImage = file.type.startsWith("image/");
+    const isImage = (file && file.type.startsWith("image/")) || image;
+
+    const src = fallback || (file && URL.createObjectURL(file));
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,14 +47,14 @@ const AttachmentModal = ({ isOpen, onClose, file, fallback }: Props) => {
                 <DialogDescription className="flex items-center">
                     <FileIcon className="w-6 h-6 text-gray-500 mr-2" />
                     <span className="text-sm font-medium truncate">
-                        {file.name}
+                        {file?.name || (isImage ? src : "File")}
                     </span>
                 </DialogDescription>
                 <div className="flex-grow overflow-auto">
                     {isImage ? (
                         <Image
-                            src={fallback || URL.createObjectURL(file)}
-                            alt={file.name}
+                            src={src || ""}
+                            alt={file?.name || "Image"}
                             width={0}
                             height={0}
                             sizes="100vw"
