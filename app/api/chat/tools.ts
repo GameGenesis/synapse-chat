@@ -15,8 +15,6 @@ const wikipedia = new WikipediaClient();
 const jina = new JinaClient();
 // const wolframAlpha = new WolframAlphaClient();
 
-console.log(JSON.stringify(createAISDKTools(weather, wikipedia, bing, jina)));
-
 export const tools = {
     get_current_time: tool({
         description: "Get the current time",
