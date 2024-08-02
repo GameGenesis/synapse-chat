@@ -604,7 +604,8 @@ const markdownToHtml = (markdown: string) => {
             showdownKatex,
             showdownFootnotes,
             showdownImage,
-            showdownLink
+            showdownLink,
+            showdownCode
         ]
     });
     converter.setFlavor("github");

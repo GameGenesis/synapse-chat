@@ -10,6 +10,7 @@ import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import "katex/dist/katex.min.css";
+import "highlight.js/styles/atom-one-dark.css";
 
 const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
     ssr: false
@@ -84,6 +85,37 @@ export const CustomMarkdown = ({ html, className = "" }: Props) => {
             container.removeEventListener("click", handleImageClick);
         };
     }, [openImageModal]);
+
+    useEffect(() => {
+        const handleCopyClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target && target.classList.contains("copy-code-button")) {
+                const codeBlock = target
+                    .closest(".code-block-wrapper")
+                    ?.querySelector("code");
+                if (codeBlock) {
+                    const code = codeBlock.innerText;
+                    navigator.clipboard
+                        .writeText(code)
+                        .then(() => {
+                            target.textContent = "Copied!";
+                            setTimeout(() => {
+                                target.textContent = "Copy code";
+                            }, 2000);
+                        })
+                        .catch((err) => {
+                            console.error("Failed to copy text: ", err);
+                        });
+                }
+            }
+        };
+
+        document.addEventListener("click", handleCopyClick);
+
+        return () => {
+            document.removeEventListener("click", handleCopyClick);
+        };
+    }, []);
 
     return (
         <>
