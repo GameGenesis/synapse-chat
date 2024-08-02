@@ -67,3 +67,27 @@
         @apply bg-background text-foreground overflow-hidden relative flex h-screen;
     }
 }
+
+.code-block {
+    @apply relative rounded-md overflow-hidden;
+}
+
+.code-header {
+    @apply flex justify-between items-center px-4 py-2 text-sm bg-gray-700;
+}
+
+.code-lang {
+    @apply text-gray-300;
+}
+
+.copy-code-button {
+    @apply text-[#abb2bf] hover:text-white transition-colors duration-200;
+}
+
+.code-pre {
+    @apply m-0 bg-[#282c34];
+}
+
+pre {
+    text-wrap: wrap;
+}

@@ -532,7 +532,7 @@ export function Chat() {
                         ref={messagesContainerRef}
                         className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
                     >
-                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
+                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[750px] mx-auto">
                             {combinedMessages.length === 0 ? (
                                 <DefaultPrompts addMessage={append} />
                             ) : (

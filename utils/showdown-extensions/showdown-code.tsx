@@ -15,14 +15,14 @@ const showdownCode: showdown.ShowdownExtension = {
                 }).value;
 
                 return `
-        <div class="code-block-wrapper relative rounded-md overflow-hidden">
-          <div class="flex justify-between items-center px-4 py-2 text-sm !bg-gray-800">
-            <span class="text-gray-300">${lang}</span>
-            <button class="copy-code-button text-[#abb2bf] hover:text-white transition-colors duration-200">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">${lang}</span>
+            <button class="copy-code-button">
               Copy code
             </button>
           </div>
-          <pre class="!m-0 !p-4 !bg-[#282c34]"><code class="hljs ${lang}">${highlightedCode}</code></pre>
+          <pre class="code-pre"><code class="hljs ${lang}">${highlightedCode}</code></pre>
         </div>
       `;
             }

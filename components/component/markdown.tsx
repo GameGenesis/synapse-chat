@@ -91,7 +91,7 @@ export const CustomMarkdown = ({ html, className = "" }: Props) => {
             const target = e.target as HTMLElement;
             if (target && target.classList.contains("copy-code-button")) {
                 const codeBlock = target
-                    .closest(".code-block-wrapper")
+                    .closest(".code-block")
                     ?.querySelector("code");
                 if (codeBlock) {
                     const code = codeBlock.innerText;

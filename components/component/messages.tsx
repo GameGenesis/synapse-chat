@@ -101,7 +101,7 @@ interface UserMessageProps {
 
 export const UserMessage = ({ message }: UserMessageProps) => {
     return (
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 mb-2">
             <Avatar className="w-9 h-9 border flex-shrink-0">
                 <AvatarImage
                     src={`https://avatar.oxro.io/avatar.svg?name=${USER_NAME.replace(
@@ -109,14 +109,14 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                         "+"
                     )}`}
                 />
-                <AvatarFallback>YO</AvatarFallback>
+                <AvatarFallback>U</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words w-full mb-2">
+            <div className="flex-1 overflow-hidden">
                 <div className="flex items-center justify-between align-middle">
                     <div className="font-bold text-lg">{USER_NAME}</div>
                     <CopyButton content={message.originalContent} />
                 </div>
-                <div className="prose text-muted-foreground max-w-full">
+                <div className="text-muted-foreground text-wrap w-full">
                     <CustomMarkdown html={message.processedContent} />
                 </div>
                 {message.attachments && message.attachments.length > 0 && (
@@ -424,12 +424,12 @@ export const AssistantMessage = ({
 
     return (
         <>
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 mb-2">
                 <Avatar className="w-9 h-9 border flex-shrink-0">
                     <AvatarImage src="/placeholder-user.jpg" />
                     <AvatarFallback>OA</AvatarFallback>
                 </Avatar>
-                <div className="grid gap-1 break-words w-full mb-2">
+                <div className="flex-1 overflow-hidden">
                     <div className="flex items-center justify-between align-middle">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-lg">Assistant</span>
@@ -484,7 +484,7 @@ export const AssistantMessage = ({
                             />
                         </div>
                     </div>
-                    <div className="prose text-muted-foreground">
+                    <div className="text-muted-foreground text-wrap w-full">
                         {processedContent}
                     </div>
                     <div className="flex flex-col space-y-4">
