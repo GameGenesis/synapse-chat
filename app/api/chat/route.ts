@@ -69,10 +69,6 @@ export async function POST(req: Request) {
                 });
             }
             data.close();
-
-            if (result.warnings) {
-                console.log(JSON.stringify(result.warnings));
-            }
         }
     });
 
