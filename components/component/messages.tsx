@@ -167,7 +167,7 @@ export const AssistantMessage = ({
                         onClick={() =>
                             onArtifactClick(message.artifact?.identifier || "")
                         }
-                        className="inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 my-1"
                     >
                         <span className="text-xs font-bold uppercase text-gray-500">
                             {message.artifact?.type}
@@ -436,7 +436,7 @@ export const AssistantMessage = ({
                             {typeof message !== "string" && message.model && (
                                 <TooltipProvider>
                                     <Tooltip>
-                                        <TooltipTrigger className="flex h-full align-middle">
+                                        <TooltipTrigger className="flex align-middle">
                                             <Badge>{message.model}</Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
