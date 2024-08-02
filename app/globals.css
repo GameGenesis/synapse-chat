@@ -85,9 +85,9 @@
 }
 
 .code-pre {
-    @apply m-0 bg-[#282c34];
+    @apply m-0 bg-[#282c34] text-sm;
 }
 
 pre {
-    text-wrap: wrap;
+    @apply text-wrap;
 }

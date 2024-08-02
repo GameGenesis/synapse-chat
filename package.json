@@ -47,7 +47,6 @@
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "react-runner": "^1.0.5",
-    "react-syntax-highlighter": "^15.5.0",
     "recharts": "^2.12.7",
     "sharp": "^0.33.4",
     "showdown": "^2.1.0",
