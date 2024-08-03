@@ -22,7 +22,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from "@/components/ui/accordion";
-import { Action, State, ToolChoice } from "@/types";
+import { Action, State, ToolChoice } from "@/lib/types";
 import {
     Select,
     SelectContent,

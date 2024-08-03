@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { WikipediaSearchResult } from "@/types";
+import { WikipediaSearchResult } from "@/lib/types";
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

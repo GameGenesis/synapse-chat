@@ -1,4 +1,4 @@
-import { ModelKey } from "@/app/api/chat/model-provider";
+import { ModelKey } from "@/lib/model-provider";
 import { ToolInvocation } from "ai";
 
 export interface Artifact {

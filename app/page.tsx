@@ -1,6 +1,6 @@
 "use client";
 
-import { Chat } from "@/components/component/chat";
+import { Chat } from "@/components/chat";
 import { Toaster } from "react-hot-toast";
 
 export default function Page() {

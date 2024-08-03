@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
 import { BingClient, JinaClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
 import { YoutubeTranscript } from 'youtube-transcript';
-import formatTime from "@/utils/format";
+import formatTime from "@/lib/tools/format";
 
 const openai = new OpenAI();
 

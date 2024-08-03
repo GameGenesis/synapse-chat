@@ -1,4 +1,4 @@
-import { CombinedMessage } from "@/types";
+import { CombinedMessage } from "@/lib/types";
 import { useCallback, useMemo, useState } from "react";
 import {
     Avatar,

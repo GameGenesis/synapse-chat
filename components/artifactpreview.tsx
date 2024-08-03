@@ -1,4 +1,4 @@
-import { Artifact } from "@/types";
+import { Artifact } from "@/lib/types";
 import { memo } from "react";
 import dynamic from "next/dynamic";
 import { LoadingSpinner } from "./icons";

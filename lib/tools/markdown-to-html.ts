@@ -6,7 +6,7 @@ import {
     showdownCode,
     showdownLink,
     showdownUnclosedCode
-} from "@/utils/showdown-extensions";
+} from "@/lib/showdown-extensions";
 import DOMPurify from 'dompurify';
 
 const markdownToHtml = (markdown: string) => {

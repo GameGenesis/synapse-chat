@@ -1,4 +1,4 @@
-import { CustomLink } from "@/components/component/link";
+import { CustomLink } from "@/components/link";
 import { renderToString } from "react-dom/server";
 
 const showdownLink = {

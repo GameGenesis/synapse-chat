@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
-import { Action, Artifact, CombinedMessage, Data, State } from "@/types";
+import { Action, Artifact, CombinedMessage, Data, State } from "@/lib/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import SettingsMenu from "./settings";
@@ -28,8 +28,8 @@ import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
-import saveChat from "@/utils/save-chat";
-import markdownToHtml from "@/utils/markdown-to-html";
+import saveChat from "@/lib/tools/save-chat";
+import markdownToHtml from "@/lib/tools/markdown-to-html";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,

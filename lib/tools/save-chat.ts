@@ -1,4 +1,4 @@
-import { CombinedMessage, State } from "@/types";
+import { CombinedMessage, State } from "@/lib/types";
 import toast from "react-hot-toast";
 
 const saveChat = async (

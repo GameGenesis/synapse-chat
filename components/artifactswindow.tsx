@@ -5,7 +5,7 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
-import { Artifact } from "@/types";
+import { Artifact } from "@/lib/types";
 import {
     CopyIcon,
     DownloadIcon,
@@ -14,9 +14,9 @@ import {
     XIcon
 } from "./icons";
 import dynamic from "next/dynamic";
-import { captureConsoleLogs } from "@/utils/capture-logs";
+import { captureConsoleLogs } from "@/lib/tools/capture-logs";
 import hljs from "highlight.js";
-import markdownToHtml from "@/utils/markdown-to-html";
+import markdownToHtml from "@/lib/tools/markdown-to-html";
 
 const PreviewComponent = dynamic(
     () => import("./artifactpreview").then((mod) => mod.default),
