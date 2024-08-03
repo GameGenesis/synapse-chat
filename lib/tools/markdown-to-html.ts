@@ -7,7 +7,7 @@ import {
     showdownLink,
     showdownUnclosedCode
 } from "@/lib/showdown-extensions";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 const markdownToHtml = (markdown: string) => {
     const converter = new Converter({
@@ -38,6 +38,5 @@ const markdownToHtml = (markdown: string) => {
     const html = converter.makeHtml(markdown);
     return DOMPurify.sanitize(html);
 };
-
 
 export default markdownToHtml;

@@ -17,9 +17,17 @@ const showdownCode: showdown.ShowdownExtension = {
             (match, language: string, code: string) => {
                 const decodedCode = decodeHTMLEntities(code);
                 const lang = language.split("language-")[1] || "plaintext";
-                const highlightedCode = hljs.highlight(decodedCode.trim(), {
-                    language: lang
-                }).value;
+                let highlightedCode = decodedCode;
+
+                try {
+                    highlightedCode = hljs.highlight(decodedCode.trim(), {
+                        language: lang
+                    }).value;
+                } catch {
+                    highlightedCode = hljs.highlightAuto(
+                        decodedCode.trim()
+                    ).value;
+                }
 
                 return `
 <div class="code-block">
