@@ -1,11 +1,9 @@
 import { CodeProps } from "@/types";
-import Markdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import Markdown, { Options } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { useState } from "react";
+import { memo, useState } from "react";
 import Image from "next/image";
 import {
     Tooltip,
@@ -16,6 +14,14 @@ import {
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import CodeBlock from "./codeblock";
+
+export const MemoizedMarkdown: React.FC<Options> = memo(
+    Markdown,
+    (prevProps, nextProps) =>
+        prevProps.children === nextProps.children &&
+        prevProps.className === nextProps.className
+);
 
 const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
     ssr: false
@@ -27,15 +33,7 @@ interface Props {
 }
 
 export const CustomMarkdown = ({ children, className = "" }: Props) => {
-    const [copiedCode, setCopiedCode] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    const copyToClipboard = (code: string) => {
-        navigator.clipboard.writeText(code).then(() => {
-            setCopiedCode(code);
-            setTimeout(() => setCopiedCode(null), 3000);
-        });
-    };
 
     const openImageModal = (src: string) => {
         setSelectedImage(src);
@@ -47,7 +45,7 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
 
     return (
         <div className={`markdown-body prose max-w-full ${className}`}>
-            <Markdown
+            <MemoizedMarkdown
                 className="prose flex-wrap text-wrap overflow-auto"
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex]}
@@ -107,40 +105,14 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
                         ...props
                     }: CodeProps) {
                         const match = /language-(\w+)/.exec(className || "");
-                        return !inline && match ? (
-                            <div className="code-block-wrapper relative rounded-md overflow-hidden bg-[#1e1e1e] text-white">
-                                <div className="flex justify-between items-center bg-[#2d2d2d] px-4 py-2 text-sm">
-                                    <span className="text-gray-400">
-                                        {match[1]}
-                                    </span>
-                                    <button
-                                        onClick={() =>
-                                            copyToClipboard(String(children))
-                                        }
-                                        className="text-gray-400 hover:text-white transition-colors duration-200"
-                                    >
-                                        {copiedCode === String(children)
-                                            ? "Copied!"
-                                            : "Copy code"}
-                                    </button>
-                                </div>
-                                <SyntaxHighlighter
-                                    language={match[1]}
-                                    style={vscDarkPlus}
-                                    PreTag="div"
-                                    customStyle={{
-                                        margin: 0,
-                                        borderRadius: 0,
-                                        padding: "1rem"
-                                    }}
-                                >
-                                    {String(children).replace(/\n$/, "")}
-                                </SyntaxHighlighter>
-                            </div>
-                        ) : (
-                            <code className={className} {...props}>
+                        return (
+                            <CodeBlock
+                                inline={inline}
+                                className={className}
+                                match={match}
+                            >
                                 {children}
-                            </code>
+                            </CodeBlock>
                         );
                     },
                     a: ({ node, href, children, ...props }) => (
@@ -151,7 +123,7 @@ export const CustomMarkdown = ({ children, className = "" }: Props) => {
                 }}
             >
                 {typeof children === "string" ? children : children?.toString()}
-            </Markdown>
+            </MemoizedMarkdown>
             <AttachmentModal
                 isOpen={!!selectedImage}
                 onClose={closeImageModal}
