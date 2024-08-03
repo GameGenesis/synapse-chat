@@ -18,6 +18,7 @@ import ErrorMessage from "./errormessage";
 import dynamic from "next/dynamic";
 import { captureConsoleLogs } from "@/utils/capture-logs";
 import hljs from "highlight.js";
+import markdownToHtml from "@/utils/markdown-to-html";
 
 const ReactRenderer = dynamic(
     () => import("./reactrenderer").then((mod) => mod.ReactRenderer),
@@ -64,9 +65,21 @@ export function ArtifactsWindow({
     const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
+    const [html, setHtml] = useState("");
+
     useEffect(() => {
         setConsoleLogs([]);
     }, [currentArtifactIndex]);
+
+    useEffect(() => {
+        if (
+            activeTab === "preview" &&
+            currentArtifact &&
+            currentArtifact.type === "text/markdown"
+        ) {
+            setHtml(markdownToHtml(currentArtifact.content));
+        }
+    }, [activeTab, currentArtifact]);
 
     const handleClearConsole = useCallback(() => {
         setConsoleLogs([]);
@@ -131,7 +144,7 @@ export function ArtifactsWindow({
                         return (
                             <CustomMarkdown
                                 className="h-full px-4 overflow-y-auto"
-                                html={artifact.content || ""}
+                                html={html || artifact.content || ""}
                             />
                         );
                     default:
@@ -153,7 +166,7 @@ export function ArtifactsWindow({
                 </div>
             );
         },
-        [consoleLogs, handleClearConsole]
+        [consoleLogs, handleClearConsole, html]
     );
 
     const handlePreviousArtifact = () => {
