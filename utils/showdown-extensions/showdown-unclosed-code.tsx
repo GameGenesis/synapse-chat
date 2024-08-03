@@ -5,7 +5,7 @@ const showdownUnclosedCode: ShowdownExtension = {
     filter: function (text: string) {
         // Regex to match unclosed code blocks with a specified language
         const unclosedCodeBlockRegex =
-            /```(\w+)\s*\n([\s\S]+?)(?:$|(?=\n```))/g;
+            /^```(\w+)\s*\n((?:(?!```)[\s\S])*)(?![\s\S]*?```)/gm;
 
         let lastIndex = 0;
         let result = "";
