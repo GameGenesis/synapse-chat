@@ -1,14 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { xonokai } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
     CheckCircleIcon,
     ChevronLeftIcon,
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
 import { Artifact } from "@/types";
-import { CustomMarkdown } from "./markdown";
 import {
     CopyIcon,
     DownloadIcon,
@@ -16,12 +13,13 @@ import {
     RefreshIcon,
     XIcon
 } from "./icons";
-import ErrorMessage from "./errormessage";
 import dynamic from "next/dynamic";
 import { captureConsoleLogs } from "@/utils/capture-logs";
+import hljs from "highlight.js";
+import markdownToHtml from "@/utils/markdown-to-html";
 
-const ReactRenderer = dynamic(
-    () => import("./reactrenderer").then((mod) => mod.ReactRenderer),
+const PreviewComponent = dynamic(
+    () => import("./artifactpreview").then((mod) => mod.default),
     {
         loading: () => <LoadingSpinner />,
         ssr: false
@@ -29,11 +27,6 @@ const ReactRenderer = dynamic(
 );
 
 const Console = dynamic(() => import("./console").then((mod) => mod.Console), {
-    loading: () => <LoadingSpinner />,
-    ssr: false
-});
-
-const Mermaid = dynamic(() => import("./mermaid").then((mod) => mod.Mermaid), {
     loading: () => <LoadingSpinner />,
     ssr: false
 });
@@ -65,9 +58,21 @@ export function ArtifactsWindow({
     const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
+    const [html, setHtml] = useState("");
+
     useEffect(() => {
         setConsoleLogs([]);
     }, [currentArtifactIndex]);
+
+    useEffect(() => {
+        if (
+            activeTab === "preview" &&
+            currentArtifact &&
+            currentArtifact.type === "text/markdown"
+        ) {
+            setHtml(markdownToHtml(currentArtifact.content));
+        }
+    }, [activeTab, currentArtifact]);
 
     const handleClearConsole = useCallback(() => {
         setConsoleLogs([]);
@@ -77,83 +82,21 @@ export function ArtifactsWindow({
         (artifact: Artifact | null) => {
             if (!artifact) return null;
 
-            const PreviewComponent = () => {
-                switch (artifact.type) {
-                    case "image/svg+xml":
-                        return (
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: artifact.content || ""
-                                }}
-                            />
-                        );
-                    case "text/html":
-                        return (
-                            <iframe
-                                ref={iframeRef}
-                                srcDoc={artifact.content}
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    border: "none"
-                                }}
-                                title={artifact.title || "Preview"}
-                                sandbox="allow-scripts allow-same-origin"
-                            />
-                        );
-                    case "application/react":
-                        try {
-                            return (
-                                <ReactRenderer
-                                    code={artifact.content || ""}
-                                    setConsoleLogs={setConsoleLogs}
-                                />
-                            );
-                        } catch (error) {
-                            return (
-                                <ErrorMessage
-                                    title="React Component Error"
-                                    message="An error occurred while trying to display the React component. Please check the component code for any issues."
-                                />
-                            );
-                        }
-                    case "application/mermaid":
-                        try {
-                            return <Mermaid chart={artifact.content || ""} />;
-                        } catch (error) {
-                            return (
-                                <ErrorMessage
-                                    title="Diagram Error"
-                                    message="An error occurred while trying to display the Mermaid diagram. Please verify the diagram syntax."
-                                />
-                            );
-                        }
-                    case "text/markdown":
-                        return (
-                            <CustomMarkdown className="h-full px-4 overflow-y-auto">
-                                {artifact.content || ""}
-                            </CustomMarkdown>
-                        );
-                    default:
-                        return (
-                            <ErrorMessage
-                                title="Unsupported Artifact"
-                                message={`The artifact type "${artifact.type}" is not supported.`}
-                            />
-                        );
-                }
-            };
-
             return (
                 <div className="flex flex-col h-full">
                     <div className="flex-grow overflow-auto">
-                        <PreviewComponent />
+                        <PreviewComponent
+                            artifact={artifact}
+                            setConsoleLogs={setConsoleLogs}
+                            html={html}
+                            iframeRef={iframeRef}
+                        />
                     </div>
                     <Console logs={consoleLogs} onClear={handleClearConsole} />
                 </div>
             );
         },
-        [consoleLogs, handleClearConsole]
+        [consoleLogs, handleClearConsole, html]
     );
 
     const handlePreviousArtifact = () => {
@@ -240,10 +183,78 @@ export function ArtifactsWindow({
         isOpen
     ]);
 
+    const renderCode = useCallback((artifact: Artifact) => {
+        const language =
+            artifact.language ||
+            getFileExtension(artifact.type)
+                .replace(".", "")
+                .replace("mmd", "js") ||
+            "plaintext";
+        const code = artifact.content || "";
+
+        // Split the code into lines
+        const lines = code.split("\n");
+
+        // Highlight the entire code block
+        const highlightedCode = hljs.highlight(code, { language }).value;
+
+        // Create an array of line number elements
+        const lineNumbers = lines
+            .map(
+                (_, index) =>
+                    `<span class="inline-block text-right w-full pr-2" key=${
+                        index + 1
+                    }>${index + 1}</span>`
+            )
+            .join("");
+
+        return (
+            <div className="h-full overflow-hidden bg-[#282c34] font-mono text-sm leading-relaxed">
+                <div className="overflow-auto h-full">
+                    <table className="w-full border-collapse">
+                        <tbody>
+                            <tr>
+                                <td className="align-top select-none text-gray-500 bg-[#2c313a] p-0 w-8">
+                                    <pre className="m-0 py-4 pl-2 pr-1 text-right">
+                                        <code
+                                            dangerouslySetInnerHTML={{
+                                                __html: lineNumbers
+                                            }}
+                                        />
+                                    </pre>
+                                </td>
+                                <td className="align-top p-0">
+                                    <pre className="m-0 overflow-auto !text-nowrap">
+                                        <code
+                                            className={`hljs language-${language}`}
+                                            dangerouslySetInnerHTML={{
+                                                __html: highlightedCode
+                                            }}
+                                        />
+                                    </pre>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }, []);
+
+    useEffect(() => {
+        if (
+            currentArtifact &&
+            (activeTab === "code" ||
+                currentArtifact.type === "application/code")
+        ) {
+            renderCode(currentArtifact);
+        }
+    }, [currentArtifact, activeTab, renderCode]);
+
     if (!isOpen) return null;
 
     return (
-        <div className="max-w-2/5 w-2/5 overflow-x-hidden bg-background border-l flex flex-col h-full">
+        <div className="max-w-[45%] w-[45%] overflow-x-hidden bg-background border-l flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-2 border-b">
                 <h3 className="text-md font-medium truncate pr-4">
                     {currentArtifact?.title || "Artifacts"}
@@ -296,25 +307,9 @@ export function ArtifactsWindow({
                         </div>
                     )}
                 {(activeTab === "code" ||
-                    currentArtifact.type === "application/code") &&
-                    currentArtifact && (
-                        <SyntaxHighlighter
-                            language={currentArtifact.language || "javascript"}
-                            style={xonokai}
-                            customStyle={{
-                                margin: 0,
-                                height: "100%",
-                                overflow: "auto"
-                            }}
-                            showLineNumbers={true}
-                            lineNumberContainerStyle={{
-                                paddingRight: "5px"
-                            }}
-                            className="h-full bg-gray-900"
-                        >
-                            {currentArtifact.content || ""}
-                        </SyntaxHighlighter>
-                    )}
+                    currentArtifact?.type === "application/code") &&
+                    currentArtifact &&
+                    renderCode(currentArtifact)}
             </div>
             <div className="border-t flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">

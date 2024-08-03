@@ -3,14 +3,15 @@ import React, {
     useEffect,
     useRef,
     useCallback,
-    useReducer
+    useReducer,
+    useLayoutEffect
 } from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
 import { Action, Artifact, CombinedMessage, Data, State } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
-import { SettingsMenu } from "./settings";
+import SettingsMenu from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
     DEFAULT_ENABLE_INSTRUCTIONS,
@@ -28,6 +29,7 @@ import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/utils/save-chat";
+import markdownToHtml from "@/utils/markdown-to-html";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -101,6 +103,7 @@ export function Chat() {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -141,7 +144,7 @@ export function Chat() {
         (content: string, index: number) => {
             if (!state.enableArtifacts || !content.includes("<assistant")) {
                 return {
-                    cleanedContent: content,
+                    cleanedContent: markdownToHtml(content),
                     artifact: undefined,
                     model: combinedMessages[index]?.model || state.model
                 };
@@ -180,6 +183,7 @@ export function Chat() {
 
             if (startMatch && startMatch.index !== undefined) {
                 const attributes = startMatch[1];
+                console.log("ATTRIBUTES:", attributes);
                 const identifier = getAttributeValue(attributes, "identifier");
 
                 if (endMatch && endMatch.index !== undefined) {
@@ -252,7 +256,7 @@ export function Chat() {
             }
 
             return {
-                cleanedContent,
+                cleanedContent: markdownToHtml(cleanedContent),
                 artifact,
                 model: combinedMessages[index]?.model || state.model
             };
@@ -420,7 +424,6 @@ export function Chat() {
     const save = async () => {
         if (isSaving && !state.chatId) return;
 
-        console.log("# BEFORE: ", state.chatId);
         setIsSaving(true);
         const newChatId = await saveChat(state.chatId, combinedMessages, state);
         if (!newChatId) return;
@@ -429,7 +432,6 @@ export function Chat() {
             payload: newChatId
         });
         setIsSaving(false);
-        console.log("# AFTER: ", state.chatId, "\n");
     };
 
     // Modify the reload function to set the regeneratingMessageId
@@ -459,16 +461,25 @@ export function Chat() {
         );
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    };
+    const scrollToBottom = useCallback(() => {
+        if (messagesContainerRef.current && messagesEndRef.current) {
+            const containerHeight = messagesContainerRef.current.clientHeight;
+            const contentHeight = messagesContainerRef.current.scrollHeight;
+            const bottomOffset = contentHeight - containerHeight;
 
-    useEffect(() => {
+            messagesContainerRef.current.scrollTo({
+                top: bottomOffset,
+                behavior: "auto"
+            });
+        }
+    }, []);
+
+    useLayoutEffect(() => {
         scrollToBottom();
-    }, [combinedMessages]);
+    }, [combinedMessages, scrollToBottom]);
 
     return (
-        <div className="flex flex-col h-screen w-full">
+        <div className="flex flex-col h-screen w-full overflow-hidden">
             <SettingsMenu
                 isOpen={isSettingsOpen}
                 onClose={() => {
@@ -480,7 +491,7 @@ export function Chat() {
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
-                        isArtifactsOpen ? "w-3/5" : "w-full"
+                        isArtifactsOpen ? "w-[55%]" : "w-full"
                     } h-full bg-background transition-all duration-300`}
                 >
                     <ChatHeader
@@ -509,9 +520,10 @@ export function Chat() {
                         }}
                     />
                     <div
-                        className={`flex-grow h-full w-full overflow-y-auto justify-center transition-all duration-300`}
+                        ref={messagesContainerRef}
+                        className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
                     >
-                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[650px] mx-auto">
+                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[700px] mx-auto">
                             {combinedMessages.length === 0 ? (
                                 <DefaultPrompts addMessage={append} />
                             ) : (

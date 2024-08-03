@@ -109,15 +109,15 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                         "+"
                     )}`}
                 />
-                <AvatarFallback>YO</AvatarFallback>
+                <AvatarFallback>U</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1 break-words w-full mb-2">
+            <div className="flex-1 overflow-hidden mb-2">
                 <div className="flex items-center justify-between align-middle">
                     <div className="font-bold text-lg">{USER_NAME}</div>
                     <CopyButton content={message.originalContent} />
                 </div>
-                <div className="prose text-muted-foreground max-w-full">
-                    <CustomMarkdown>{message.processedContent}</CustomMarkdown>
+                <div className="text-muted-foreground text-wrap w-full">
+                    <CustomMarkdown html={message.processedContent} />
                 </div>
                 {message.attachments && message.attachments.length > 0 && (
                     <AttachmentPreview attachments={message.attachments} />
@@ -152,7 +152,7 @@ export const AssistantMessage = ({
         if (!message.originalContent || !message.processedContent) return null;
 
         if (!message.artifact || !onArtifactClick) {
-            return <CustomMarkdown>{message.processedContent}</CustomMarkdown>;
+            return <CustomMarkdown html={message.processedContent} />;
         }
 
         const parts = message.processedContent.split(/(\[ARTIFACT:[^\]]+\])/);
@@ -167,7 +167,7 @@ export const AssistantMessage = ({
                         onClick={() =>
                             onArtifactClick(message.artifact?.identifier || "")
                         }
-                        className="my-2 inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 my-1"
                     >
                         <span className="text-xs font-bold uppercase text-gray-500">
                             {message.artifact?.type}
@@ -183,7 +183,7 @@ export const AssistantMessage = ({
             <>
                 {elements.map((element, index) =>
                     typeof element === "string" ? (
-                        <CustomMarkdown key={index}>{element}</CustomMarkdown>
+                        <CustomMarkdown key={index} html={element} />
                     ) : (
                         element
                     )
@@ -429,14 +429,14 @@ export const AssistantMessage = ({
                     <AvatarImage src="/placeholder-user.jpg" />
                     <AvatarFallback>OA</AvatarFallback>
                 </Avatar>
-                <div className="grid gap-1 break-words w-full mb-2">
+                <div className="flex-1 overflow-hidden mb-2">
                     <div className="flex items-center justify-between align-middle">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-lg">Assistant</span>
                             {typeof message !== "string" && message.model && (
                                 <TooltipProvider>
                                     <Tooltip>
-                                        <TooltipTrigger className="flex h-full align-middle">
+                                        <TooltipTrigger className="flex align-middle">
                                             <Badge>{message.model}</Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -484,7 +484,7 @@ export const AssistantMessage = ({
                             />
                         </div>
                     </div>
-                    <div className="prose text-muted-foreground">
+                    <div className="text-muted-foreground text-wrap w-full">
                         {processedContent}
                     </div>
                     <div className="flex flex-col space-y-4">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { NewChatIcon } from "./icons";
 
@@ -33,4 +33,4 @@ const Sidebar = ({ onNewChat, onClose }: Props) => {
     );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

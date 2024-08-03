@@ -1,230 +1,119 @@
-import { CodeProps } from "@/types";
-import Markdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import { useState } from "react";
-import Image from "next/image";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger
-} from "@/components/ui/tooltip";
-import { ExternalLinkIcon } from "lucide-react";
-import Link from "next/link";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import "katex/dist/katex.min.css";
+import "highlight.js/styles/atom-one-dark.css";
 
 const AttachmentModal = dynamic(() => import("./attachmentmodal"), {
     ssr: false
 });
 
 interface Props {
-    children: React.ReactNode;
+    html: string;
     className?: string;
 }
 
-export const CustomMarkdown = ({ children, className = "" }: Props) => {
-    const [copiedCode, setCopiedCode] = useState<string | null>(null);
+export const CustomMarkdown = ({ html, className = "" }: Props) => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const copyToClipboard = (code: string) => {
-        navigator.clipboard.writeText(code).then(() => {
-            setCopiedCode(code);
-            setTimeout(() => setCopiedCode(null), 3000);
-        });
-    };
-
-    const openImageModal = (src: string) => {
-        setSelectedImage(src);
-    };
+    const openImageModal = useCallback((src: string) => {
+        // Extract the original image URL from the Next.js Image component srcset
+        const match = src.match(/url=([^&]+)/);
+        if (match && match[1]) {
+            const decodedUrl = decodeURIComponent(match[1]);
+            const originalUrlMatch = decodedUrl.match(/url=([^&]+)/);
+            if (originalUrlMatch && originalUrlMatch[1]) {
+                setSelectedImage(decodeURIComponent(originalUrlMatch[1]));
+            } else {
+                setSelectedImage(decodedUrl);
+            }
+        } else {
+            setSelectedImage(src);
+        }
+    }, []);
 
     const closeImageModal = () => {
         setSelectedImage(null);
     };
 
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleImageClick = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.tagName === "IMG") {
+                event.preventDefault();
+                event.stopPropagation();
+                const srcset = target.getAttribute("srcset");
+                if (srcset) {
+                    // Use the highest resolution image from srcset
+                    const srcsetParts = srcset.split(",");
+                    const lastSrc = srcsetParts[srcsetParts.length - 1]
+                        .trim()
+                        .split(" ")[0];
+                    openImageModal(lastSrc);
+                } else {
+                    const src = target.getAttribute("src");
+                    if (src) {
+                        openImageModal(src);
+                    }
+                }
+            }
+        };
+
+        container.addEventListener("click", handleImageClick);
+
+        return () => {
+            container.removeEventListener("click", handleImageClick);
+        };
+    }, [openImageModal]);
+
+    useEffect(() => {
+        const handleCopyClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target && target.classList.contains("copy-code-button")) {
+                const codeBlock = target
+                    .closest(".code-block")
+                    ?.querySelector("code");
+                if (codeBlock) {
+                    const code = codeBlock.innerText;
+                    navigator.clipboard
+                        .writeText(code)
+                        .then(() => {
+                            target.textContent = "Copied!";
+                            setTimeout(() => {
+                                target.textContent = "Copy code";
+                            }, 2000);
+                        })
+                        .catch((err) => {
+                            console.error("Failed to copy text: ", err);
+                        });
+                }
+            }
+        };
+
+        document.addEventListener("click", handleCopyClick);
+
+        return () => {
+            document.removeEventListener("click", handleCopyClick);
+        };
+    }, []);
+
     return (
-        <div className={`markdown-body prose max-w-full ${className}`}>
-            <Markdown
-                className="prose flex-wrap text-wrap overflow-auto"
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-                components={{
-                    h1: ({ node, ...props }) => (
-                        <h1
-                            className="text-2xl font-bold my-4 pb-2 border-b"
-                            {...props}
-                        />
-                    ),
-                    h2: ({ node, ...props }) => (
-                        <h2
-                            className="text-2xl font-semibold my-3 pb-1 border-b"
-                            {...props}
-                        />
-                    ),
-                    h3: ({ node, ...props }) => (
-                        <h3 className="text-xl font-semibold my-2" {...props} />
-                    ),
-                    h4: ({ node, ...props }) => (
-                        <h4 className="text-lg font-medium my-2" {...props} />
-                    ),
-                    h5: ({ node, ...props }) => (
-                        <h5 className="text-base font-medium my-1" {...props} />
-                    ),
-                    h6: ({ node, ...props }) => (
-                        <h6 className="text-sm font-medium my-1" {...props} />
-                    ),
-                    img: ({ node, ...props }) => {
-                        const { src, alt, width, height, ...rest } = props;
-                        return (
-                            <Image
-                                {...rest}
-                                src={src || ""}
-                                alt={alt || "Image"}
-                                onClick={() => openImageModal(src || "")}
-                                className="cursor-pointer hover:opacity-80 transition-opacity"
-                                width={
-                                    typeof width === "number"
-                                        ? width
-                                        : parseInt(width || "", 10) || 0
-                                }
-                                height={
-                                    typeof height === "number"
-                                        ? height
-                                        : parseInt(height || "", 10) || 0
-                                }
-                                layout="responsive"
-                            />
-                        );
-                    },
-                    code({
-                        node,
-                        inline,
-                        className,
-                        children,
-                        ...props
-                    }: CodeProps) {
-                        const match = /language-(\w+)/.exec(className || "");
-                        return !inline && match ? (
-                            <div className="code-block-wrapper relative rounded-md overflow-hidden bg-[#1e1e1e] text-white">
-                                <div className="flex justify-between items-center bg-[#2d2d2d] px-4 py-2 text-sm">
-                                    <span className="text-gray-400">
-                                        {match[1]}
-                                    </span>
-                                    <button
-                                        onClick={() =>
-                                            copyToClipboard(String(children))
-                                        }
-                                        className="text-gray-400 hover:text-white transition-colors duration-200"
-                                    >
-                                        {copiedCode === String(children)
-                                            ? "Copied!"
-                                            : "Copy code"}
-                                    </button>
-                                </div>
-                                <SyntaxHighlighter
-                                    language={match[1]}
-                                    style={vscDarkPlus}
-                                    PreTag="div"
-                                    customStyle={{
-                                        margin: 0,
-                                        borderRadius: 0,
-                                        padding: "1rem"
-                                    }}
-                                >
-                                    {String(children).replace(/\n$/, "")}
-                                </SyntaxHighlighter>
-                            </div>
-                        ) : (
-                            <code className={className} {...props}>
-                                {children}
-                            </code>
-                        );
-                    },
-                    a: ({ node, href, children, ...props }) => (
-                        <CustomLink href={href} {...props}>
-                            {children}
-                        </CustomLink>
-                    )
-                }}
-            >
-                {typeof children === "string" ? children : children?.toString()}
-            </Markdown>
+        <>
+            <div
+                ref={containerRef}
+                className={`markdown-body prose max-w-full m-0 p-0 ${className}`}
+                dangerouslySetInnerHTML={{ __html: html }}
+            />
             <AttachmentModal
                 isOpen={!!selectedImage}
                 onClose={closeImageModal}
-                file={
-                    selectedImage
-                        ? new File([selectedImage], "image.png", {
-                              type: "image/png"
-                          })
-                        : null
-                }
+                file={null}
                 fallback={selectedImage || ""}
+                image
             />
-        </div>
-    );
-};
-
-const CustomLink = ({
-    href,
-    children
-}: {
-    href?: string;
-    children: React.ReactNode;
-}) => {
-    if (!href) {
-        return <span>{children}</span>;
-    }
-
-    let domain;
-    try {
-        domain = new URL(href).hostname;
-    } catch {
-        domain = href;
-    }
-
-    return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Link
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 no-underline hover:underline inline-flex items-center"
-                    >
-                        {children}
-                        <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
-                    </Link>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="w-80 p-0">
-                    <div className="p-4">
-                        <div className="flex items-center mb-2 space-x-2 max-h-4">
-                            <Image
-                                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
-                                alt={`${domain} icon`}
-                                width={16}
-                                height={16}
-                            />
-                            <span className="text-sm text-gray-500">
-                                {domain}
-                            </span>
-                        </div>
-                        <Link
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-bold text-blue-600 no-underline hover:underline block"
-                        >
-                            {href}
-                            <ExternalLinkIcon className="inline ml-1 w-4 h-4" />
-                        </Link>
-                    </div>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        </>
     );
 };
