@@ -1,6 +1,12 @@
 import showdown from "showdown";
 import hljs from "highlight.js";
 
+const decodeHTMLEntities = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = text;
+    return textArea.value;
+};
+
 const showdownCode: showdown.ShowdownExtension = {
     type: "output",
     filter: (text: string) => {
@@ -9,22 +15,23 @@ const showdownCode: showdown.ShowdownExtension = {
         return text.replace(
             codeRegex,
             (match, language: string, code: string) => {
+                const decodedCode = decodeHTMLEntities(code);
                 const lang = language.split("language-")[1] || "plaintext";
-                const highlightedCode = hljs.highlight(code.trim(), {
+                const highlightedCode = hljs.highlight(decodedCode.trim(), {
                     language: lang
                 }).value;
 
                 return `
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-lang">${lang}</span>
-            <button class="copy-code-button">
-              Copy code
-            </button>
-          </div>
-          <pre class="code-pre"><code class="hljs ${lang}">${highlightedCode}</code></pre>
-        </div>
-      `;
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">${lang}</span>
+    <button class="copy-code-button">
+      Copy code
+    </button>
+  </div>
+  <pre class="code-pre"><code class="hljs ${lang}">${highlightedCode}</code></pre>
+</div>
+    `;
             }
         );
     }
