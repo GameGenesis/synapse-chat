@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@agentic/stdlib": "^6.6.0",
+    "@agentic/stdlib": "6.5.0",
     "@ai-sdk/anthropic": "^0.0.35",
     "@ai-sdk/azure": "^0.0.17",
     "@ai-sdk/openai": "^0.0.40",
@@ -67,7 +67,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/showdown": "^2.0.6",
     "@types/xml2js": "^0.4.14",
-    "eslint": "^9",
+    "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.7",
