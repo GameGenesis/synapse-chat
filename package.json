@@ -64,7 +64,6 @@
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/react-syntax-highlighter": "^15.5.13",
     "@types/showdown": "^2.0.6",
     "@types/xml2js": "^0.4.14",
     "eslint": "^8",
