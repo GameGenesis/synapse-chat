@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, useCallback } from "react";
-import ErrorMessage from "./errormessage";
+import { ErrorMessage } from "./errormessage";
 import { LoadingSpinner } from "./icons";
 import { Runner } from "react-runner";
 

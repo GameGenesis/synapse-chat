@@ -6,7 +6,6 @@ import {
     ChevronRightIcon
 } from "@heroicons/react/24/solid";
 import { Artifact } from "@/types";
-import { CustomMarkdown } from "./markdown";
 import {
     CopyIcon,
     DownloadIcon,
@@ -14,14 +13,13 @@ import {
     RefreshIcon,
     XIcon
 } from "./icons";
-import ErrorMessage from "./errormessage";
 import dynamic from "next/dynamic";
 import { captureConsoleLogs } from "@/utils/capture-logs";
 import hljs from "highlight.js";
 import markdownToHtml from "@/utils/markdown-to-html";
 
-const ReactRenderer = dynamic(
-    () => import("./reactrenderer").then((mod) => mod.ReactRenderer),
+const PreviewComponent = dynamic(
+    () => import("./artifactpreview").then((mod) => mod.PreviewComponent),
     {
         loading: () => <LoadingSpinner />,
         ssr: false
@@ -29,11 +27,6 @@ const ReactRenderer = dynamic(
 );
 
 const Console = dynamic(() => import("./console").then((mod) => mod.Console), {
-    loading: () => <LoadingSpinner />,
-    ssr: false
-});
-
-const Mermaid = dynamic(() => import("./mermaid").then((mod) => mod.Mermaid), {
     loading: () => <LoadingSpinner />,
     ssr: false
 });
@@ -89,78 +82,15 @@ export function ArtifactsWindow({
         (artifact: Artifact | null) => {
             if (!artifact) return null;
 
-            const PreviewComponent = () => {
-                switch (artifact.type) {
-                    case "image/svg+xml":
-                        return (
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: artifact.content || ""
-                                }}
-                            />
-                        );
-                    case "text/html":
-                        return (
-                            <iframe
-                                ref={iframeRef}
-                                srcDoc={artifact.content}
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    border: "none"
-                                }}
-                                title={artifact.title || "Preview"}
-                                sandbox="allow-scripts allow-same-origin"
-                            />
-                        );
-                    case "application/react":
-                        try {
-                            return (
-                                <ReactRenderer
-                                    code={artifact.content || ""}
-                                    setConsoleLogs={setConsoleLogs}
-                                />
-                            );
-                        } catch (error) {
-                            return (
-                                <ErrorMessage
-                                    title="React Component Error"
-                                    message="An error occurred while trying to display the React component. Please check the component code for any issues."
-                                />
-                            );
-                        }
-                    case "application/mermaid":
-                        try {
-                            return <Mermaid chart={artifact.content || ""} />;
-                        } catch (error) {
-                            return (
-                                <ErrorMessage
-                                    title="Diagram Error"
-                                    message="An error occurred while trying to display the Mermaid diagram. Please verify the diagram syntax."
-                                />
-                            );
-                        }
-                    case "text/markdown":
-                        return (
-                            <CustomMarkdown
-                                className="h-full px-4 overflow-y-auto"
-                                html={html || artifact.content || ""}
-                            />
-                        );
-                    default:
-                        return (
-                            <ErrorMessage
-                                title="Unsupported Artifact"
-                                message={`The artifact type "${artifact.type}" is not supported.`}
-                            />
-                        );
-                }
-            };
-
             return (
                 <div className="flex flex-col h-full">
                     <div className="flex-grow overflow-auto">
-                        <PreviewComponent />
+                        <PreviewComponent
+                            artifact={artifact}
+                            setConsoleLogs={setConsoleLogs}
+                            html={html}
+                            iframeRef={iframeRef}
+                        />
                     </div>
                     <Console logs={consoleLogs} onClear={handleClearConsole} />
                 </div>

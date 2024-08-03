@@ -6,7 +6,7 @@ interface Props {
     message: string;
 }
 
-const ErrorMessage = ({ title, message }: Props) => {
+export const ErrorMessage = ({ title, message }: Props) => {
     return (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 my-4">
             <div className="flex items-center">
@@ -17,5 +17,3 @@ const ErrorMessage = ({ title, message }: Props) => {
         </div>
     );
 };
-
-export default ErrorMessage;
