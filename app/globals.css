@@ -69,7 +69,7 @@
 }
 
 .code-block {
-    @apply relative rounded-md overflow-hidden;
+    @apply relative rounded-md overflow-hidden my-2;
 }
 
 .code-header {
