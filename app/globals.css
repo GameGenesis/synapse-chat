@@ -85,7 +85,7 @@
 }
 
 .code-pre {
-    @apply m-0 bg-[#282c34] text-sm;
+    @apply m-0 bg-[#282c34] text-sm overflow-x-auto !text-nowrap;
 }
 
 pre {
