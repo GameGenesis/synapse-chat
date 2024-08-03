@@ -37,7 +37,7 @@ import {
     showdownCode,
     showdownLink
 } from "@/utils/showdown-extensions";
-import purify from "dompurify";
+import DOMPurify from "dompurify";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -191,6 +191,7 @@ export function Chat() {
 
             if (startMatch && startMatch.index !== undefined) {
                 const attributes = startMatch[1];
+                console.log("ATTRIBUTES:", attributes);
                 const identifier = getAttributeValue(attributes, "identifier");
 
                 if (endMatch && endMatch.index !== undefined) {
@@ -431,7 +432,6 @@ export function Chat() {
     const save = async () => {
         if (isSaving && !state.chatId) return;
 
-        console.log("# BEFORE: ", state.chatId);
         setIsSaving(true);
         const newChatId = await saveChat(state.chatId, combinedMessages, state);
         if (!newChatId) return;
@@ -440,7 +440,6 @@ export function Chat() {
             payload: newChatId
         });
         setIsSaving(false);
-        console.log("# AFTER: ", state.chatId, "\n");
     };
 
     // Modify the reload function to set the regeneratingMessageId
@@ -500,7 +499,7 @@ export function Chat() {
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
-                        isArtifactsOpen ? "w-3/5" : "w-full"
+                        isArtifactsOpen ? "w-[55%]" : "w-full"
                     } h-full bg-background transition-all duration-300`}
                 >
                     <ChatHeader
@@ -532,7 +531,7 @@ export function Chat() {
                         ref={messagesContainerRef}
                         className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
                     >
-                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[750px] mx-auto">
+                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[700px] mx-auto">
                             {combinedMessages.length === 0 ? (
                                 <DefaultPrompts addMessage={append} />
                             ) : (
@@ -610,5 +609,5 @@ const markdownToHtml = (markdown: string) => {
     });
     converter.setFlavor("github");
     const html = converter.makeHtml(markdown);
-    return purify.sanitize(html);
+    return DOMPurify.sanitize(html);
 };
