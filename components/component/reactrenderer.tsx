@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useCallback } from "react";
+import React, { useState, useEffect, Suspense, useCallback, memo } from "react";
 import { ErrorMessage } from "./errormessage";
 import { LoadingSpinner } from "./icons";
 import { Runner } from "react-runner";
@@ -8,7 +8,7 @@ interface Props {
     setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export const ReactRenderer = ({ code, setConsoleLogs }: Props) => {
+const ReactRenderer = ({ code, setConsoleLogs }: Props) => {
     const [error, setError] = useState<string | undefined>();
     const [scope, setScope] = useState<any>(null);
 
@@ -112,3 +112,5 @@ export const ReactRenderer = ({ code, setConsoleLogs }: Props) => {
         </Suspense>
     );
 };
+
+export default memo(ReactRenderer);

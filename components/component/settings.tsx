@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -55,7 +55,7 @@ interface Props {
     dispatch: React.Dispatch<Action>;
 }
 
-export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
+const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
     const [toolChoice, setToolChoice] = useState<ToolChoice>("auto");
     const [openCombobox, setOpenCombobox] = useState(false);
@@ -473,4 +473,6 @@ export function SettingsMenu({ isOpen, onClose, state, dispatch }: Props) {
             </DialogContent>
         </Dialog>
     );
-}
+};
+
+export default memo(SettingsMenu);

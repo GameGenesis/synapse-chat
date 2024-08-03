@@ -11,7 +11,7 @@ import { useChat } from "ai/react";
 import { Action, Artifact, CombinedMessage, Data, State } from "@/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
-import { SettingsMenu } from "./settings";
+import SettingsMenu from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
     DEFAULT_ENABLE_INSTRUCTIONS,

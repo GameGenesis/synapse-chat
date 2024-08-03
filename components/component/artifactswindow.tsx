@@ -19,7 +19,7 @@ import hljs from "highlight.js";
 import markdownToHtml from "@/utils/markdown-to-html";
 
 const PreviewComponent = dynamic(
-    () => import("./artifactpreview").then((mod) => mod.PreviewComponent),
+    () => import("./artifactpreview").then((mod) => mod.default),
     {
         loading: () => <LoadingSpinner />,
         ssr: false
