@@ -35,7 +35,8 @@ import {
     showdownFootnotes,
     showdownImage,
     showdownCode,
-    showdownLink
+    showdownLink,
+    showdownUnclosedCode
 } from "@/utils/showdown-extensions";
 import DOMPurify from "dompurify";
 
@@ -604,6 +605,7 @@ const markdownToHtml = (markdown: string) => {
             showdownFootnotes,
             showdownImage,
             showdownLink,
+            showdownUnclosedCode,
             showdownCode
         ]
     });

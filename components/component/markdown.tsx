@@ -22,16 +22,8 @@ interface Props {
 }
 
 export const CustomMarkdown = ({ html, className = "" }: Props) => {
-    const [copiedCode, setCopiedCode] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-
-    const copyToClipboard = (code: string) => {
-        navigator.clipboard.writeText(code).then(() => {
-            setCopiedCode(code);
-            setTimeout(() => setCopiedCode(null), 2000);
-        });
-    };
 
     const openImageModal = useCallback((src: string) => {
         // Extract the original image URL from the Next.js Image component srcset
