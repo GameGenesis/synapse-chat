@@ -18,11 +18,13 @@ class AgentNetwork {
   private agents: { [key: string]: Agent };
   private projectManager: Agent;
   private supervisor: Agent;
+  private maxRevisions: number = 2;
 
-  constructor(projectManager: Agent, supervisor: Agent) {
+  constructor(projectManager: Agent, supervisor: Agent, maxRevisions: number = 2) {
     this.agents = {};
     this.projectManager = projectManager;
     this.supervisor = supervisor;
+    this.maxRevisions = maxRevisions;
   }
 
   addAgent(agent: Agent) {
@@ -32,19 +34,19 @@ class AgentNetwork {
   async executePrompt(prompt: string): Promise<any> {
     let context = { originalPrompt: prompt };
     let finalResult: any;
-    let taskList: any[] = [];
+    let revisionCount = 0;
 
-    while (true) {
+    while (revisionCount < this.maxRevisions) {
       // Step 1: Project Manager creates or updates task list
       const availableAgents = Object.keys(this.agents);
       const pmResult = await this.projectManager.execute(`
         Available Agents: ${availableAgents}
         Original Prompt: ${prompt}
         Current Context: ${JSON.stringify(context)}
-        ${taskList.length > 0 ? 'Update the task list based on the current context.' : 'Create an initial task list.'}
+        ${revisionCount > 0 ? 'Update the task list based on the current context.' : 'Create an initial task list.'}
       `);
-      console.log("# Project Manager:\n", JSON.stringify(pmResult));
-      taskList = pmResult.taskList;
+      console.log("# Project Manager:\n", JSON.stringify(pmResult), `\nCurrent Context: ${JSON.stringify(context)}`);
+      const taskList = pmResult.taskList;
 
       context = { ...context, ...taskList };
 
@@ -70,6 +72,7 @@ class AgentNetwork {
           # Agent: ${task.agent}
           # Result: ${JSON.stringify(result)}
           # Supervisor Review: ${JSON.stringify(supervisorReview)}
+          # Context: ${JSON.stringify(context)}
         `);
 
         if (supervisorReview.needsRevision) {
@@ -83,6 +86,8 @@ class AgentNetwork {
       if (!needsRevision) {
         break;
       }
+
+      revisionCount++;
     }
 
     return finalResult;
@@ -128,7 +133,7 @@ const projectManagerSchema = z.object({
     taskList: z.array(z.object({
         agent: z.string(),
         instructions: z.string()
-      })).describe("Only choose the agents that are relevant to the task. Keep within the scope of the described task.")
+      })).describe("Only choose the agents that are relevant to the task. Keep within the scope of the described task. You may call on the same agent multiple times if required (for different tasks or as different persona). Keep in mind, final results should be formatted in markdown, plaintext, latex, or as code (you DO NOT need to delegate this as a separate task).")
 })
 
 const supervisorSchema = z.object({
