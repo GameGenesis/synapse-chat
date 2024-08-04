@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { getModel, ModelConfig, models } from "@/lib/utils/model-provider";
 import { generateObject } from 'ai';
+import { NextRequest, NextResponse } from "next/server";
+import { debuggerSchema, programmerSchema, projectManagerSchema, supervisorSchema, writerSchema } from './config';
 
 // Define the Agent interface
 interface Agent {
@@ -33,7 +35,7 @@ class AgentNetwork {
 
   async executePrompt(prompt: string): Promise<any> {
     let context = { originalPrompt: prompt };
-    let finalResult: any;
+    const messages = [];
     let revisionCount = 0;
 
     while (revisionCount < this.maxRevisions) {
@@ -45,9 +47,10 @@ class AgentNetwork {
         Current Context: ${JSON.stringify(context)}
         ${revisionCount > 0 ? 'Update the task list based on the current context.' : 'Create an initial task list.'}
       `);
-      console.log("# Project Manager:\n", JSON.stringify(pmResult), `\nCurrent Context: ${JSON.stringify(context)}`);
+      messages.push({agent: this.projectManager.name, result: pmResult, context})
       const taskList = pmResult.taskList;
-
+      // console.log("# Project Manager:\n", JSON.stringify(pmResult), `\nCurrent Context: ${JSON.stringify(context)}\n`);
+      
       context = { ...context, ...taskList };
 
       let needsRevision = false;
@@ -68,19 +71,19 @@ class AgentNetwork {
         const supervisorReview = await this.supervisor.execute(JSON.stringify(context));
         context = { ...context, ...supervisorReview };
 
-        console.log(`
-          # Agent: ${task.agent}
-          # Result: ${JSON.stringify(result)}
-          # Supervisor Review: ${JSON.stringify(supervisorReview)}
-          # Context: ${JSON.stringify(context)}
-        `);
+        // console.log(`
+        //   # Agent: ${task.agent}
+        //   # Result: ${JSON.stringify(result)}
+
+        //   # Supervisor Review: ${JSON.stringify(supervisorReview)}
+        // `);
 
         if (supervisorReview.needsRevision) {
           needsRevision = true;
           break;
         }
 
-        finalResult = result;
+        messages.push({agent: task.agent, task: task.instructions, result, review: supervisorReview});
       }
 
       if (!needsRevision) {
@@ -90,7 +93,7 @@ class AgentNetwork {
       revisionCount++;
     }
 
-    return finalResult;
+    return messages;
   }
 }
 
@@ -127,50 +130,16 @@ class AgentBuilder {
   }
 }
 
-// Define schemas
-const projectManagerSchema = z.object({
-    innerThinking: z.string().optional(),
-    taskList: z.array(z.object({
-        agent: z.string(),
-        instructions: z.string()
-      })).describe("Only choose the agents that are relevant to the task. Keep within the scope of the described task. You may call on the same agent multiple times if required (for different tasks or as different persona). Keep in mind, final results should be formatted in markdown, plaintext, latex, or as code (you DO NOT need to delegate this as a separate task).")
-})
-
-const supervisorSchema = z.object({
-  summary: z.string(),
-  nextSteps: z.string().optional().describe("Describes the next steps to be performed for the project to be completed. Leave blank if the project has been completed and no further revisions are needed."),
-  concerns: z.array(z.string()).optional(),
-  needsRevision: z.boolean().describe("Set to true if the task needs to be revised by the project manager. This should only be the case if it is imperative that the current concerns be resolved or if you feel the project hasn't been completed successfully."),
-});
-
-const programmerSchema = z.object({
-  innerThinking: z.string().optional(),
-  code: z.string(),
-  comments: z.string().optional()
-});
-
-const debuggerSchema = z.object({
-  innerThinking: z.string().optional(),
-  bugs: z.array(z.string()).optional(),
-  edgeCases: z.array(z.string()).optional(),
-  comments: z.string().optional()
-});
-
-const writerSchema = z.object({
-  innerThinking: z.string().optional(),
-  content: z.string(),
-});
-
 // Function to create and use the agent network
 export async function createAndUseAgentNetwork(
   prompt: string
-): Promise<any> {
+): Promise<any[]> {
   const agentBuilder = new AgentBuilder();
 
   // Create Project Manager
   const projectManager = agentBuilder.build({
     name: 'Project Manager',
-    role: 'You are a project manager. Create a task list and delegate tasks to appropriate agents.',
+    role: 'You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well.',
     model: models.gpt4omini,
     temperature: 0.7,
     maxTokens: 1000,
@@ -180,7 +149,7 @@ export async function createAndUseAgentNetwork(
   // Create Supervisor
   const supervisor = agentBuilder.build({
     name: 'Supervisor',
-    role: 'You are a supervisor. Review the work of other agents and provide guidance.',
+    role: 'You are a supervisor. Review the work of other agents and provide guidance, context, steer the direction back to the project if it goes off course. Also, determine if the project is complete or needs necessary revisions',
     model: models.gpt4omini,
     temperature: 0.7,
     maxTokens: 1000,
@@ -246,12 +215,18 @@ export async function createAndUseAgentNetwork(
   return await agentNetwork.executePrompt(prompt);
 }
 
-// Example usage in an API route
-export async function POST(req: Request) {
-  const { prompt } = await req.json();
-  
-  const result = await createAndUseAgentNetwork(prompt);
-  return new Response(JSON.stringify(result), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+export async function POST(req: NextRequest) {
+  try {
+    const { prompt } = await req.json();
+    
+    const result = await createAndUseAgentNetwork(prompt);
+    
+    // Ensure result is an array
+    const messages = Array.isArray(result) ? result : [result];
+    
+    return NextResponse.json({ messages });
+  } catch (error) {
+    console.error("Error in POST /api/agents:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
