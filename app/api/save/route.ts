@@ -3,44 +3,58 @@ import dbConnect from "@/lib/db";
 import Chat from "@/models/chat";
 
 export async function POST(req: Request) {
-    await dbConnect();
-
-    let request;
     try {
-        const body = await req.text();
+        await dbConnect();
+
+        const body = await req.json();
         if (!body) {
             return NextResponse.json({
                 success: false,
                 error: "Request body is empty"
-            });
+            }, { status: 400 });
         }
-        request = JSON.parse(body);
-    } catch (error) {
-        console.error("Error parsing JSON:", error);
-        return NextResponse.json({ success: false, error: "Invalid JSON" });
-    }
 
-    const { chatId, messages, settings } = request;
+        const { chatId, messages, settings } = body;
 
-    try {
-        if (chatId) {
-            await Chat.findByIdAndUpdate(chatId, {
-                messages,
-                settings
-            });
-            return NextResponse.json({ success: true, chatId });
-        } else {
-            const chat = new Chat({
-                messages,
-                settings
-            });
-            await chat.save();
-            console.log(chat._id);
-            return NextResponse.json({ success: true, chatId: chat._id });
+        if (!chatId || !Array.isArray(messages) || typeof settings !== 'object') {
+            return NextResponse.json({
+                success: false,
+                error: "Invalid request format"
+            }, { status: 400 });
         }
+
+        const update = {
+            messages,
+            settings
+        };
+
+        const options = {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true
+        };
+
+        const chat = await Chat.findOneAndUpdate({ _id: chatId }, update, options);
+
+        if (!chat) {
+            throw new Error("Failed to upsert chat");
+        }
+
+        // Determine if this was a new chat or an update
+        const isNewChat = chat.createdAt.getTime() === chat.updatedAt.getTime();
+
+        return NextResponse.json({ 
+            success: true, 
+            chatId: chat._id,
+            isNewChat
+        }, { status: isNewChat ? 201 : 200 });
+
     } catch (error) {
-        console.error("Error updating chat:", error);
-        const errorMessage = (error as Error).message;
-        return NextResponse.json({ success: false, error: errorMessage });
+        console.error("Error in POST /api/chat:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return NextResponse.json({ 
+            success: false, 
+            error: errorMessage 
+        }, { status: 500 });
     }
 }

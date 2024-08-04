@@ -30,6 +30,7 @@ import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/lib/tools/save-chat";
 import markdownToHtml from "@/lib/tools/markdown-to-html";
+import { generateId } from "ai";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -90,6 +91,9 @@ export function Chat() {
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
     const lastDataIndexRef = useRef<number | undefined>();
+    const shouldSaveRef = useRef(false);
+    const chatIdRef = useRef<string | null>(null);
+    const combinedMessagesRef = useRef<CombinedMessage[]>([]);
 
     const [showContinueButton, setShowContinueButton] = useState(false);
 
@@ -100,8 +104,6 @@ export function Chat() {
     const [regeneratingMessageId, setRegeneratingMessageId] = useState<
         string | null
     >(null);
-
-    const [isSaving, setIsSaving] = useState(false);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -123,14 +125,16 @@ export function Chat() {
             settings: state
         },
         onResponse: (response: Response) => {
-            save();
+            shouldSaveRef.current = true;
             console.log("Received response from server:", response);
         },
         onFinish: (message) => {
+            shouldSaveRef.current = true;
             save();
             console.log("Chat finished:", message);
         },
         onError: (error) => {
+            shouldSaveRef.current = true;
             console.error("Chat error:", error);
         },
         maxToolRoundtrips,
@@ -139,6 +143,41 @@ export function Chat() {
         // run client-side tools that are automatically executed:
         async onToolCall({ toolCall }) {}
     });
+
+    useEffect(() => {
+        chatIdRef.current = state.chatId;
+    }, [state.chatId]);
+
+    useEffect(() => {
+        if (combinedMessages.length > 0) {
+            combinedMessagesRef.current = combinedMessages;
+        } else {
+            console.log("SAVE: ITS EMPTY!!");
+        }
+    }, [combinedMessages]);
+
+    const save = useCallback(async () => {
+        if (!chatIdRef.current) {
+            const newChatId = generateId();
+            dispatch({
+                type: "SET_CHAT_ID",
+                payload: newChatId
+            });
+            chatIdRef.current = newChatId;
+        }
+
+        if (
+            !combinedMessagesRef.current ||
+            combinedMessagesRef.current.length === 0
+        ) {
+            return;
+        }
+
+        shouldSaveRef.current = false;
+        console.log("Saving...");
+        await saveChat(chatIdRef.current, combinedMessagesRef.current, state);
+        console.log("Save completed");
+    }, [state]);
 
     const processMessage = useCallback(
         (content: string, index: number) => {
@@ -212,6 +251,7 @@ export function Chat() {
 
                     if (isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = false;
+                        shouldSaveRef.current = true;
                         setArtifacts((prevArtifacts) => [
                             ...prevArtifacts.slice(0, -1),
                             artifact as Artifact
@@ -280,8 +320,7 @@ export function Chat() {
                 promptTokens,
                 completionTokens,
                 totalTokens,
-                finishReason,
-                chatId
+                finishReason
             } =
                 data && data.length > 0
                     ? (data[data?.length - 1] as Data)
@@ -289,17 +328,12 @@ export function Chat() {
                           promptTokens: undefined,
                           completionTokens: undefined,
                           totalTokens: undefined,
-                          finishReason: undefined,
-                          chatId: null
+                          finishReason: undefined
                       };
 
             setShowContinueButton(
                 finishReason === "length" && latestMessage.role === "assistant"
             );
-
-            if (!state.chatId && chatId) {
-                dispatch({ type: "SET_CHAT_ID", payload: chatId });
-            }
 
             let newCombinedMessages = [...combinedMessages];
 
@@ -394,6 +428,11 @@ export function Chat() {
             }
 
             setCombinedMessages(newCombinedMessages);
+
+            if (shouldSaveRef.current) {
+                console.log("COMBINED MESSAGE SHOULD SAVE...");
+                save();
+            }
         };
 
         const latestMessageIndex = messages.length - 1;
@@ -409,7 +448,7 @@ export function Chat() {
             lastProcessedMessageRef.current = latestMessage.content;
             lastDataIndexRef.current = data?.length;
 
-            console.log("MESSAGES: ", combinedMessages);
+            // console.log("MESSAGES: ", combinedMessages);
         }
     }, [
         messages,
@@ -418,21 +457,8 @@ export function Chat() {
         combinedMessages,
         regeneratingMessageId,
         data,
-        state.chatId
+        save
     ]);
-
-    const save = async () => {
-        if (isSaving && !state.chatId) return;
-
-        setIsSaving(true);
-        const newChatId = await saveChat(state.chatId, combinedMessages, state);
-        if (!newChatId) return;
-        dispatch({
-            type: "SET_CHAT_ID",
-            payload: newChatId
-        });
-        setIsSaving(false);
-    };
 
     // Modify the reload function to set the regeneratingMessageId
     const handleReload = useCallback(() => {
@@ -442,6 +468,7 @@ export function Chat() {
         if (lastAssistantMessage) {
             setRegeneratingMessageId(lastAssistantMessage.id);
         }
+        shouldSaveRef.current = true;
         reload();
     }, [combinedMessages, reload]);
 
@@ -483,7 +510,8 @@ export function Chat() {
             <SettingsMenu
                 isOpen={isSettingsOpen}
                 onClose={() => {
-                    save().then(() => setIsSettingsOpen(false));
+                    save();
+                    setIsSettingsOpen(false);
                 }}
                 state={state}
                 dispatch={dispatch}
@@ -514,7 +542,7 @@ export function Chat() {
                                 setShowContinueButton(false);
                                 dispatch({
                                     type: "SET_CHAT_ID",
-                                    payload: null
+                                    payload: generateId()
                                 });
                             });
                         }}
@@ -556,7 +584,7 @@ export function Chat() {
                         isLoading={isLoading}
                         handleStop={() => {
                             stop();
-                            save();
+                            shouldSaveRef.current = true;
                         }}
                         enablePasteToFile={state.enablePasteToFile}
                     />

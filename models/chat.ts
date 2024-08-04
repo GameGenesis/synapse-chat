@@ -45,6 +45,7 @@ const settingsSchema: Schema = new Schema({
 
 const chatSchema: Schema = new Schema(
     {
+        _id: { type: String, required: true },
         messages: { type: [messageSchema], required: true },
         settings: { type: settingsSchema, required: true }
     },
