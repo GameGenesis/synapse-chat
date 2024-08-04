@@ -1,4 +1,4 @@
-import { ModelKey } from "@/lib/model-provider";
+import { ModelKey } from "@/lib/utils/model-provider";
 import { ToolInvocation } from "ai";
 
 export interface Artifact {

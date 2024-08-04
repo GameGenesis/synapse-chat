@@ -10,7 +10,7 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
 import { AutoIcon, MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
-import { ModelKey } from "@/lib/model-provider";
+import { ModelKey } from "@/lib/utils/model-provider";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 

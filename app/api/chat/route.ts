@@ -1,5 +1,5 @@
 import { convertToCoreMessages, StreamData, streamText } from "ai";
-import { getModel, ModelKey, models } from "../../../lib/model-provider";
+import { getModel, ModelKey, models } from "@/lib/utils/model-provider";
 import { tools } from "./tools";
 import buildPrompt from "./prompt-builder";
 import { keywordCategories } from "./config";

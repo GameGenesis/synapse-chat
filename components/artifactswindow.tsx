@@ -14,9 +14,9 @@ import {
     XIcon
 } from "./icons";
 import dynamic from "next/dynamic";
-import { captureConsoleLogs } from "@/lib/tools/capture-logs";
-import hljs from "highlight.js";
-import markdownToHtml from "@/lib/tools/markdown-to-html";
+import { captureConsoleLogs } from "@/lib/utils/capture-logs";
+import markdownToHtml from "@/lib/utils/markdown-to-html";
+import { highlightCode } from "@/lib/utils/highlight";
 
 const PreviewComponent = dynamic(
     () => import("./artifactpreview").then((mod) => mod.default),
@@ -196,7 +196,8 @@ export function ArtifactsWindow({
         const lines = code.split("\n");
 
         // Highlight the entire code block
-        const highlightedCode = hljs.highlight(code, { language }).value;
+        const { value: highlightedCode, language: detectedLang } =
+            highlightCode(code, language);
 
         // Create an array of line number elements
         const lineNumbers = lines
@@ -226,7 +227,7 @@ export function ArtifactsWindow({
                                 <td className="align-top p-0">
                                     <pre className="m-0 overflow-auto !text-nowrap">
                                         <code
-                                            className={`hljs language-${language}`}
+                                            className={`hljs ${detectedLang}`}
                                             dangerouslySetInnerHTML={{
                                                 __html: highlightedCode
                                             }}

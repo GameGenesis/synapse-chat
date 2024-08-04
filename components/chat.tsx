@@ -28,8 +28,8 @@ import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
-import saveChat from "@/lib/tools/save-chat";
-import markdownToHtml from "@/lib/tools/markdown-to-html";
+import saveChat from "@/lib/utils/save-chat";
+import markdownToHtml from "@/lib/utils/markdown-to-html";
 import { generateId } from "ai";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {

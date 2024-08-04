@@ -1,11 +1,6 @@
 import showdown from "showdown";
-import hljs from "highlight.js";
-
-const decodeHTMLEntities = (text: string) => {
-    const textArea = document.createElement("textarea");
-    textArea.innerHTML = text;
-    return textArea.value;
-};
+import { decodeHTML } from "@/lib/utils/decode-html";
+import { highlightCode } from "@/lib/utils/highlight";
 
 const showdownCode: showdown.ShowdownExtension = {
     type: "output",
@@ -15,31 +10,20 @@ const showdownCode: showdown.ShowdownExtension = {
         return text.replace(
             codeRegex,
             (match, language: string, code: string) => {
-                const decodedCode = decodeHTMLEntities(code);
+                const decodedCode = decodeHTML(code).trim();
                 const lang = language.split("language-")[1] || "plaintext";
-                let highlightedCode = decodedCode;
 
-                try {
-                    highlightedCode = hljs.highlight(decodedCode.trim(), {
-                        language: lang
-                    }).value;
-                } catch {
-                    highlightedCode = hljs.highlightAuto(
-                        decodedCode.trim()
-                    ).value;
-                }
+                const { value: highlightedCode, language: detectedLang } =
+                    highlightCode(decodedCode, lang);
 
                 return `
 <div class="code-block">
   <div class="code-header">
-    <span class="code-lang">${lang}</span>
-    <button class="copy-code-button">
-      Copy code
-    </button>
+    <span class="code-lang">${detectedLang}</span>
+    <button class="copy-code-button">Copy code</button>
   </div>
-  <pre class="code-pre"><code class="hljs ${lang}">${highlightedCode}</code></pre>
-</div>
-    `;
+  <pre class="code-pre"><code class="hljs ${detectedLang}">${highlightedCode}</code></pre>
+</div>`;
             }
         );
     }
