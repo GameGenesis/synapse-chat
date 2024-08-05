@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { NewChatIcon } from "./icons";
+import { MessageSquarePlusIcon } from "lucide-react";
 
 interface Props {
     onNewChat: () => void;
@@ -19,7 +19,7 @@ const Sidebar = ({ onNewChat, onClose }: Props) => {
                         onClose();
                     }}
                 >
-                    <NewChatIcon className="mr-2 h-5 w-5" />
+                    <MessageSquarePlusIcon className="mr-2 h-5 w-5" />
                     New chat
                 </Button>
             </div>

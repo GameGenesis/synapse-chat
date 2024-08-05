@@ -3,9 +3,15 @@ import { z } from "zod";
 import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
-import { BingClient, JinaClient, WeatherClient, WikipediaClient } from "@agentic/stdlib";
-import { YoutubeTranscript } from 'youtube-transcript';
+import {
+    BingClient,
+    JinaClient,
+    WeatherClient,
+    WikipediaClient
+} from "@agentic/stdlib";
+import { YoutubeTranscript } from "youtube-transcript";
 import formatTime from "@/lib/utils/format";
+import { createAgentNetwork } from "@/lib/agents";
 
 const openai = new OpenAI();
 
@@ -14,6 +20,25 @@ const bing = new BingClient();
 const wikipedia = new WikipediaClient();
 const jina = new JinaClient();
 // const wolframAlpha = new WolframAlphaClient();
+
+const agentNetwork = createAgentNetwork();
+
+export const agentsTool = tool({
+    description:
+        "Call upon agents to perform a specific task. Once you receive their response, output a formatted final response to the user.",
+    parameters: z.object({
+        task: z.string().describe("The original prompt or task description")
+    }),
+    execute: async ({ task }) => {
+        console.log("ITS CALLED");
+        const messages = await agentNetwork.executePrompt(task);
+
+        return {
+            messages,
+            explanation: "The agents have completed their tasks. Here are their responses."
+        };
+    }
+});
 
 export const tools = {
     get_current_time: tool({
@@ -64,15 +89,28 @@ export const tools = {
         })
     }),
     get_youtube_video_transcript: tool({
-        description: "Retrieve the complete transcript of a YouTube video using its video ID",
+        description:
+            "Retrieve the complete transcript of a YouTube video using its video ID",
         parameters: z.object({
-            videoId: z.string().describe("The unique identifier of the YouTube video. For example, the video ID for 'https://www.youtube.com/watch?v=jNQXAC9IVRw' is 'jNQXAC9IVRw'.")
+            videoId: z
+                .string()
+                .describe(
+                    "The unique identifier of the YouTube video. For example, the video ID for 'https://www.youtube.com/watch?v=jNQXAC9IVRw' is 'jNQXAC9IVRw'."
+                )
         }),
-        execute: async ({videoId}) => {
+        execute: async ({ videoId }) => {
             const data = await YoutubeTranscript.fetchTranscript(videoId);
             return {
-                transcript: data.map((line) => `[${formatTime(Math.floor(line.offset))}] ${line.text}`).join("\n").replaceAll("&amp;#39;", "'")
-            }
+                transcript: data
+                    .map(
+                        (line) =>
+                            `[${formatTime(Math.floor(line.offset))}] ${
+                                line.text
+                            }`
+                    )
+                    .join("\n")
+                    .replaceAll("&amp;#39;", "'")
+            };
         }
     }),
     // evaluate_math_expression: tool({

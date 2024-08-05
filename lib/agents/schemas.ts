@@ -17,13 +17,13 @@ export const projectManagerSchema = z.object({
 
 export const supervisorSchema = z.object({
     summary: z.string(),
-    nextSteps: z
+        updatedContext: z.record(z.any()).optional(),
+        nextSteps: z
         .string()
         .optional()
         .describe(
             "Describes the next steps to be performed for the project to be completed. Leave blank if the project has been completed and no further revisions are needed."
         ),
-    concerns: z.array(z.string()).optional(),
     needsRevision: z
         .boolean()
         .describe(

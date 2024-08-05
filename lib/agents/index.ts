@@ -9,13 +9,13 @@ import {
 import { AgentBuilder, AgentNetwork } from "./agent-builder";
 
 // Function to create and use the agent network
-export async function createAndUseAgentNetwork(prompt: string): Promise<any[]> {
+export const createAgentNetwork = () => {
     const agentBuilder = new AgentBuilder();
 
     // Create Project Manager
     const projectManager = agentBuilder.build({
         name: "Project Manager",
-        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well.",
+        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well. If multiple tasks can be done by the same agent, group them into one task. Each agent can only work on one file at a time.",
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 1000,
@@ -25,7 +25,7 @@ export async function createAndUseAgentNetwork(prompt: string): Promise<any[]> {
     // Create Supervisor
     const supervisor = agentBuilder.build({
         name: "Supervisor",
-        role: "You are a supervisor. Review the work of other agents and provide guidance, context, steer the direction back to the project if it goes off course. Also, determine if the project is complete or needs necessary revisions",
+        role: "You are a supervisor. Review the work of other agents and provide guidance. Only set needsRevision to true if absolutely necessary. If revision is needed, provide updatedContext with only the necessary information for the next iteration.",
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 1000,
@@ -87,6 +87,5 @@ export async function createAndUseAgentNetwork(prompt: string): Promise<any[]> {
     agentNetwork.addAgent(editorAgent);
     agentNetwork.addAgent(summarizerAgent);
 
-    // Execute the prompt using the agent network
-    return await agentNetwork.executePrompt(prompt);
+    return agentNetwork;
 }

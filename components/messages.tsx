@@ -199,7 +199,9 @@ export const AssistantMessage = ({
                 const capitalizedKey =
                     formattedKey.charAt(0).toUpperCase() +
                     formattedKey.slice(1);
-                return `${capitalizedKey}: ${value}`;
+                const formattedValue =
+                    typeof value === "string" ? value : JSON.stringify(value);
+                return `${capitalizedKey}: ${formattedValue}`;
             })
             .join("\n");
     };

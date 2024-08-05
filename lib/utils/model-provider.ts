@@ -25,7 +25,8 @@ export type ModelKey =
     | "gptLatest"
     | "claudeLatest"
     | "azureLatest"
-    | "auto";
+    | "auto"
+    | "agents";
 
 // Used to specify a model other than the DEFAULT_MODEL_CONFIG for certain usage
 export const models: { [key in ModelKey]: ModelConfig } = {
@@ -53,7 +54,8 @@ export const models: { [key in ModelKey]: ModelConfig } = {
     azureLatest: { name: "gpt-4o", provider: ModelProvider.Azure },
 
     // Auto
-    auto: { name: "auto", provider: ModelProvider.OpenAI }
+    auto: { name: "auto", provider: ModelProvider.OpenAI },
+    agents: { name: "agents", provider: ModelProvider.OpenAI }
 };
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;

@@ -448,7 +448,7 @@ export function Chat() {
             lastProcessedMessageRef.current = latestMessage.content;
             lastDataIndexRef.current = data?.length;
 
-            // console.log("MESSAGES: ", combinedMessages);
+            console.log("MESSAGES: ", combinedMessages);
         }
     }, [
         messages,

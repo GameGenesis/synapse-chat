@@ -457,6 +457,10 @@ The assistant should always take care to not produce artifacts that would be hig
 ---
 `;
 
+export const agentsPrompt = `
+You must use the call_agents tool for any tasks. Use this tool (in combination with other tools if necessary) when the request is a task (i.e. more than small talk e.g. writing an essay, researching a topic, coding something, explaining a topic, summarizing, etc.).
+`
+
 export const keywordCategories = {
     artifact: [
         "artifact",

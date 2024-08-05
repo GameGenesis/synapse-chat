@@ -1,11 +1,12 @@
-import { createAndUseAgentNetwork } from "@/lib/agents";
+import { createAgentNetwork } from "@/lib/agents";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const { prompt } = await req.json();
     
-    const result = await createAndUseAgentNetwork(prompt);
+    const agentNetwork = createAgentNetwork();
+    const result = await agentNetwork.executePrompt(prompt);
     
     // Ensure result is an array
     const messages = Array.isArray(result) ? result : [result];

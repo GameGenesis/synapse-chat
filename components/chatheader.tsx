@@ -8,8 +8,13 @@ import {
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { LayoutPanelLeftIcon, SettingsIcon } from "lucide-react";
-import { AutoIcon, MenuIcon, NewChatIcon, SparkleIcon, ZapIcon } from "./icons";
+import {
+    LayoutPanelLeftIcon,
+    MessageSquarePlusIcon,
+    MessagesSquareIcon,
+    SettingsIcon
+} from "lucide-react";
+import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/lib/utils/model-provider";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -56,6 +61,11 @@ export const modelInfo: Partial<
         name: "Auto",
         description: "Automatically selects the best model for your task.",
         icon: AutoIcon
+    },
+    agents: {
+        name: "Agents",
+        description: "Specialized AI agents that excel at specific tasks.",
+        icon: MessagesSquareIcon
     }
 };
 
@@ -117,7 +127,7 @@ const ChatHeader = ({
                         onClick={onNewChat}
                         aria-label="Open new chat"
                     >
-                        <NewChatIcon className="h-5 w-5" />
+                        <MessageSquarePlusIcon className="h-5 w-5" />
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -140,7 +150,7 @@ const ChatHeader = ({
                                         <div key={modelKey}>
                                             {index ===
                                                 Object.keys(modelInfo).length -
-                                                    1 && (
+                                                    2 && (
                                                 <DropdownMenuSeparator />
                                             )}
                                             <DropdownMenuItem

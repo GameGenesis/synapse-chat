@@ -13,6 +13,12 @@ interface Agent {
     execute: (prompt: string, context?: any) => Promise<any>;
 }
 
+interface Message {
+    agent: string;
+    content: any;
+    type: "task" | "result" | "review";
+}
+
 // Define the AgentNetwork class
 export class AgentNetwork {
     private agents: { [key: string]: Agent };
@@ -35,33 +41,43 @@ export class AgentNetwork {
         this.agents[agent.name] = agent;
     }
 
-    async executePrompt(prompt: string): Promise<any> {
-        let context = { originalPrompt: prompt };
-        const messages = [];
+    listAgents() {
+        return Object.values(this.agents);
+    }
+
+    async executePrompt(prompt: string, initialTaskList?: any[]): Promise<any> {
+        let context: any = { originalPrompt: prompt };
+        const messages: Message[] = [];
         let revisionCount = 0;
 
         while (revisionCount < this.maxRevisions) {
             // Step 1: Project Manager creates or updates task list
-            const availableAgents = Object.keys(this.agents);
-            const pmResult = await this.projectManager.execute(`
-        Available Agents: ${availableAgents}
-        Original Prompt: ${prompt}
-        Current Context: ${JSON.stringify(context)}
-        ${
-            revisionCount > 0
-                ? "Update the task list based on the current context."
-                : "Create an initial task list."
-        }
-      `);
-            messages.push({
-                agent: this.projectManager.name,
-                result: pmResult,
-                context
-            });
-            const taskList = pmResult.taskList;
-            // console.log("# Project Manager:\n", JSON.stringify(pmResult), `\nCurrent Context: ${JSON.stringify(context)}\n`);
+            let taskList: any[];
+            if (revisionCount === 0 && initialTaskList) {
+                taskList = initialTaskList;
+            } else {
+                const availableAgents = Object.keys(this.agents);
+                const pmResult = await this.projectManager.execute(`
+                    Available Agents: ${availableAgents}
+                    Original Prompt: ${prompt}
+                    Current Context: ${JSON.stringify(context)}
+                    ${
+                        revisionCount > 0 || initialTaskList
+                            ? "Update the task list based on the current context."
+                            : "Create an initial task list."
+                    }
+                `);
 
-            context = { ...context, ...taskList };
+                messages.push({
+                    agent: this.projectManager.name,
+                    content: pmResult,
+                    type: "task"
+                });
+
+                taskList = pmResult.taskList;
+            }
+
+            context = { ...context, taskList };
 
             let needsRevision = false;
 
@@ -74,33 +90,41 @@ export class AgentNetwork {
                 // Execute the task with the current agent
                 const result = await agent.execute(task.instructions, context);
 
-                // Update context with the result
-                context = { ...context, [task.agent]: result };
+                messages.push({
+                    agent: task.agent,
+                    content: result,
+                    type: "result"
+                });
 
-                // Supervisor reviews and updates context
                 const supervisorReview = await this.supervisor.execute(
-                    JSON.stringify(context)
+                    JSON.stringify({
+                        agent: task.agent,
+                        task: task.instructions,
+                        result: result
+                    })
                 );
-                context = { ...context, ...supervisorReview };
 
-                // console.log(`
-                //   # Agent: ${task.agent}
-                //   # Result: ${JSON.stringify(result)}
-
-                //   # Supervisor Review: ${JSON.stringify(supervisorReview)}
-                // `);
+                messages.push({
+                    agent: this.supervisor.name,
+                    content: supervisorReview,
+                    type: "review"
+                });
 
                 if (supervisorReview.needsRevision) {
                     needsRevision = true;
+                    context = {
+                        ...context,
+                        ...supervisorReview.updatedContext
+                    };
                     break;
                 }
 
-                messages.push({
-                    agent: task.agent,
-                    task: task.instructions,
-                    result,
-                    review: supervisorReview
-                });
+                // Update context with the result and review
+                context = {
+                    ...context,
+                    [task.agent]: result,
+                    supervisorReview
+                };
             }
 
             if (!needsRevision) {
@@ -110,6 +134,7 @@ export class AgentNetwork {
             revisionCount++;
         }
 
+        console.log(JSON.stringify(messages));
         return messages;
     }
 }
