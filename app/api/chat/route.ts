@@ -6,15 +6,23 @@ import { agentsPrompt, keywordCategories } from "./config";
 
 export const maxDuration = 1000;
 
-const shouldUseAdvancedModel = (message: string): boolean => {
-    return Object.values(keywordCategories).some((category) =>
-        category.some((keyword) => message.includes(keyword))
+const shouldUseAdvancedModel = (message: string): boolean =>
+    Object.values(keywordCategories).some((category) =>
+        category.some((keyword) => message.toLowerCase().includes(keyword))
     );
+
+const getLastNonEmptyMessage = (messages: any[]): string =>
+    messages.filter((message) => message.content).pop()?.content || "";
+
+const determineModel = (model: string, lastMessage: string): string => {
+    if (model === "auto") {
+        return shouldUseAdvancedModel(lastMessage) ? "gpt4o" : "gpt4omini";
+    }
+    return model === "agents" ? "gpt4omini" : model;
 };
 
 export async function POST(req: Request) {
     const { messages, settings } = await req.json();
-
     const {
         model,
         temperature,
@@ -27,39 +35,31 @@ export async function POST(req: Request) {
         toolChoice
     } = settings;
 
-    const system =
-        model === "agents"
-            ? agentsPrompt
-            : buildPrompt(
-                  enableArtifacts,
-                  enableInstructions,
-                  enableSafeguards,
-                  customInstructions
-              );
+    const lastMessage = getLastNonEmptyMessage(messages);
+    const modelToUse = determineModel(model, lastMessage);
+    const isAgentsModel = model === "agents";
+
+    const system = isAgentsModel
+        ? agentsPrompt
+        : buildPrompt(
+              enableArtifacts,
+              enableInstructions,
+              enableSafeguards,
+              customInstructions
+          );
+
+    const toolsToUse: any =
+        toolChoice === "none"
+            ? (isAgentsModel ? { call_agents: agentsTool } : {})
+            : {
+                  ...tools,
+                  ...(isAgentsModel ? { call_agents: agentsTool } : {})
+              };
+    const finalToolChoice = isAgentsModel ? "auto" : toolChoice;
+
+    console.log("MODE:", model, ", MODEL:", modelToUse);
+
     const data = new StreamData();
-
-    let toolsToUse: any = toolChoice === "none" ? {} : tools;
-    let finalToolChoice = toolChoice;
-
-    // Determine the model to use
-    let modelToUse = model;
-    if (model === "auto") {
-        const nonEmptyMessages = messages.filter(
-            (message: any) => message.content
-        );
-        const lastMessage: string =
-            nonEmptyMessages[nonEmptyMessages.length - 1].content.toLowerCase();
-        modelToUse = shouldUseAdvancedModel(lastMessage)
-            ? "gpt4o"
-            : "gpt4omini";
-    } else if (model === "agents") {
-        modelToUse = "gpt4omini";
-        toolsToUse.call_agents = agentsTool;
-        finalToolChoice = "auto";
-    }
-
-    console.log("MODEL SETTING: ", model, ", MODEL USE: ", modelToUse);
-
     const result = await streamText({
         model: getModel(models[modelToUse as ModelKey]),
         system,

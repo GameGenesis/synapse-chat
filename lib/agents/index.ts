@@ -39,7 +39,7 @@ export const createAgentNetwork = () => {
     const programmerAgent = agentBuilder.build({
         name: "Programmer",
         role: "You are a senior software engineer.",
-        model: models.gpt4omini,
+        model: models.claudeLatest,
         temperature: 0.5,
         maxTokens: 4096,
         schema: programmerSchema
@@ -56,16 +56,16 @@ export const createAgentNetwork = () => {
 
     const writerAgent = agentBuilder.build({
         name: "Writer",
-        role: "You are an expert writer.",
-        model: models.gpt4omini,
+        role: "You are an expert writer. Think step by step.",
+        model: models.claudeLatest,
         temperature: 0.5,
         maxTokens: 4096,
         schema: writerSchema
     });
 
     const editorAgent = agentBuilder.build({
-        name: "Writer",
-        role: "You are an expert editor. You will check the content you receive for spelling, clearness, and grammar errors. Improve the content, but do not add to it. ",
+        name: "Editor",
+        role: "You are an expert editor. You will check the content you receive for spelling, clearness, and grammar errors. Improve the content, but do not add to it. Think step by step.",
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
@@ -73,8 +73,26 @@ export const createAgentNetwork = () => {
     });
 
     const summarizerAgent = agentBuilder.build({
-        name: "Writer",
-        role: "You are an expert summarizer.",
+        name: "Summarizer",
+        role: "You are an expert summarizer. Summarize the provided content and make sure to keep the most important information. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.5,
+        maxTokens: 4096,
+        schema: writerSchema
+    });
+
+    const mathAgent = agentBuilder.build({
+        name: "Mathematician",
+        role: `You are an expert mathematician. Depending on the input:
+            - Analyze the provided math problem
+            - Come up with a solution or proceed with the task
+            - If necessary, Come up with a proof for the problem
+            - Verify the provided proof for the math problem
+            - Check for correctness
+            - Explain your decision making and reasoning
+            - Use latex formatting
+            - Think step by step
+            `,
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
@@ -86,6 +104,7 @@ export const createAgentNetwork = () => {
     agentNetwork.addAgent(writerAgent);
     agentNetwork.addAgent(editorAgent);
     agentNetwork.addAgent(summarizerAgent);
+    agentNetwork.addAgent(mathAgent);
 
     return agentNetwork;
 }
