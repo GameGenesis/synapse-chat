@@ -68,6 +68,8 @@ export class AgentNetwork {
                     }
                 `);
 
+                console.log(`Current Context: ${JSON.stringify(context)}`);
+
                 messages.push({
                     agent: this.projectManager.name,
                     content: pmResult,

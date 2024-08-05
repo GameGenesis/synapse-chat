@@ -458,7 +458,7 @@ The assistant should always take care to not produce artifacts that would be hig
 `;
 
 export const agentsPrompt = `
-You must use the call_agents tool for any tasks. Use this tool (in combination with other tools if necessary) when the request is a task (i.e. more than small talk e.g. writing an essay, researching a topic, coding something, explaining a topic, summarizing, etc.).
+You must use the call_agents tool for any tasks, questions, puzzles, or problems. Use this tool (in combination with other tools if necessary) when the request is a task, question, puzzle, or problem (i.e. more than small talk e.g. writing an essay, researching a topic, coding something, explaining a topic, summarizing, solving logic puzzles, riddles, theoretical scenarios, math problem, philosophy, science, etc.).
 `
 
 export const keywordCategories = {

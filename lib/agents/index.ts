@@ -1,9 +1,12 @@
 import { models } from "@/lib/utils/model-provider";
 import {
     debuggerSchema,
+    inquisitorSchema,
     programmerSchema,
     projectManagerSchema,
+    researcherSchema,
     supervisorSchema,
+    verifierSchema,
     writerSchema
 } from "./schemas";
 import { AgentBuilder, AgentNetwork } from "./agent-builder";
@@ -15,7 +18,7 @@ export const createAgentNetwork = () => {
     // Create Project Manager
     const projectManager = agentBuilder.build({
         name: "Project Manager",
-        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well. If multiple tasks can be done by the same agent, group them into one task. Each agent can only work on one file at a time. Try to use a variety of different agents if possible (e.g. Writer and Editor or Programmer and Debugger) Think step by step.",
+        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well. If multiple tasks can be done by the same agent, group them into one task. Each agent can only work on one file at a time. Try to use a variety of different agents if possible (e.g. Writer and Editor or Programmer and Debugger). For any word problems, riddles, or logic puzzles, call upon the Logician and optionally either one, some, or all of: Mathematician, Debater, Verifier. Think step by step.",
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 1000,
@@ -99,12 +102,62 @@ export const createAgentNetwork = () => {
         schema: writerSchema
     });
 
+    const researcherAgent = agentBuilder.build({
+        name: "Researcher",
+        role: "You are an expert researcher. Research for relevant information about the topic and respond with your findings. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.5,
+        maxTokens: 4096,
+        schema: researcherSchema
+    });
+
+    const verifierAgent = agentBuilder.build({
+        name: "Verifier",
+        role: "You are a fact checker, reviewer, and verifier. You must make sure all the information presented is rooted in facts and truth unless mentioned otherwise (e.g. opinions or theories). You point out anything that might've been missed. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.3,
+        maxTokens: 4096,
+        schema: verifierSchema
+    });
+
+    const debaterAgent = agentBuilder.build({
+        name: "Debater",
+        role: "You are an staunch debater and a logical contrarian. You present varying opinions and counterarguments. You call out any biases, logical fallacies, or potential misinformation. You point out anything that might've been missed. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.7,
+        maxTokens: 4096,
+        schema: writerSchema
+    });
+
+    const inquisitorAgent = agentBuilder.build({
+        name: "Inquisitor",
+        role: "You are a curious inquisitor and explorer. You try to dive deeper into topics by providing some questions or topics that can lead to deeper and more nuanced information related to the topic. You make connections with other fields and topics. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.6,
+        maxTokens: 4096,
+        schema: inquisitorSchema
+    });
+
+    const logicianAgent = agentBuilder.build({
+        name: "Logician",
+        role: "You are an expert logician. You solve logic puzzles and riddles. Think of all the possible nuances of the problem. The answer might not be the obvious one. Think of alternate solutions and see if they would also work. Think step by step.",
+        model: models.gpt4omini,
+        temperature: 0.5,
+        maxTokens: 4096,
+        schema: writerSchema
+    });
+
     agentNetwork.addAgent(programmerAgent);
     agentNetwork.addAgent(debuggerAgent);
     agentNetwork.addAgent(writerAgent);
     agentNetwork.addAgent(editorAgent);
     agentNetwork.addAgent(summarizerAgent);
     agentNetwork.addAgent(mathAgent);
+    // agentNetwork.addAgent(researcherAgent);
+    agentNetwork.addAgent(verifierAgent);
+    agentNetwork.addAgent(debaterAgent);
+    agentNetwork.addAgent(inquisitorAgent);
+    agentNetwork.addAgent(logicianAgent);
 
     return agentNetwork;
 }

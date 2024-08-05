@@ -27,12 +27,12 @@ export const agentsTool = tool({
     description:
         "Call upon agents to perform a specific task. Once you receive their response, output a formatted final response to the user.",
     parameters: z.object({
-        task: z.string().describe("The original prompt or task description"),
-        context: z.string().optional().describe("The context the agents need to complete the task. This can be previous messages in the conversation, previous essay drafts, or a current version of the code. Make sure to include all the necessary context in full (e.g. list out the entire source code instead of summarizing)")
+        task: z.string().describe("The original prompt or task description. Be specific and include all the key information."),
+        context: z.string().optional().describe("The agents do not have any context of this conversation or any messages including this one. Provide the agents with context to complete the task. This can be previous messages in the conversation, previous essay drafts, or the current version of the code (insert the full essay or code). Make sure to include all the necessary context in full (e.g. list out the entire source code instead of summarizing)")
     }),
-    execute: async ({ task }) => {
-        console.log("ITS CALLED");
-        const messages = await agentNetwork.executePrompt(task);
+    execute: async ({ task, context }) => {
+        console.log("### Agents ###");
+        const messages = await agentNetwork.executePrompt(task, context);
 
         return {
             messages,
