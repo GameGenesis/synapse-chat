@@ -201,7 +201,7 @@ export const AssistantMessage = ({
                     formattedKey.slice(1);
                 const formattedValue =
                     typeof value === "string" ? value : JSON.stringify(value);
-                return `${capitalizedKey}: ${formattedValue}`;
+                return `${capitalizedKey}: ${formattedValue.substring(0, 500)}`;
             })
             .join("\n");
     };

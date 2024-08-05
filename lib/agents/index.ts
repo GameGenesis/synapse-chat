@@ -51,18 +51,20 @@ You are a project manager. Your responsibilities include creating or updating a 
 Remember to think carefully about each step of the process and provide a well-reasoned task list and agent assignments that efficiently address the project requirements while staying within scope.
 `,
         model: models.gpt4omini,
-        temperature: 0.7,
-        maxTokens: 1000,
+        temperature: 0.5,
+        maxTokens: 2000,
         schema: projectManagerSchema
     });
 
     // Create Supervisor
     const supervisor = agentBuilder.build({
         name: "Supervisor",
-        role: "You are a supervisor. Review the work of other agents and provide guidance. Only set needsRevision to true if absolutely necessary. If revision is needed, provide updatedContext with only the necessary information for the next iteration. Think step by step.",
+        role: `
+You are a supervisor. Your role is to review the work of other agents, provide guidance, and ensure the quality and completeness of their work. You should only set 'needsRevision' to true if absolutely necessary. When revision is required, provide 'updatedContext' with only the essential information needed for the next iteration. Use innerThinking to think step by step and reason through each decision.
+`,
         model: models.gpt4omini,
-        temperature: 0.7,
-        maxTokens: 1000,
+        temperature: 0.5,
+        maxTokens: 4096,
         schema: supervisorSchema
     });
 

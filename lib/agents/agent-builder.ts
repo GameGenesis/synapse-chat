@@ -49,6 +49,7 @@ export class AgentNetwork {
         let context: any = { originalPrompt: prompt, additionalContext };
         const messages: Message[] = [];
         let revisionCount = 0;
+        let projectRevisionReport = ""
 
         while (revisionCount < this.maxRevisions) {
             // Step 1: Project Manager creates or updates task list
@@ -56,19 +57,50 @@ export class AgentNetwork {
             if (revisionCount === 0 && initialTaskList) {
                 taskList = initialTaskList;
             } else {
-                const availableAgents = Object.keys(this.agents);
-                const pmResult = await this.projectManager.execute(`
-                    Available Agents: ${availableAgents}
-                    Original Prompt: ${prompt}
-                    Current Context: ${JSON.stringify(context)}
-                    ${
-                        revisionCount > 0 || initialTaskList
-                            ? "Update the task list based on the current context."
-                            : "Create an initial task list."
-                    }
-                `);
+                const availableAgents = this.listAgents().map((agent, index) => `<agent_${index}>Agent Name: ${agent.name}\nAgent Role: ${agent.role.substring(0, 100)}..</agent_${index}>`).join("\n");
+                const pmPrompt = `
+Carefully read the project description and any additional context:
 
-                console.log(`Current Context: ${JSON.stringify(context)}`);
+<project_description>
+## This is the initial description for the project:
+${prompt}
+
+## Additional Context:
+${additionalContext}
+</project_description>
+
+${projectRevisionReport ? `
+<project_revision_report>
+The project has some issues and the supervisor has decided it needs some revisions.
+Use these revisions to create a new tasklist to update the current project. Do not repeat tasks from the previous tasklist if they have already been completed.
+
+## Project Revision Report:
+${projectRevisionReport}
+</project_revision_report>
+
+<project_context>
+Review the current project context to make decisions on where to proceed with the new task list in order to resolve the issues mentioned in the \`project_revision_report\`.
+
+## Context:
+${JSON.stringify(context)}
+</project_context>
+` : ""}
+
+Review the list of available agents and their roles:
+
+<available_agents>
+${availableAgents}
+</available_agents>
+
+${
+    revisionCount > 0
+        ? "Update the task list based on the \`project_revision_report\` and \`project_context\`."
+        : "Create an initial task list."
+}
+`
+                const pmResult = await this.projectManager.execute(pmPrompt);
+                console.log(pmPrompt);
+                console.log(JSON.stringify(pmResult));
 
                 messages.push({
                     agent: this.projectManager.name,
@@ -90,6 +122,7 @@ export class AgentNetwork {
                 }
 
                 // Execute the task with the current agent
+                console.log(`### AGENT: ${agent.name} ###\n\n# Instructions: ${task.instructions}\n\n# Context: ${JSON.stringify(context)}\n\n`)
                 const result = await agent.execute(task.instructions, context);
 
                 messages.push({
@@ -105,6 +138,7 @@ export class AgentNetwork {
                         result: result
                     })
                 );
+                console.log(`### Supervisor Review:  ###\n\n${JSON.stringify(supervisorReview)}`)
 
                 messages.push({
                     agent: this.supervisor.name,
@@ -114,6 +148,7 @@ export class AgentNetwork {
 
                 if (supervisorReview.needsRevision) {
                     needsRevision = true;
+                    projectRevisionReport = supervisorReview.report;
                     context = {
                         ...context,
                         ...supervisorReview.updatedContext
