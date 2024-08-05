@@ -45,8 +45,8 @@ export class AgentNetwork {
         return Object.values(this.agents);
     }
 
-    async executePrompt(prompt: string, initialTaskList?: any[]): Promise<any> {
-        let context: any = { originalPrompt: prompt };
+    async executePrompt(prompt: string, additionalContext?: string, initialTaskList?: any[]): Promise<any> {
+        let context: any = { originalPrompt: prompt, additionalContext };
         const messages: Message[] = [];
         let revisionCount = 0;
 

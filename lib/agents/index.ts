@@ -15,7 +15,7 @@ export const createAgentNetwork = () => {
     // Create Project Manager
     const projectManager = agentBuilder.build({
         name: "Project Manager",
-        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well. If multiple tasks can be done by the same agent, group them into one task. Each agent can only work on one file at a time.",
+        role: "You are a project manager. Create a task list and delegate tasks to appropriate agents. Make sure to remain within the project scope and not over-delegate. Use the smallest number of agents that can get the job done well. If multiple tasks can be done by the same agent, group them into one task. Each agent can only work on one file at a time. Try to use a variety of different agents if possible (e.g. Writer and Editor or Programmer and Debugger) Think step by step.",
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 1000,
@@ -25,7 +25,7 @@ export const createAgentNetwork = () => {
     // Create Supervisor
     const supervisor = agentBuilder.build({
         name: "Supervisor",
-        role: "You are a supervisor. Review the work of other agents and provide guidance. Only set needsRevision to true if absolutely necessary. If revision is needed, provide updatedContext with only the necessary information for the next iteration.",
+        role: "You are a supervisor. Review the work of other agents and provide guidance. Only set needsRevision to true if absolutely necessary. If revision is needed, provide updatedContext with only the necessary information for the next iteration. Think step by step.",
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 1000,
