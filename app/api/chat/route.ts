@@ -34,8 +34,9 @@ const determineModel = (model: ModelKey, messages: any[]): ModelKey => {
 const getToolsToUse = (
     toolChoice: ToolChoice,
     isAgentsModel: boolean,
-    previousAssistantMessage: string
+    messages: any[]
 ): Record<string, CoreTool> => {
+    const previousAssistantMessage = messages.reverse().find((message: any) => message.role === "assistant")?.content ?? "";
     const agentsTool = createAgentsTool(previousAssistantMessage);
 
     if (toolChoice === "none") {
@@ -46,6 +47,10 @@ const getToolsToUse = (
         ...(isAgentsModel ? { call_agents: agentsTool } : {})
     };
 };
+
+const cloneObject = (obj: object) => {
+    return JSON.parse(JSON.stringify(obj));
+}
 
 export async function POST(req: Request) {
     const { messages, settings } = await req.json();
@@ -62,7 +67,7 @@ export async function POST(req: Request) {
         toolChoice
     } = settings;
 
-    const modelToUse = determineModel(model, JSON.parse(JSON.stringify(messages)));
+    const modelToUse = determineModel(model, cloneObject(messages));
     const useAgents = model === "agents";
 
     const system = useAgents
@@ -74,8 +79,7 @@ export async function POST(req: Request) {
               customInstructions
           );
 
-    const previousAssistantMessage = messages.reverse().find((message: any) => message.role === "assistant")?.content ?? ""
-    const toolsToUse = getToolsToUse(toolChoice, useAgents, previousAssistantMessage);
+    const toolsToUse = getToolsToUse(toolChoice, useAgents, cloneObject(messages));
     const finalToolChoice = useAgents
         ? DEFAULT_AGENT_SETTINGS.toolChoice
         : toolChoice;
