@@ -63,6 +63,10 @@ export type CombinedMessage = {
 
 export type State = {
     chatId: string | null;
+    enablePasteToFile: boolean;
+} & Settings;
+
+export type Settings = {
     model: ModelKey;
     temperature: number;
     topP: number;
@@ -70,7 +74,6 @@ export type State = {
     enableArtifacts: boolean;
     enableInstructions: boolean;
     enableSafeguards: boolean;
-    enablePasteToFile: boolean;
     customInstructions: string;
     toolChoice: ToolChoice;
 };

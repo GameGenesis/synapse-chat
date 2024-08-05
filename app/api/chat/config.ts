@@ -1,3 +1,5 @@
+import { Settings } from "@/lib/types";
+
 export const DEFAULT_MODEL = "gpt4omini";
 export const DEFAULT_TEMPERATURE = 0.5;
 export const DEFAULT_TOPP = 1;
@@ -7,6 +9,12 @@ export const DEFAULT_ENABLE_INSTRUCTIONS = true;
 export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 export const DEFAULT_TOOL_CHOICE = "auto";
+export const DEFAULT_AGENT_SETTINGS: Partial<Settings> = {
+  temperature: 0.3,
+  topP: 1,
+  maxTokens: 4096,
+  toolChoice: "auto"
+};
 
 export const USER_NAME = "User";
 export const ASSISTANT_NAME = "Poe";
