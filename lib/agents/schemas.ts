@@ -2,16 +2,23 @@ import { z } from "zod";
 
 // Define schemas
 export const projectManagerSchema = z.object({
-    innerThinking: z.string().optional(),
+    innerThinking: z.string().optional().describe("First, use innerThinking to think through your process step-by-step. Consider the project requirements, available agents, and potential task groupings. Provide insights or thought processes related to task delegation, including any important considerations or trade-offs."),
     taskList: z
         .array(
             z.object({
-                agent: z.string(),
-                instructions: z.string()
+                agent: z.string().describe("The name of the agent responsible to complete the task."),
+                instructions: z.string().describe("Detailed instructions for completing the task. The instructions should be clear, concise, and specific to each task.")
             })
         )
         .describe(
-            "Only choose the agents that are relevant to the task. Keep within the scope of the described task. You may call on the same agent multiple times if required (for different tasks or as different persona). Keep in mind, final results should be formatted in markdown, plaintext, latex, or as code (you DO NOT need to delegate this as a separate task)."
+`
+When creating the taskList, keep the following guidelines in mind:
+   - Only choose agents that are relevant to the task.
+   - Stay within the scope of the described project.
+   - You may assign multiple tasks to the same agent if required (for different tasks or as different personas).
+   - Preferably, do not assign the same agent to two consecutive related tasks, as those should be grouped, unless they involve multiple personas or fields.
+   - Keep in mind that final results should be formatted in markdown, plaintext, LaTeX, or as code. You do not need to delegate this formatting as a separate task.
+`
         )
 });
 

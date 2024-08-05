@@ -51,15 +51,28 @@ class AgentNetwork {
             // Step 1: Project Manager creates or updates task list
             const availableAgents = Object.keys(this.agents);
             const pmResult = await this.projectManager.execute(`
-        Available Agents: ${availableAgents}
-        Original Prompt: ${prompt}
-        Current Context: ${JSON.stringify(context)}
-        ${
-            revisionCount > 0
-                ? "Update the task list based on the current context."
-                : "Create an initial task list."
-        }
-      `);
+Carefully read the project description and current context:
+
+<project_description>
+${prompt}
+</project_description>
+
+<context>
+${JSON.stringify(context)}
+</context>
+
+Review the list of available agents and their roles:
+
+<available_agents>
+${availableAgents}
+</available_agents>
+
+${
+    revisionCount > 0
+        ? "Update the task list based on the current context."
+        : "Create an initial task list."
+}
+`);
             messages.push({
                 agent: this.projectManager.name,
                 result: pmResult,
