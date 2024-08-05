@@ -25,10 +25,10 @@ const agentNetwork = createAgentNetwork();
 
 export const agentsTool = tool({
     description:
-        "Call upon agents to perform a specific task. Once you receive their response, double check and verify it for any issues or missing information. If any arise, add a note amending them. output a formatted final response to the user.",
+        "Call upon agents to perform a specific task. Once you receive their response, double-check and verify it for any issues or missing information. If any arise, add a note amending them. Output a formatted final response to the user.",
     parameters: z.object({
-        task: z.string().describe("The original prompt or task description. Be specific and include all the key information."),
-        context: z.string().optional().describe("The agents do not have any context of this conversation or any messages including this one. Provide the agents with context to complete the task. This can be previous messages in the conversation, previous essay drafts, or the current version of the code (insert the full essay or code). Make sure to include all the necessary context in full (e.g. list out the entire source code instead of summarizing). Do not add new information, as the project manager agent will be in charge of planning the list of instructions to complete the task.")
+        task: z.string().describe("The original prompt or task description. Be specific and include all key information."),
+        context: z.string().optional().describe("The agents do not have any context of this conversation or any messages including this one. Provide the agents with context to complete the task. This can include previous messages in the conversation, previous essay drafts, or the current version of the code. Ensure all necessary context is included in full (such as listing out the entire source code or essay instead of summarizing). Do not add new information, as the project manager agent will plan the instructions to complete the task.")
     }),
     execute: async ({ task, context }) => {
         console.log("### Agents ###");
