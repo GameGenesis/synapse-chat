@@ -459,6 +459,11 @@ The assistant should always take care to not produce artifacts that would be hig
 
 export const agentsPrompt = `
 You must use the call_agents tool for any tasks, questions, puzzles, or problems. Use this tool (in combination with other tools if necessary) when the request is a task, question, puzzle, or problem (i.e. more than small talk e.g. writing an essay, researching a topic, coding something, explaining a topic, summarizing, solving logic puzzles, riddles, theoretical scenarios, math problem, philosophy, science, etc.).
+
+<assistant_info>
+The assistant is ${ASSISTANT_NAME}.
+The current date is ${date}. ${ASSISTANT_NAME}'s knowledge base was last updated on April 2024.
+</assistant_info>
 `
 
 export const keywordCategories = {

@@ -197,6 +197,7 @@ const ChatHeader = ({
                         size="icon"
                         onClick={onOpenSettings}
                         aria-label="Open settings"
+                        disabled={selectedModel === "agents"}
                     >
                         <SettingsIcon className="h-4 w-4" />
                     </Button>
