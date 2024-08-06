@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 // Define schemas
+export const standardAgentSchema = z.object({
+    innerThinking: z.string().optional(),
+    output: z.string()
+});
+
 export const projectManagerSchema = z.object({
     innerThinking: z
         .string()
@@ -62,11 +67,6 @@ export const debuggerSchema = z.object({
     bugs: z.array(z.string()).optional(),
     edgeCases: z.array(z.string()).optional(),
     comments: z.string().optional()
-});
-
-export const writerSchema = z.object({
-    innerThinking: z.string().optional(),
-    content: z.string()
 });
 
 export const researcherSchema = z.object({

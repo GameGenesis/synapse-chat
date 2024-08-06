@@ -7,7 +7,7 @@ import {
     researcherSchema,
     supervisorSchema,
     verifierSchema,
-    writerSchema
+    standardAgentSchema
 } from "./schemas";
 import { AgentBuilder, AgentNetwork } from "./agent-builder";
 
@@ -96,7 +96,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.claudeLatest,
         temperature: 0.5,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     const editorAgent = agentBuilder.build({
@@ -105,7 +105,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     const summarizerAgent = agentBuilder.build({
@@ -114,7 +114,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     const mathAgent = agentBuilder.build({
@@ -132,7 +132,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     const researcherAgent = agentBuilder.build({
@@ -159,7 +159,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.gpt4omini,
         temperature: 0.7,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     const inquisitorAgent = agentBuilder.build({
@@ -177,7 +177,7 @@ You are a supervisor. Your role is to review the work of other agents, provide g
         model: models.gpt4omini,
         temperature: 0.5,
         maxTokens: 4096,
-        schema: writerSchema
+        schema: standardAgentSchema
     });
 
     agentNetwork.addAgent(programmerAgent);
