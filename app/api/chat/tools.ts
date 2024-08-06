@@ -23,23 +23,43 @@ const jina = new JinaClient();
 
 const agentNetwork = createAgentNetwork();
 
-export const createAgentsTool = (previousAssistantMessage: string) => (tool({
-    description:
-        "Call upon agents to perform a specific task. Once you receive their response, double-check and verify it for any issues or missing information. If any arise, add a note amending them. Output a formatted final response to the user.",
-    parameters: z.object({
-        project: z.string().describe("The original prompt or task description. Be specific and include all key information."),
-        context: z.string().optional().describe("The agents do not have any context of this conversation or any messages including this one. Provide the agents with context to complete the task. This can include previous messages in the conversation, previous essay drafts, or the current version of the code. Ensure all necessary context is included in full. Do not add new information, as the project manager agent will plan the instructions to complete the task."),
-    }),
-    execute: async ({ project, context }) => {
-        console.log("### Agents ###");
-        const messages = await agentNetwork.executePrompt(project, `${context}.\n\n## Previous user content:\n${previousAssistantMessage}`);
+export const createAgentsTool = (previousAssistantMessage: string) =>
+    tool({
+        description:
+            "Call upon agents to perform a specific task. Once you receive their response, double-check and verify it for any issues or missing information. If any arise, add a note amending them. Output a formatted final response to the user.",
+        parameters: z.object({
+            project: z
+                .string()
+                .describe(
+                    "The original prompt or task description. Be specific and include all key information."
+                ),
+            context: z
+                .string()
+                .optional()
+                .describe(
+                    "The agents do not have any context of this conversation or any messages including this one. Provide the agents with context to complete the task. This can include previous messages in the conversation, previous essay drafts, or the current version of the code. Ensure all necessary context is included in full. Do not add new information, as the project manager agent will plan the instructions to complete the task."
+                )
+        }),
+        execute: async ({ project, context }) => {
+            console.log("### Agents ###");
+            try {
+                const messages = await agentNetwork.executePrompt(
+                    project,
+                    `${context}.\n\n## Previous user content:\n${previousAssistantMessage}`
+                );
 
-        return {
-            messages,
-            explanation: "The agents have completed their tasks. Here are their responses."
-        };
-    }
-}));
+                return {
+                    status: "Success: The agents have completed their tasks. Here are their responses.",
+                    messages
+                };
+            } catch (error) {
+                return {
+                    status: "Error: Fulfill the user request without calling the agents. Preface the response with this error",
+                    error: `An error occurred while trying to receive the agents' responses. Error ${error}.`
+                };
+            }
+        }
+    });
 
 export const tools = {
     get_current_time: tool({
