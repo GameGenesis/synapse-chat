@@ -248,7 +248,7 @@ export class AgentNetwork {
 
                 contextManager.addMessage({
                     agent: this.projectManager.name,
-                    content: contextManager.taskListToString(pmResult.taskList),
+                    content: { taskList: pmResult.taskList },
                     type: "task"
                 });
             }

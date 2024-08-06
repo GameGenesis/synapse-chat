@@ -81,8 +81,6 @@ export async function POST(req: Request) {
               customInstructions
           );
 
-    console.log(system);
-
     const toolsToUse = getToolsToUse(toolChoice, useAgents, cloneObject(messages));
     const finalToolChoice = useAgents
         ? DEFAULT_AGENT_SETTINGS.toolChoice
