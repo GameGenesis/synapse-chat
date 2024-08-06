@@ -1,6 +1,7 @@
 import {
     artifactPrompt,
     assistantPrompt,
+    toolsPrompt,
     imageSafetyPrompt,
     safetyPrompt
 } from "./config";
@@ -9,6 +10,7 @@ const buildPrompt = (
     enableArtifacts: boolean,
     enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
+    useTools: boolean,
     customInstructions?: string
 ) => {
     let defaultPrompt = ""
@@ -19,7 +21,7 @@ const buildPrompt = (
         )
     }
     
-    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}\n${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${useTools ? toolsPrompt : ""}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
         customInstructions ?
         `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>` : ""
     }`;

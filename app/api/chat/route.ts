@@ -5,7 +5,8 @@ import buildPrompt from "./prompt-builder";
 import {
     agentsPrompt,
     DEFAULT_AGENT_SETTINGS,
-    keywordCategories
+    keywordCategories,
+    toolsPrompt
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 
@@ -71,13 +72,16 @@ export async function POST(req: Request) {
     const useAgents = model === "agents";
 
     const system = useAgents
-        ? agentsPrompt
+        ? `${agentsPrompt}${toolsPrompt}`
         : buildPrompt(
               enableArtifacts,
               enableInstructions,
               enableSafeguards,
+              toolChoice !== "none",
               customInstructions
           );
+
+    console.log(system);
 
     const toolsToUse = getToolsToUse(toolChoice, useAgents, cloneObject(messages));
     const finalToolChoice = useAgents
