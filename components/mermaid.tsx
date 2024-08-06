@@ -1,6 +1,8 @@
 import mermaid from "mermaid";
 import { useEffect, useRef, useState } from "react";
 
+// For reference: https://codesandbox.io/s/react-with-mermaid-ex9f7
+
 mermaid.initialize({
     startOnLoad: true,
     theme: "dark",

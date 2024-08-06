@@ -9,6 +9,7 @@ export const DEFAULT_ENABLE_INSTRUCTIONS = true;
 export const DEFAULT_ENABLE_SAFEGUARDS = false;
 export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 export const DEFAULT_TOOL_CHOICE = "auto";
+export const DEFAULT_MESSAGE_LIMIT = 6;
 export const DEFAULT_AGENT_SETTINGS: Partial<Settings> = {
   temperature: 0.3,
   topP: 1,

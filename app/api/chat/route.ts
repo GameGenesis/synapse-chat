@@ -5,10 +5,12 @@ import buildPrompt from "./prompt-builder";
 import {
     agentsPrompt,
     DEFAULT_AGENT_SETTINGS,
+    DEFAULT_MESSAGE_LIMIT,
     keywordCategories,
     toolsPrompt
 } from "./config";
 import { ToolChoice } from "@/lib/types";
+import { limitMessages } from "@/lib/utils/message-manager";
 
 export const maxDuration = 1000;
 
@@ -92,6 +94,8 @@ export async function POST(req: Request) {
 
     console.log("MODE:", model, ", MODEL:", modelToUse);
 
+    const limitedMessages = await limitMessages([...messages], DEFAULT_MESSAGE_LIMIT) as any;
+
     const data = new StreamData();
     const result = await streamText({
         model: getModel(models[modelToUse]),
@@ -99,7 +103,7 @@ export async function POST(req: Request) {
         temperature: finalTemperature,
         topP: finalTopP,
         maxTokens: finalMaxTokens,
-        messages: convertToCoreMessages(messages),
+        messages: convertToCoreMessages(limitedMessages),
         tools: toolsToUse,
         toolChoice: finalToolChoice,
         onFinish: async (result) => {
