@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import {
+    BlendIcon,
     BookOpenIcon,
     GaugeIcon,
     LayoutPanelLeftIcon,
@@ -78,6 +79,11 @@ export const modelInfo: Partial<
     //         "Previous gen Llama model from Groq specifically designed for advanced tool use.",
     //     icon: WrenchIcon
     // },
+    mixtral_8x7b: {
+        name: "Mixtral 8x7B (Groq)",
+        description: "Open source Mixtral of experts model from Mistral AI.",
+        icon: BlendIcon
+    },
     auto: {
         name: "Auto",
         description: "Automatically selects the best model for your task.",

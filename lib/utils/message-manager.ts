@@ -1,6 +1,10 @@
 import { CoreMessage, generateText } from "ai";
 import { getModel, models } from "./model-provider";
 
+// TODO: Add a toggle in the settings to turn on message limits and summarization
+// Add error handling
+// Possibly call this summarization after the assistant message instead of before
+
 const MAX_SUMMARY_LENGTH_WORDS = 50;
 
 const summarizeMessages = async (messages: CoreMessage[]) => {

@@ -241,6 +241,9 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 payload: checked
                                             })
                                         }
+                                        disabled={
+                                            state.model === "mixtral_8x7b"
+                                        }
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -317,7 +320,9 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                         <AccordionTrigger>Tools</AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 p-1">
-                                {state.model === "llama31_8b" && (
+                                {["llama31_8b", "mixtral_8x7b"].includes(
+                                    state.model
+                                ) && (
                                     <p>
                                         Tool Use is disabled for this model.
                                         Choose another model to be able to use
@@ -335,7 +340,10 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 ? toolChoice
                                                 : "specific"
                                         }
-                                        disabled={state.model === "llama31_8b"}
+                                        disabled={[
+                                            "llama31_8b",
+                                            "mixtral_8x7b"
+                                        ].includes(state.model)}
                                     >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select tool choice" />

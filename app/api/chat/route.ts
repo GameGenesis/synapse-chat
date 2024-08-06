@@ -42,7 +42,7 @@ const getToolsToUse = (
     const previousAssistantMessage = messages.reverse().find((message: any) => message.role === "assistant")?.content ?? "";
     const agentsTool = createAgentsTool(previousAssistantMessage);
 
-    if (toolChoice === "none" || model === "llama31_8b") {
+    if (toolChoice === "none" || model === "llama31_8b" || model === "mixtral_8x7b") {
         return { toolChoice, tools: model === "agents" ? {call_agents: agentsTool} : {} };
     }
     return {
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     const system = useAgents
         ? `${agentsPrompt}${toolsPrompt}`
         : buildPrompt(
-              enableArtifacts,
+              enableArtifacts && model !== "mixtral_8x7b",
               enableInstructions,
               enableSafeguards,
               toolChoice !== "none",
