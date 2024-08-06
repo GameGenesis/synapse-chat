@@ -34,18 +34,20 @@ const determineModel = (model: ModelKey, messages: any[]): ModelKey => {
 
 const getToolsToUse = (
     toolChoice: ToolChoice,
-    isAgentsModel: boolean,
+    model: ModelKey,
     messages: any[]
-): Record<string, CoreTool> => {
+): {toolChoice: ToolChoice, tools: any} => {
     const previousAssistantMessage = messages.reverse().find((message: any) => message.role === "assistant")?.content ?? "";
     const agentsTool = createAgentsTool(previousAssistantMessage);
 
-    if (toolChoice === "none") {
-        return isAgentsModel ? { call_agents: agentsTool } : {};
+    if (toolChoice === "none" || model === "llama31_8b") {
+        return { toolChoice, tools: model === "agents" ? {call_agents: agentsTool} : {} };
     }
     return {
-        ...tools,
-        ...(isAgentsModel ? { call_agents: agentsTool } : {})
+        toolChoice: model === "agents" ? DEFAULT_AGENT_SETTINGS.toolChoice! : toolChoice,
+        tools:
+        {...tools,
+        ...(model === "agents" ? { call_agents: agentsTool } : {})}
     };
 };
 
@@ -81,10 +83,7 @@ export async function POST(req: Request) {
               customInstructions
           );
 
-    const toolsToUse = getToolsToUse(toolChoice, useAgents, cloneObject(messages));
-    const finalToolChoice = useAgents
-        ? DEFAULT_AGENT_SETTINGS.toolChoice
-        : toolChoice;
+    const {toolChoice: finalToolChoice, tools: toolsToUse} = getToolsToUse(toolChoice, model, cloneObject(messages));
     const {
         temperature: finalTemperature,
         topP: finalTopP,

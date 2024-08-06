@@ -317,6 +317,13 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                         <AccordionTrigger>Tools</AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 p-1">
+                                {state.model === "llama31_8b" && (
+                                    <p>
+                                        Tool Use is disabled for this model.
+                                        Choose another model to be able to use
+                                        tools.
+                                    </p>
+                                )}
                                 <div className="flex flex-col space-y-2">
                                     <Label htmlFor="toolChoice">
                                         Tool Choice Mode
@@ -328,6 +335,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 ? toolChoice
                                                 : "specific"
                                         }
+                                        disabled={state.model === "llama31_8b"}
                                     >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select tool choice" />
