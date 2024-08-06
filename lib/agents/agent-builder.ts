@@ -165,14 +165,14 @@ ${JSON.stringify(this.lastRevisionReport)}
 
         const revisionReportPrompt = this._lastRevisionReport
             ? `
-        <project_revision_report>
-        The project has some issues and the supervisor has decided it needs some revisions.
-        Use these revisions to create a new tasklist to update the current project. Do not repeat tasks from the previous tasklist if they have already been completed.
-        
-        ## Project Revision Report:
-        ${this._lastRevisionReport}
-        </project_revision_report>
-        `
+<project_revision_report>
+The project has some issues and the supervisor has decided it needs some revisions.
+Use these revisions to create a new tasklist to update the current project. Do not repeat tasks from the previous tasklist if they have already been completed.
+
+## Project Revision Report:
+${this._lastRevisionReport}
+</project_revision_report>
+`
             : "";
 
         return `
@@ -230,6 +230,8 @@ export class AgentNetwork {
         const contextManager = new ContextManager(fullPrompt);
 
         while (contextManager.revisionCount < this.maxRevisions) {
+            console.log("REVISION COUNT: ", contextManager.revisionCount);
+
             // Step 1: Project Manager creates or updates task list
             if (contextManager.revisionCount === 0 && initialTaskList) {
                 contextManager.taskList = initialTaskList;

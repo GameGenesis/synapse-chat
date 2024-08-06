@@ -15,7 +15,7 @@ import {
     MessageSquarePlusIcon,
     MessagesSquareIcon,
     SettingsIcon,
-    WrenchIcon
+    SparklesIcon
 } from "lucide-react";
 import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey } from "@/lib/utils/model-provider";
@@ -48,7 +48,7 @@ export const modelInfo: Partial<
         name: "Claude 3.5 Sonnet",
         description:
             "Anthropic's latest model, great for various applications.",
-        icon: SparkleIcon
+        icon: SparklesIcon
     },
     gpt4o: {
         name: "GPT-4o",
@@ -72,12 +72,12 @@ export const modelInfo: Partial<
             "Instant responses from Llama 3.1 8B using Groq LPU AI inference.",
         icon: GaugeIcon
     },
-    llama_3_70b_tool_use: {
-        name: "Llama 3 70B Tools (Groq)",
-        description:
-            "Previous gen Llama model from Groq specifically designed for advanced tool use.",
-        icon: WrenchIcon
-    },
+    // llama_3_70b_tool_use: {
+    //     name: "Llama 3 70B Tools (Groq)",
+    //     description:
+    //         "Previous gen Llama model from Groq specifically designed for advanced tool use.",
+    //     icon: WrenchIcon
+    // },
     auto: {
         name: "Auto",
         description: "Automatically selects the best model for your task.",
