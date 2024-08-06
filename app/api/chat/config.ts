@@ -64,7 +64,9 @@ export const tools = [
   "get_current_weather",
   "wikipedia_search",
   "wikipedia_get_page_summary",
-  "bing_web_search"
+  "bing_web_search",
+  "readUrl",
+  "search"
 ];
 
 export const assistantPrompt = `
