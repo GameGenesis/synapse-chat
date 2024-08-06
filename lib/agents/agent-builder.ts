@@ -19,6 +19,182 @@ interface Message {
     type: "task" | "result" | "review";
 }
 
+interface Task {
+    agent: string;
+    instructions: string;
+}
+
+class ContextManager {
+    private _globalMessages: Message[];
+    private _prompt: string;
+    private _revisionCount: number;
+    private _taskList: Task[];
+    private _currentTask: Task | null;
+    private _lastTaskReview: any;
+    private _lastRevisionReport: string;
+
+    constructor(prompt: string) {
+        this._globalMessages = [];
+        this._prompt = prompt;
+        this._revisionCount = 0;
+        this._taskList = [];
+        this._currentTask = null;
+        this._lastTaskReview = null;
+        this._lastRevisionReport = "";
+    }
+
+    get globalMessages() {
+        return this._globalMessages;
+    }
+
+    addMessage(message: Message) {
+        this._globalMessages.push(message);
+    }
+
+    get prompt() {
+        return this._prompt;
+    }
+
+    set prompt(value) {
+        this._prompt = value;
+    }
+
+    get revisionCount() {
+        return this._revisionCount;
+    }
+
+    incrementRevisionCount() {
+        this._revisionCount++;
+    }
+
+    get taskList() {
+        return this._taskList;
+    }
+
+    set taskList(taskList: Task[]) {
+        this._taskList = [...taskList];
+    }
+
+    completeTask() {
+        this._taskList.shift();
+    }
+
+    taskToString(task?: Task, index?: number) {
+        if (!task) return "";
+
+        const tag = index !== undefined ? `task_${index}` : "task";
+        return `<${tag}>\nAgent: ${task.agent}\nInstructions: ${task.instructions}\n<${tag}>`;
+    }
+
+    taskListToString(taskList: Task[]) {
+        return taskList
+            .map((task, index) => this.taskToString(task, index))
+            .join("\n");
+    }
+
+    agentToString(agent: Agent, index: number) {
+        return `<agent_${index}>
+Agent Name: ${agent.name}
+Agent Role: ${agent.role.substring(0, 100)}..
+</agent_${index}>`;
+    }
+
+    agentListToString(agentList: Agent[]) {
+        return agentList
+            .map((agent, index) => this.agentToString(agent, index))
+            .join("\n");
+    }
+
+    get currentTask() {
+        return this._currentTask;
+    }
+
+    set currentTask(task) {
+        this._currentTask = task;
+    }
+
+    get lastTaskReview() {
+        return this._lastTaskReview;
+    }
+
+    set lastTaskReview(review) {
+        this._lastTaskReview = review;
+    }
+
+    get lastRevisionReport() {
+        return this._lastRevisionReport;
+    }
+
+    set lastRevisionReport(report) {
+        this._lastRevisionReport = report;
+    }
+
+    getProjectContext() {
+        return `
+<project_context>
+<original_prompt>
+${this._prompt}
+</original_prompt>
+
+<last_task_review>
+${JSON.stringify(this.lastTaskReview)}
+</last_task_review>
+
+<current_task_list>
+${this.taskListToString(this._taskList)}
+</current_task_list>
+
+<current_task>
+${this.taskToString(this._currentTask || undefined)}
+</current_task>
+
+<last_revision_report>
+${JSON.stringify(this.lastRevisionReport)}
+</last_revision_report>
+</project_context>
+        `;
+    }
+
+    createProjectManagerPrompt(agents: Agent[]) {
+        const availableAgents = this.agentListToString(agents);
+
+        const finalInstructions =
+            this._revisionCount > 0
+                ? "Update the task list based on the `project_revision_report` and `project_context`."
+                : "Create an initial task list.";
+
+        const revisionReportPrompt = this._lastRevisionReport
+            ? `
+        <project_revision_report>
+        The project has some issues and the supervisor has decided it needs some revisions.
+        Use these revisions to create a new tasklist to update the current project. Do not repeat tasks from the previous tasklist if they have already been completed.
+        
+        ## Project Revision Report:
+        ${this._lastRevisionReport}
+        </project_revision_report>
+        `
+            : "";
+
+        return `
+Carefully read the project description and any additional context:
+
+<project_description>
+${this._prompt}
+</project_description>
+
+${revisionReportPrompt}
+
+Review the list of available agents and their roles:
+
+<available_agents>
+${availableAgents}
+</available_agents>
+
+${finalInstructions}
+`;
+    }
+}
+
 // Define the AgentNetwork class
 export class AgentNetwork {
     private agents: { [key: string]: Agent };
@@ -45,134 +221,114 @@ export class AgentNetwork {
         return Object.values(this.agents);
     }
 
-    async executePrompt(prompt: string, additionalContext?: string, initialTaskList?: any[]): Promise<any> {
-        let context: any = { originalPrompt: prompt, additionalContext };
-        const messages: Message[] = [];
-        let revisionCount = 0;
-        let projectRevisionReport = ""
+    async executePrompt(
+        prompt: string,
+        additionalContext: string = "",
+        initialTaskList?: any[]
+    ): Promise<any> {
+        const fullPrompt = `\n${prompt}\n\n## Additional Context:\n${additionalContext}`;
+        const contextManager = new ContextManager(fullPrompt);
 
-        while (revisionCount < this.maxRevisions) {
+        while (contextManager.revisionCount < this.maxRevisions) {
             // Step 1: Project Manager creates or updates task list
-            let taskList: any[];
-            if (revisionCount === 0 && initialTaskList) {
-                taskList = initialTaskList;
+            if (contextManager.revisionCount === 0 && initialTaskList) {
+                contextManager.taskList = initialTaskList;
             } else {
-                const availableAgents = this.listAgents().map((agent, index) => `<agent_${index}>Agent Name: ${agent.name}\nAgent Role: ${agent.role.substring(0, 100)}..</agent_${index}>`).join("\n");
-                const pmPrompt = `
-Carefully read the project description and any additional context:
-
-<project_description>
-## This is the initial description for the project:
-${prompt}
-
-## Additional Context:
-${additionalContext}
-</project_description>
-
-${projectRevisionReport ? `
-<project_revision_report>
-The project has some issues and the supervisor has decided it needs some revisions.
-Use these revisions to create a new tasklist to update the current project. Do not repeat tasks from the previous tasklist if they have already been completed.
-
-## Project Revision Report:
-${projectRevisionReport}
-</project_revision_report>
-
-<project_context>
-Review the current project context to make decisions on where to proceed with the new task list in order to resolve the issues mentioned in the \`project_revision_report\`.
-
-## Context:
-${JSON.stringify(context)}
-</project_context>
-` : ""}
-
-Review the list of available agents and their roles:
-
-<available_agents>
-${availableAgents}
-</available_agents>
-
-${
-    revisionCount > 0
-        ? "Update the task list based on the \`project_revision_report\` and \`project_context\`."
-        : "Create an initial task list."
-}
-`
+                const pmPrompt = contextManager.createProjectManagerPrompt(
+                    Object.values(this.agents)
+                );
                 const pmResult = await this.projectManager.execute(pmPrompt);
+
+                contextManager.taskList = pmResult.taskList;
+
+                console.log("### PM BEGIN ###");
                 console.log(pmPrompt);
                 console.log(JSON.stringify(pmResult));
+                console.log("### PM END ###");
 
-                messages.push({
+                contextManager.addMessage({
                     agent: this.projectManager.name,
-                    content: pmResult,
+                    content: contextManager.taskListToString(pmResult.taskList),
                     type: "task"
                 });
-
-                taskList = pmResult.taskList;
             }
 
-            context = { ...context, taskList };
-
             let needsRevision = false;
+            const taskList = [...contextManager.taskList];
 
             for (const task of taskList) {
+                contextManager.currentTask = task;
+
                 const agent = this.agents[task.agent];
                 if (!agent) {
                     throw new Error(`Agent ${task.agent} not found`);
                 }
 
+                // Get the last 3 messages excluding the first (PM) message
+                const pastMessages = contextManager.globalMessages.slice(
+                    Math.max(contextManager.globalMessages.length - 3, 1)
+                );
+                const taskContext = `${contextManager.getProjectContext()}\n\n<past_messages>\n${JSON.stringify(
+                    pastMessages
+                )}\n<past_messages>`;
+                console.log(
+                    `### AGENT: ${agent.name} ###\n\n# Instructions: ${task.instructions}\n\n# Context: ${taskContext}\n\n`
+                );
                 // Execute the task with the current agent
-                console.log(`### AGENT: ${agent.name} ###\n\n# Instructions: ${task.instructions}\n\n# Context: ${JSON.stringify(context)}\n\n`)
-                const result = await agent.execute(task.instructions, context);
+                const result = await agent.execute(
+                    task.instructions,
+                    taskContext
+                );
 
-                messages.push({
+                contextManager.addMessage({
                     agent: task.agent,
                     content: result,
                     type: "result"
                 });
 
+                const supervisorContext = contextManager.getProjectContext();
                 const supervisorReview = await this.supervisor.execute(
                     JSON.stringify({
                         agent: task.agent,
                         task: task.instructions,
                         result: result
-                    })
+                    }),
+                    supervisorContext
                 );
-                console.log(`### Supervisor Review:  ###\n\n${JSON.stringify(supervisorReview)}`)
 
-                messages.push({
+                contextManager.lastTaskReview = supervisorReview;
+
+                console.log(
+                    `### Supervisor Context ###\n\n${supervisorContext}\n\n### Supervisor Review:  ###\n\n${JSON.stringify(
+                        supervisorReview
+                    )}`
+                );
+
+                contextManager.addMessage({
                     agent: this.supervisor.name,
                     content: supervisorReview,
                     type: "review"
                 });
 
+                contextManager.completeTask();
+
                 if (supervisorReview.needsRevision) {
                     needsRevision = true;
-                    projectRevisionReport = supervisorReview.report;
-                    context = {
-                        ...context,
-                        ...supervisorReview.updatedContext
-                    };
+                    contextManager.lastRevisionReport = supervisorReview.report;
                     break;
                 }
-
-                // Update context with the result and review
-                context = {
-                    ...context,
-                    [task.agent]: result,
-                    supervisorReview
-                };
             }
 
             if (!needsRevision) {
                 break;
             }
 
-            revisionCount++;
+            contextManager.incrementRevisionCount();
         }
 
-        console.log(JSON.stringify(messages));
-        return messages;
+        console.log("### GLOBAL CONTEXT ###");
+        console.log(JSON.stringify(contextManager.globalMessages));
+        return contextManager.globalMessages;
     }
 }
 
@@ -193,15 +349,15 @@ export class AgentBuilder {
             temperature: config.temperature,
             maxTokens: config.maxTokens,
             schema: config.schema,
-            execute: async (prompt: string, context?: any) => {
+            execute: async (prompt: string, context?: string) => {
+                const fullPrompt = `Instructions: ${prompt}\n\nContext: ${context}\n\nInstructions: ${prompt}`;
+
                 const { object } = await generateObject({
                     model: getModel(config.model),
                     system: config.role,
                     temperature: config.temperature,
                     maxTokens: config.maxTokens,
-                    prompt: context
-                        ? `${JSON.stringify(context)}\n\n${prompt}`
-                        : prompt,
+                    prompt: fullPrompt,
                     schema: config.schema
                 });
 

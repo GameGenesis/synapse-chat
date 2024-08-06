@@ -32,7 +32,7 @@ export const createAgentsTool = (previousAssistantMessage: string) => (tool({
     }),
     execute: async ({ project, context }) => {
         console.log("### Agents ###");
-        const messages = await agentNetwork.executePrompt(project, `Context: ${context}. Previous user content: ${previousAssistantMessage}`);
+        const messages = await agentNetwork.executePrompt(project, `${context}.\n\n## Previous user content:\n${previousAssistantMessage}`);
 
         return {
             messages,
