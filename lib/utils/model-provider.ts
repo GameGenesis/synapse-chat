@@ -44,7 +44,7 @@ export type ModelKey =
 // Used to specify a model other than the DEFAULT_MODEL_CONFIG for certain usage
 export const models: { [key in ModelKey]: ModelConfig } = {
     chatgpt4o: { name: "chatgpt-4o-latest", provider: ModelProvider.OpenAI },
-    gpt4o: { name: "gpt-4o", provider: ModelProvider.OpenAI },
+    gpt4o: { name: "gpt-4o-2024-08-06", provider: ModelProvider.OpenAI }, // Change back to gpt-4o (latest)
     gpt4omini: { name: "gpt-4o-mini", provider: ModelProvider.OpenAI },
     gpt4turbo: { name: "gpt-4-turbo", provider: ModelProvider.OpenAI },
     gpt4: { name: "gpt-4", provider: ModelProvider.OpenAI },
@@ -106,5 +106,9 @@ export const getModel = (modelConfig: ModelConfig) => {
     }
 };
 
-export const unsupportedToolUseModels = ["llama31_8b", "mixtral_8x7b", "chatgpt4o"];
-export const unsupportedArtifactUseModels = ["mixtral_8x7b"]
+export const unsupportedToolUseModels = [
+    "llama31_8b",
+    "mixtral_8x7b",
+    "chatgpt4o"
+];
+export const unsupportedArtifactUseModels = ["mixtral_8x7b"];
