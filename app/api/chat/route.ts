@@ -1,5 +1,11 @@
 import { convertToCoreMessages, CoreTool, StreamData, streamText } from "ai";
-import { getModel, ModelKey, models } from "@/lib/utils/model-provider";
+import {
+    getModel,
+    ModelKey,
+    models,
+    unsupportedArtifactUseModels,
+    unsupportedToolUseModels
+} from "@/lib/utils/model-provider";
 import { createAgentsTool, tools } from "./tools";
 import buildPrompt from "./prompt-builder";
 import {
@@ -38,24 +44,33 @@ const getToolsToUse = (
     toolChoice: ToolChoice,
     model: ModelKey,
     messages: any[]
-): {toolChoice: ToolChoice, tools: any} => {
-    const previousAssistantMessage = messages.reverse().find((message: any) => message.role === "assistant")?.content ?? "";
+): { toolChoice: ToolChoice; tools: any } => {
+    const previousAssistantMessage =
+        messages.reverse().find((message: any) => message.role === "assistant")
+            ?.content ?? "";
     const agentsTool = createAgentsTool(previousAssistantMessage);
 
-    if (toolChoice === "none" || model === "llama31_8b" || model === "mixtral_8x7b") {
-        return { toolChoice, tools: model === "agents" ? {call_agents: agentsTool} : {} };
+    if (toolChoice === "none" || unsupportedToolUseModels.includes(model)) {
+        return {
+            toolChoice,
+            tools: model === "agents" ? { call_agents: agentsTool } : {}
+        };
     }
     return {
-        toolChoice: model === "agents" ? DEFAULT_AGENT_SETTINGS.toolChoice! : toolChoice,
-        tools:
-        {...tools,
-        ...(model === "agents" ? { call_agents: agentsTool } : {})}
+        toolChoice:
+            model === "agents"
+                ? DEFAULT_AGENT_SETTINGS.toolChoice!
+                : toolChoice,
+        tools: {
+            ...tools,
+            ...(model === "agents" ? { call_agents: agentsTool } : {})
+        }
     };
 };
 
 const cloneObject = (obj: object) => {
     return JSON.parse(JSON.stringify(obj));
-}
+};
 
 export async function POST(req: Request) {
     const { messages, settings } = await req.json();
@@ -78,14 +93,18 @@ export async function POST(req: Request) {
     const system = useAgents
         ? `${agentsPrompt}${toolsPrompt}`
         : buildPrompt(
-              enableArtifacts && model !== "mixtral_8x7b",
+              enableArtifacts && !unsupportedArtifactUseModels.includes(model),
               enableInstructions,
               enableSafeguards,
               toolChoice !== "none",
               customInstructions
           );
 
-    const {toolChoice: finalToolChoice, tools: toolsToUse} = getToolsToUse(toolChoice, model, cloneObject(messages));
+    const { toolChoice: finalToolChoice, tools: toolsToUse } = getToolsToUse(
+        toolChoice,
+        model,
+        cloneObject(messages)
+    );
     const {
         temperature: finalTemperature,
         topP: finalTopP,
@@ -94,7 +113,10 @@ export async function POST(req: Request) {
 
     console.log("MODE:", model, ", MODEL:", modelToUse);
 
-    const limitedMessages = await limitMessages([...messages], DEFAULT_MESSAGE_LIMIT) as any;
+    const limitedMessages = (await limitMessages(
+        [...messages],
+        DEFAULT_MESSAGE_LIMIT
+    )) as any;
 
     const data = new StreamData();
     const result = await streamText({

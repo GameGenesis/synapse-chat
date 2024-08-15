@@ -14,6 +14,7 @@ import {
     GaugeIcon,
     LayoutPanelLeftIcon,
     MessageSquarePlusIcon,
+    MessageSquareTextIcon,
     MessagesSquareIcon,
     SettingsIcon,
     SparklesIcon
@@ -50,6 +51,12 @@ export const modelInfo: Partial<
         description:
             "Anthropic's latest model, great for various applications.",
         icon: SparklesIcon
+    },
+    chatgpt4o: {
+        name: "ChatGPT-4o",
+        description:
+            "Latest version of GPT-4o in ChatGPT optimized for chat uses.",
+        icon: MessageSquareTextIcon
     },
     gpt4o: {
         name: "GPT-4o",

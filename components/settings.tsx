@@ -47,6 +47,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { InfoIcon, Check, ChevronsUpDown } from "lucide-react";
 import { tools } from "@/app/api/chat/config";
+import {
+    unsupportedArtifactUseModels,
+    unsupportedToolUseModels
+} from "@/lib/utils/model-provider";
 
 interface Props {
     isOpen: boolean;
@@ -241,9 +245,9 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 payload: checked
                                             })
                                         }
-                                        disabled={
-                                            state.model === "mixtral_8x7b"
-                                        }
+                                        disabled={unsupportedArtifactUseModels.includes(
+                                            state.model
+                                        )}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -320,7 +324,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                         <AccordionTrigger>Tools</AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 p-1">
-                                {["llama31_8b", "mixtral_8x7b"].includes(
+                                {unsupportedToolUseModels.includes(
                                     state.model
                                 ) && (
                                     <p>
@@ -340,10 +344,9 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 ? toolChoice
                                                 : "specific"
                                         }
-                                        disabled={[
-                                            "llama31_8b",
-                                            "mixtral_8x7b"
-                                        ].includes(state.model)}
+                                        disabled={unsupportedToolUseModels.includes(
+                                            state.model
+                                        )}
                                     >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select tool choice" />
