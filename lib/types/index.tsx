@@ -71,6 +71,7 @@ export type Settings = {
     temperature: number;
     topP: number;
     maxTokens: number;
+    messageLimit: number;
     enableArtifacts: boolean;
     enableInstructions: boolean;
     enableSafeguards: boolean;
@@ -84,6 +85,7 @@ export type Action =
     | { type: "SET_TEMPERATURE"; payload: number }
     | { type: "SET_TOP_P"; payload: number }
     | { type: "SET_MAX_TOKENS"; payload: number }
+    | { type: "SET_MESSAGE_LIMIT"; payload: number }
     | { type: "SET_ENABLE_ARTIFACTS"; payload: boolean }
     | { type: "SET_ENABLE_INSTRUCTIONS"; payload: boolean }
     | { type: "SET_ENABLE_SAFEGUARDS"; payload: boolean }

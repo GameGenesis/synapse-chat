@@ -11,7 +11,6 @@ import buildPrompt from "./prompt-builder";
 import {
     agentsPrompt,
     DEFAULT_AGENT_SETTINGS,
-    DEFAULT_MESSAGE_LIMIT,
     keywordCategories,
     toolsPrompt
 } from "./config";
@@ -80,6 +79,7 @@ export async function POST(req: Request) {
         temperature,
         topP,
         maxTokens,
+        messageLimit,
         enableArtifacts,
         enableInstructions,
         enableSafeguards,
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
 
     const limitedMessages = (await limitMessages(
         [...messages],
-        DEFAULT_MESSAGE_LIMIT
+        messageLimit
     )) as any;
 
     const data = new StreamData();

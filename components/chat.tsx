@@ -18,6 +18,7 @@ import {
     DEFAULT_ENABLE_PASTE_TO_FILE,
     DEFAULT_ENABLE_SAFEGUARDS,
     DEFAULT_MAX_TOKENS,
+    DEFAULT_MESSAGE_LIMIT,
     DEFAULT_MODEL,
     DEFAULT_TEMPERATURE,
     DEFAULT_TOOL_CHOICE,
@@ -49,6 +50,8 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, topP: action.payload };
         case "SET_MAX_TOKENS":
             return { ...state, maxTokens: action.payload };
+        case "SET_MESSAGE_LIMIT":
+            return { ...state, messageLimit: action.payload };
         case "SET_ENABLE_ARTIFACTS":
             return { ...state, enableArtifacts: action.payload };
         case "SET_ENABLE_INSTRUCTIONS":
@@ -73,6 +76,7 @@ export function Chat() {
         temperature: DEFAULT_TEMPERATURE,
         topP: DEFAULT_TOPP,
         maxTokens: DEFAULT_MAX_TOKENS,
+        messageLimit: DEFAULT_MESSAGE_LIMIT,
         enableArtifacts: DEFAULT_ENABLE_ARTIFACTS,
         enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
         enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,

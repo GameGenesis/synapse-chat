@@ -224,6 +224,70 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         className="w-20"
                                     />
                                 </div>
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex w-36">
+                                        <Label
+                                            htmlFor="topP"
+                                            className="w-full"
+                                        >
+                                            Message Limit
+                                        </Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-96 overflow-auto">
+                                                        Controls how many
+                                                        previous messages are
+                                                        passed into context.
+                                                        Setting this to 0 means
+                                                        all messages are passed
+                                                        into context. Setting
+                                                        this too high may cause
+                                                        the context window to
+                                                        fill up.
+                                                        <br />
+                                                        <br />
+                                                        <b>Note:</b> Messages
+                                                        outside of the limit are
+                                                        automatically
+                                                        summarized.
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <Slider
+                                        id="topP"
+                                        min={0}
+                                        max={20}
+                                        step={1}
+                                        value={[state.messageLimit]}
+                                        onValueChange={(value) =>
+                                            dispatch({
+                                                type: "SET_MESSAGE_LIMIT",
+                                                payload: value[0]
+                                            })
+                                        }
+                                        className="w-full"
+                                    />
+                                    <Input
+                                        type="number"
+                                        value={state.messageLimit}
+                                        onChange={(e) =>
+                                            dispatch({
+                                                type: "SET_MESSAGE_LIMIT",
+                                                payload: Number(e.target.value)
+                                            })
+                                        }
+                                        min={0}
+                                        max={20}
+                                        step={1}
+                                        className="w-20"
+                                    />
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>

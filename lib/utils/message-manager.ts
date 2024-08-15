@@ -41,7 +41,7 @@ export const limitMessages = async (
     summary_threshold: number = 1
 ) => {
     const startTime = performance.now()
-    if (messages.length <= limit) {
+    if (messages.length <= limit || limit <= 0) {
         return messages;
     }
 
