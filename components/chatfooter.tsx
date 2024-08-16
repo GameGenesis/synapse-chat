@@ -7,7 +7,7 @@ import AttachmentModal from "./attachmentmodal";
 import { PaperclipIcon } from "lucide-react";
 import { StopIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { supportedFileFormats } from "@/app/api/chat/config";
+import { supportedFileFormats, usableFileFormats } from "@/app/api/chat/config";
 import { extractRawText } from "mammoth";
 
 interface Props {
@@ -293,7 +293,7 @@ const ChatFooter = ({
                         type="file"
                         ref={fileInputRef}
                         multiple
-                        accept={supportedFileFormats.join(", ")}
+                        accept={usableFileFormats.join(", ")}
                         onChange={handleFileUpload}
                         className="hidden"
                     />
@@ -367,7 +367,7 @@ const convertToTextFile = async (file: File): Promise<File> => {
         }
 
         const blob = new Blob([content], { type: "text/plain" });
-        return new File([blob], `${file.name}.txt`, { type: "text/plain" });
+        return new File([blob], file.name, { type: "text/plain" });
     } catch (error) {
         console.error("Error converting file:", error);
         throw error;
