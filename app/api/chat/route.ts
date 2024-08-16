@@ -128,6 +128,7 @@ export async function POST(req: Request) {
         messages: convertToCoreMessages(limitedMessages),
         tools: toolsToUse,
         toolChoice: finalToolChoice,
+        headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" },
         onFinish: async (result) => {
             if (result.text) {
                 data.append({
