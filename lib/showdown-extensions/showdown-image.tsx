@@ -7,9 +7,12 @@ const showdownImage: showdown.ShowdownExtension = {
         const imgRegex =
             /<img[^>]+src="([^"]+)"(?:\s+alt="([^"]*)")?\s*[^>]*>/g;
         return text.replace(imgRegex, (match, src, alt) => {
+            // Convert protocol-relative URLs to absolute URLs
+            const absoluteSrc = src.startsWith("//") ? `https:${src}` : src;
+
             return renderToString(
                 <Image
-                    src={src || ""}
+                    src={absoluteSrc}
                     alt={alt || "Image"}
                     onClick={() => {
                         // This will be replaced with actual functionality in the component
