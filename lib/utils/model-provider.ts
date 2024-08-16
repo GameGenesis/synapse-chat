@@ -119,7 +119,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
 export const getModel = (modelConfig: ModelConfig) => {
     switch (modelConfig.provider) {
         case ModelProvider.OpenAI:
-            return openai(modelConfig.name, { parallelToolCalls: true });
+            return openai(modelConfig.name);
         case ModelProvider.Anthropic:
             return anthropic(modelConfig.name);
         case ModelProvider.Azure:

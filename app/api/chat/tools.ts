@@ -19,6 +19,7 @@ const weather = new WeatherClient();
 const bing = new BingClient();
 const wikipedia = new WikipediaClient();
 const jina = new JinaClient();
+// const searxng = new SearxngClient();
 // const wolframAlpha = new WolframAlphaClient();
 
 const agentNetwork = createAgentNetwork();
@@ -172,5 +173,10 @@ export const tools = {
     //         }
     //     }
     // }),
-    ...createAISDKTools(weather, wikipedia, bing, jina)
+    ...createAISDKTools(
+        weather,
+        wikipedia,
+        bing,
+        jina.functions.pick("readUrl")
+    )
 };
