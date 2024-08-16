@@ -8,15 +8,17 @@ const groq = createOpenAI({
 });
 
 export enum ModelProvider {
-    OpenAI = "openai",
-    Anthropic = "anthropic",
-    Azure = "azure",
-    Groq = "groq"
+    OpenAI = "OpenAI",
+    Anthropic = "Anthropic",
+    Azure = "Azure",
+    Groq = "Groq",
+    Other = "Other"
 }
 
 export interface ModelConfig {
     name: string;
     provider: ModelProvider;
+    maxTokens?: number;
 }
 
 export type ModelKey =
@@ -43,15 +45,36 @@ export type ModelKey =
 
 // Used to specify a model other than the DEFAULT_MODEL_CONFIG for certain usage
 export const models: { [key in ModelKey]: ModelConfig } = {
-    chatgpt4o: { name: "chatgpt-4o-latest", provider: ModelProvider.OpenAI },
-    gpt4o: { name: "gpt-4o-2024-08-06", provider: ModelProvider.OpenAI }, // Change back to gpt-4o (latest)
-    gpt4omini: { name: "gpt-4o-mini", provider: ModelProvider.OpenAI },
-    gpt4turbo: { name: "gpt-4-turbo", provider: ModelProvider.OpenAI },
-    gpt4: { name: "gpt-4", provider: ModelProvider.OpenAI },
-    gpt35: { name: "gpt-3.5-turbo", provider: ModelProvider.OpenAI },
+    chatgpt4o: {
+        name: "chatgpt-4o-latest",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 16384
+    },
+    gpt4o: {
+        name: "gpt-4o-2024-08-06",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 16384
+    }, // Change back to gpt-4o (latest)
+    gpt4omini: {
+        name: "gpt-4o-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 16384
+    },
+    gpt4turbo: {
+        name: "gpt-4-turbo",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 4096
+    },
+    gpt4: { name: "gpt-4", provider: ModelProvider.OpenAI, maxTokens: 8192 },
+    gpt35: {
+        name: "gpt-3.5-turbo",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 4096
+    },
     claude35sonnet: {
         name: "claude-3-5-sonnet-20240620",
-        provider: ModelProvider.Anthropic
+        provider: ModelProvider.Anthropic,
+        maxTokens: 8192
     },
     claude3opus: {
         name: "claude-3-opus-20240229",
@@ -83,8 +106,8 @@ export const models: { [key in ModelKey]: ModelConfig } = {
     azureLatest: { name: "gpt-4o", provider: ModelProvider.Azure },
 
     // Auto
-    auto: { name: "auto", provider: ModelProvider.OpenAI },
-    agents: { name: "agents", provider: ModelProvider.OpenAI }
+    auto: { name: "auto", provider: ModelProvider.Other },
+    agents: { name: "agents", provider: ModelProvider.Other }
 };
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
@@ -92,7 +115,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
 export const getModel = (modelConfig: ModelConfig) => {
     switch (modelConfig.provider) {
         case ModelProvider.OpenAI:
-            return openai(modelConfig.name);
+            return openai(modelConfig.name, { parallelToolCalls: true });
         case ModelProvider.Anthropic:
             return anthropic(modelConfig.name);
         case ModelProvider.Azure:

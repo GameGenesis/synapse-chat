@@ -1,12 +1,19 @@
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu";
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import {
     BlendIcon,
@@ -20,8 +27,8 @@ import {
     SparklesIcon
 } from "lucide-react";
 import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
-import { ModelKey } from "@/lib/utils/model-provider";
-import { useState } from "react";
+import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
@@ -43,6 +50,7 @@ export const modelInfo: Partial<
             name: string;
             description: string;
             icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+            provider: ModelProvider;
         }
     >
 > = {
@@ -50,35 +58,41 @@ export const modelInfo: Partial<
         name: "Claude 3.5 Sonnet",
         description:
             "Anthropic's latest model, great for various applications.",
-        icon: SparklesIcon
+        icon: SparklesIcon,
+        provider: ModelProvider.Anthropic
     },
     chatgpt4o: {
         name: "ChatGPT-4o",
         description:
             "Latest version of GPT-4o in ChatGPT optimized for chat uses.",
-        icon: MessageSquareTextIcon
+        icon: MessageSquareTextIcon,
+        provider: ModelProvider.OpenAI
     },
     gpt4o: {
         name: "GPT-4o",
         description: "Most capable GPT-4 model for a wide range of tasks.",
-        icon: SparkleIcon
+        icon: SparkleIcon,
+        provider: ModelProvider.OpenAI
     },
     gpt4omini: {
         name: "GPT-4o Mini",
         description: "Fast and efficient for most everyday tasks.",
-        icon: ZapIcon
+        icon: ZapIcon,
+        provider: ModelProvider.OpenAI
     },
     llama31_70b: {
         name: "Llama 3.1 70B (Groq)",
         description:
             "Capable and versatile open source model from Meta using Groq.",
-        icon: BookOpenIcon
+        icon: BookOpenIcon,
+        provider: ModelProvider.Groq
     },
     llama31_8b: {
         name: "Llama 3.1 8B (Groq)",
         description:
             "Instant responses from Llama 3.1 8B using Groq LPU AI inference.",
-        icon: GaugeIcon
+        icon: GaugeIcon,
+        provider: ModelProvider.Groq
     },
     // llama_3_70b_tool_use: {
     //     name: "Llama 3 70B Tools (Groq)",
@@ -89,17 +103,20 @@ export const modelInfo: Partial<
     mixtral_8x7b: {
         name: "Mixtral 8x7B (Groq)",
         description: "Open source Mixtral of experts model from Mistral AI.",
-        icon: BlendIcon
+        icon: BlendIcon,
+        provider: ModelProvider.Groq
     },
     auto: {
         name: "Auto",
         description: "Automatically selects the best model for your task.",
-        icon: AutoIcon
+        icon: AutoIcon,
+        provider: ModelProvider.Other
     },
     agents: {
         name: "Agents",
         description: "Specialized AI agents that excel at specific tasks.",
-        icon: MessagesSquareIcon
+        icon: MessagesSquareIcon,
+        provider: ModelProvider.Other
     }
 };
 
@@ -113,6 +130,7 @@ const ChatHeader = ({
     onNewChat
 }: Props) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const handleModelChange = (model: ModelKey) => {
         onModelSelect(model);
@@ -129,6 +147,19 @@ const ChatHeader = ({
     const getModelIcon = (modelKey: ModelKey) => {
         return modelInfo[modelKey]?.icon || SparkleIcon;
     };
+
+    const groupedModels = useMemo(() => {
+        return Object.entries(modelInfo).reduce((acc, [key, value]) => {
+            if (value) {
+                const provider = value.provider;
+                if (!acc[provider]) {
+                    acc[provider] = [];
+                }
+                acc[provider].push({ key: key as ModelKey, ...value });
+            }
+            return acc;
+        }, {} as Record<ModelProvider, Array<{ key: ModelKey } & NonNullable<(typeof modelInfo)[ModelKey]>>>);
+    }, []);
 
     return (
         <header className="flex align-middle justify-center w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
@@ -163,56 +194,69 @@ const ChatHeader = ({
                     >
                         <MessageSquarePlusIcon className="h-5 w-5" />
                     </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                    <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="gap-1 rounded-md px-3 h-10 data-[state=open]:bg-muted text-lg"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="gap-1 rounded-md px-3 h-10 text-lg justify-between"
                             >
                                 {getModelDisplayName(selectedModel)}
-                                <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
+                                <ChevronDownIcon className="w-4 h-4 text-muted-foreground ml-2 shrink-0 opacity-50" />
                             </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="start"
-                            className="max-w-[300px]"
-                        >
-                            {(Object.keys(modelInfo) as ModelKey[]).map(
-                                (modelKey, index) => {
-                                    const Icon = getModelIcon(modelKey);
-                                    return (
-                                        <div key={modelKey}>
-                                            {index ===
-                                                Object.keys(modelInfo).length -
-                                                    2 && (
-                                                <DropdownMenuSeparator />
-                                            )}
-                                            <DropdownMenuItem
-                                                className="items-start gap-2"
-                                                onClick={() =>
-                                                    handleModelChange(modelKey)
-                                                }
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0">
+                            <Command>
+                                <CommandInput
+                                    placeholder="Search model..."
+                                    className="h-9"
+                                />
+                                <CommandList>
+                                    <CommandEmpty>No model found.</CommandEmpty>
+                                    {Object.entries(groupedModels).map(
+                                        ([provider, models], index) => (
+                                            <CommandGroup
+                                                key={provider}
+                                                heading={provider}
                                             >
-                                                <Icon className="w-4 h-4 mr-2 translate-y-1 shrink-0" />
-                                                <div>
-                                                    <div className="font-medium">
-                                                        {getModelDisplayName(
-                                                            modelKey
-                                                        )}
-                                                    </div>
-                                                    <div className="text-muted-foreground/80">
-                                                        {getModelDescription(
-                                                            modelKey
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </DropdownMenuItem>
-                                        </div>
-                                    );
-                                }
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                                {index > 0 && (
+                                                    <CommandSeparator />
+                                                )}
+                                                {models.map((model) => {
+                                                    const Icon = model.icon;
+                                                    return (
+                                                        <CommandItem
+                                                            key={model.key}
+                                                            onSelect={() => {
+                                                                handleModelChange(
+                                                                    model.key
+                                                                );
+                                                                setOpen(false);
+                                                            }}
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            <Icon className="w-4 h-4 shrink-0" />
+                                                            <div>
+                                                                <div className="font-medium">
+                                                                    {model.name}
+                                                                </div>
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    {
+                                                                        model.description
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </CommandItem>
+                                                    );
+                                                })}
+                                            </CommandGroup>
+                                        )
+                                    )}
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <div className="flex space-x-2">
                     {artifacts && !isArtifactsOpen && (

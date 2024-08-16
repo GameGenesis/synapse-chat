@@ -201,6 +201,10 @@ const prompts: Prompt[] = [
 // Add: Create an image: An antique anthropological drawing of a victorian-style house. Sketches labelled with handwriting.
 // Add: DALLE - Japanese landscape during daytime, a samurai on a motorcycle in the middle with their back to the camera, in anime style
 
+/*
+Create a Polaroid photo with VSCO filter, 1990, a gorgeous woman, at night, flash photo, freckled, blonde, cute, young face, sexy, perfect, curvilinear body, salmon coloured bikini, beautiful shadows, tropical plants, inside an apartment, VSCO filter, DSLR
+*/
+
 interface Props {
     addMessage: (message: Message) => void;
 }

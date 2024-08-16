@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { InfoIcon, Check, ChevronsUpDown } from "lucide-react";
 import { tools } from "@/app/api/chat/config";
 import {
+    models,
     unsupportedArtifactUseModels,
     unsupportedToolUseModels
 } from "@/lib/utils/model-provider";
@@ -68,7 +69,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
     );
 
     useEffect(() => {
-        const newMaxPossibleOutput = state.model === "gpt4omini" ? 16384 : 4096;
+        const newMaxPossibleOutput = models[state.model].maxTokens || 4096;
         setMaxPossibleOutput(newMaxPossibleOutput);
         dispatch({
             type: "SET_MAX_TOKENS",
