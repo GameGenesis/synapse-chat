@@ -20,6 +20,7 @@ import {
     BookOpenIcon,
     GaugeIcon,
     LayoutPanelLeftIcon,
+    LightbulbIcon,
     MessageSquarePlusIcon,
     MessageSquareTextIcon,
     MessagesSquareIcon,
@@ -60,6 +61,19 @@ export const modelInfo: Partial<
         description:
             "Anthropic's latest model, great for various applications.",
         icon: SparklesIcon,
+        provider: ModelProvider.Anthropic
+    },
+    claude3opus: {
+        name: "Claude 3 Opus",
+        description: "Powerful Anthropic model for highly complex tasks.",
+        icon: LightbulbIcon,
+        provider: ModelProvider.Anthropic
+    },
+    claude3haiku: {
+        name: "Claude 3 Haiku",
+        description:
+            "Fastest and most compact model for near-instant responses.",
+        icon: ZapIcon,
         provider: ModelProvider.Anthropic
     },
     chatgpt4o: {
