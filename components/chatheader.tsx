@@ -24,7 +24,8 @@ import {
     MessageSquareTextIcon,
     MessagesSquareIcon,
     SettingsIcon,
-    SparklesIcon
+    SparklesIcon,
+    WrenchIcon
 } from "lucide-react";
 import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
@@ -75,7 +76,7 @@ export const modelInfo: Partial<
         provider: ModelProvider.OpenAI
     },
     gpt4omini: {
-        name: "GPT-4o Mini",
+        name: "GPT-4o mini",
         description: "Fast and efficient for most everyday tasks.",
         icon: ZapIcon,
         provider: ModelProvider.OpenAI
@@ -94,12 +95,13 @@ export const modelInfo: Partial<
         icon: GaugeIcon,
         provider: ModelProvider.Groq
     },
-    // llama_3_70b_tool_use: {
-    //     name: "Llama 3 70B Tools (Groq)",
-    //     description:
-    //         "Previous gen Llama model from Groq specifically designed for advanced tool use.",
-    //     icon: WrenchIcon
-    // },
+    llama_3_70b_tool_use: {
+        name: "Llama 3 70B Tools (Groq)",
+        description:
+            "Previous gen Llama model from Groq specifically designed for advanced tool use.",
+        icon: WrenchIcon,
+        provider: ModelProvider.Groq
+    },
     mixtral_8x7b: {
         name: "Mixtral 8x7B (Groq)",
         description: "Open source Mixtral of experts model from Mistral AI.",

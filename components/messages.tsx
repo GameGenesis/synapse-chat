@@ -16,7 +16,6 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import { RefreshIcon } from "./icons";
-import { modelInfo } from "./chatheader";
 import {
     ClipboardCheckIcon,
     ClipboardCopyIcon,
@@ -26,6 +25,7 @@ import {
 import { USER_NAME } from "@/app/api/chat/config";
 import { Message } from "ai";
 import dynamic from "next/dynamic";
+import { models } from "@/lib/utils/model-provider";
 
 const ImageGallery = dynamic(
     () => import("@/components/tools").then((mod) => mod.ImageGallery),
@@ -439,13 +439,15 @@ export const AssistantMessage = ({
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger className="flex align-middle">
-                                            <Badge>{message.model}</Badge>
+                                            <Badge>
+                                                {models[message.model]?.name}
+                                            </Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <div className="flex flex-col space-y-1 max-w-96 overflow-auto">
                                                 <span className="font-bold text-sm">
                                                     {
-                                                        modelInfo[message.model]
+                                                        models[message.model]
                                                             ?.name
                                                     }
                                                 </span>
