@@ -29,7 +29,7 @@ ${JSON.stringify(messages)}
     const content = `This is a summary of past conversation messages between the user and assistant:\n${text}`;
     console.log(content);
 
-    return { role: "assistant", content } as CoreMessage;
+    return { role: "user", content } as CoreMessage;
 };
 
 // When summarizing, usually takes around 1s (0.9s - 1.5s) to process with gpt-4o-mini
