@@ -1,4 +1,4 @@
-import { convertToCoreMessages, CoreTool, StreamData, streamText } from "ai";
+import { convertToCoreMessages, StreamData, streamText } from "ai";
 import {
     getModel,
     ModelKey,

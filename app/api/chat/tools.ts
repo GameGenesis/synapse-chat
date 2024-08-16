@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import OpenAI from "openai";
 
-import { createAISDKTools } from "@agentic/stdlib/ai-sdk";
+import { createAISDKTools } from "@agentic/ai-sdk";
 import {
     BingClient,
     JinaClient,
