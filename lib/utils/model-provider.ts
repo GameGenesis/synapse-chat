@@ -1,6 +1,10 @@
 import { openai, createOpenAI } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
+
+const anthropic = createAnthropic({
+    headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" }
+})
 
 const groq = createOpenAI({
     baseURL: "https://api.groq.com/openai/v1",
