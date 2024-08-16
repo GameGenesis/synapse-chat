@@ -51,7 +51,7 @@ const getToolsToUse = (
 
     if (toolChoice === "none" || unsupportedToolUseModels.includes(model)) {
         return {
-            toolChoice,
+            toolChoice: "none",
             tools: model === "agents" ? { call_agents: agentsTool } : {}
         };
     }
@@ -90,16 +90,6 @@ export async function POST(req: Request) {
     const modelToUse = determineModel(model, cloneObject(messages));
     const useAgents = model === "agents";
 
-    const system = useAgents
-        ? `${agentsPrompt}${toolsPrompt}`
-        : buildPrompt(
-              enableArtifacts && !unsupportedArtifactUseModels.includes(model),
-              enableInstructions,
-              enableSafeguards,
-              toolChoice !== "none",
-              customInstructions
-          );
-
     const { toolChoice: finalToolChoice, tools: toolsToUse } = getToolsToUse(
         toolChoice,
         model,
@@ -110,6 +100,16 @@ export async function POST(req: Request) {
         topP: finalTopP,
         maxTokens: finalMaxTokens
     } = useAgents ? DEFAULT_AGENT_SETTINGS : { temperature, topP, maxTokens };
+
+    const system = useAgents
+    ? `${agentsPrompt}${toolsPrompt}`
+    : buildPrompt(
+          enableArtifacts && !unsupportedArtifactUseModels.includes(model),
+          enableInstructions,
+          enableSafeguards,
+          finalToolChoice !== "none",
+          customInstructions
+      );
 
     console.log("MODE:", model, ", MODEL:", modelToUse);
 
