@@ -16,6 +16,7 @@ import {
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 import { limitMessages } from "@/lib/utils/message-manager";
+import { extractMemory } from "@/lib/utils/memory-manager";
 
 export const maxDuration = 1000;
 
@@ -117,6 +118,8 @@ export async function POST(req: Request) {
         [...messages],
         messageLimit
     )) as any;
+
+    extractMemory(messages[messages.length - 1].content);
 
     const data = new StreamData();
     const result = await streamText({
