@@ -23,6 +23,7 @@ const settingsSchema: Schema = new Schema({
 const userSchema: Schema = new Schema(
     {
         _id: { type: String, required: true },
+        name: { type: String, default: "User", required: true },
         memories: { type: [memorySchema], required: true },
         settings: { type: settingsSchema, required: true },
         chats: [{ type: String, ref: "Chat" }]
