@@ -144,10 +144,26 @@ export const findRelevantMemories = async (
         similarity: cosineSimilarity(userQueryEmbedding, memory.embedding)
     }));
 
-    const relevantMemories = memories
+    // Sort memories by similarity in descending order
+    const sortedMemories = memories.sort(
+        (a: any, b: any) => b.similarity - a.similarity
+    );
+
+    // Filter memories above the threshold
+    const relevantMemories = sortedMemories
         .filter((memory: any) => memory.similarity > similarityThreshold)
-        .sort((a: any, b: any) => b.similarity - a.similarity)
         .slice(0, limit);
 
-    return relevantMemories.map((memory: any) => memory.content);
+    // If there are relevant memories above the threshold, return them
+    if (relevantMemories.length > 0) {
+        return relevantMemories.map((memory: any) => memory.content);
+    }
+
+    // If there are no memories above the threshold, check if there's at least one memory with similarity > 0
+    const mostRelevantMemory = sortedMemories.find(
+        (memory: any) => memory.similarity > 0
+    );
+
+    // If there's a memory with similarity > 0, return it; otherwise, return an empty array
+    return mostRelevantMemory ? [mostRelevantMemory.content] : [];
 };
