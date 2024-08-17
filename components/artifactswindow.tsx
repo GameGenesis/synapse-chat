@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, {
+    useState,
+    useCallback,
+    useEffect,
+    useRef,
+    MutableRefObject
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
     CheckCircleIcon,
@@ -48,6 +54,7 @@ interface Props {
     setCurrentArtifactIndex: (index: number) => void;
     activeTab: string;
     setActiveTab: (tab: string) => void;
+    isStreamingArtifactRef: MutableRefObject<boolean>;
 }
 
 export function ArtifactsWindow({
@@ -57,7 +64,8 @@ export function ArtifactsWindow({
     currentArtifactIndex,
     setCurrentArtifactIndex,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    isStreamingArtifactRef
 }: Props) {
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloaded, setIsDownloaded] = useState(false);
@@ -70,16 +78,14 @@ export function ArtifactsWindow({
     const [html, setHtml] = useState("");
 
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-    const [shareableLink, setShareableLink] = useState("");
     const [isPublishing, setIsPublishing] = useState(false);
-    const [isPublished, setIsPublished] = useState(false);
 
     const handleShareClick = useCallback(() => {
         setIsShareDialogOpen(true);
     }, []);
 
     const handlePublishArtifact = useCallback(async () => {
-        if (currentArtifact && !isPublished) {
+        if (currentArtifact && !currentArtifact.shareableURL) {
             setIsPublishing(true);
             try {
                 const response = await fetch("/api/artifacts", {
@@ -93,8 +99,7 @@ export function ArtifactsWindow({
                 if (response.ok) {
                     const { id } = await response.json();
                     const link = `${window.location.origin}/artifacts/${id}`;
-                    setShareableLink(link);
-                    setIsPublished(true);
+                    currentArtifact.shareableURL = link;
                 } else {
                     console.error("Failed to publish artifact");
                 }
@@ -104,7 +109,7 @@ export function ArtifactsWindow({
                 setIsPublishing(false);
             }
         }
-    }, [currentArtifact, isPublished]);
+    }, [currentArtifact]);
 
     useEffect(() => {
         setConsoleLogs([]);
@@ -393,18 +398,20 @@ export function ArtifactsWindow({
                             )}
                             <span className="sr-only">Download</span>
                         </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full"
-                            onClick={handleRefreshPreview}
-                            disabled={
-                                !currentArtifact || !currentArtifact.content
-                            }
-                        >
-                            <RefreshIcon className="w-5 h-5" />
-                            <span className="sr-only">Refresh Preview</span>
-                        </Button>
+                        {currentArtifact?.type !== "application/code" && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                                onClick={handleRefreshPreview}
+                                disabled={
+                                    !currentArtifact || !currentArtifact.content
+                                }
+                            >
+                                <RefreshIcon className="w-5 h-5" />
+                                <span className="sr-only">Refresh Preview</span>
+                            </Button>
+                        )}
                         {currentArtifact?.type !== "application/code" && (
                             <Button
                                 variant="ghost"
@@ -412,7 +419,9 @@ export function ArtifactsWindow({
                                 className="rounded-full"
                                 onClick={handleShareClick}
                                 disabled={
-                                    !currentArtifact || !currentArtifact.content
+                                    !currentArtifact ||
+                                    !currentArtifact.content ||
+                                    isStreamingArtifactRef.current
                                 }
                             >
                                 <ShareIcon className="w-5 h-5" />
@@ -454,18 +463,21 @@ export function ArtifactsWindow({
                     <DialogHeader>
                         <DialogTitle>Share Artifact</DialogTitle>
                         <DialogDescription>
-                            {isPublished
+                            {currentArtifact.shareableURL
                                 ? "Copy the link below to share this artifact:"
                                 : "Publish this artifact to generate a shareable link."}
                         </DialogDescription>
                     </DialogHeader>
-                    {isPublished ? (
+                    {currentArtifact.shareableURL ? (
                         <>
-                            <Input value={shareableLink} readOnly />
+                            <Input
+                                value={currentArtifact.shareableURL}
+                                readOnly
+                            />
                             <Button
                                 onClick={() => {
                                     navigator.clipboard.writeText(
-                                        shareableLink
+                                        currentArtifact.shareableURL!
                                     );
                                     setIsShareDialogOpen(false);
                                 }}

@@ -7,6 +7,7 @@ export interface Artifact {
     language: string;
     title: string;
     content: string;
+    shareableURL?: string;
 }
 
 export interface CodeProps {

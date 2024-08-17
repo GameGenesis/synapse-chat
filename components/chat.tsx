@@ -611,6 +611,7 @@ export function Chat({ userId }: { userId: string }) {
                     setCurrentArtifactIndex={setCurrentArtifactIndex}
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    isStreamingArtifactRef={isStreamingArtifactRef}
                 />
             </div>
         </div>

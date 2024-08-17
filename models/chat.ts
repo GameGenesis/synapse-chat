@@ -1,12 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
-const artifactSchema: Schema = new Schema({
-    identifier: { type: String, required: true },
-    type: { type: String },
-    language: { type: String },
-    title: { type: String },
-    content: { type: String }
-});
+import { artifactSchema } from "./artifact";
 
 const stateSchema: Schema = new Schema({
     content: { type: String },
