@@ -19,7 +19,7 @@ import { limitMessages } from "@/lib/utils/message-manager";
 import {
     findRelevantMemories,
     extractMemory
-} from "@/lib/utils/memory-manager";
+} from "@/lib/memory";
 
 export const maxDuration = 100; // Timeout in seconds
 
