@@ -17,6 +17,15 @@ import dynamic from "next/dynamic";
 import { captureConsoleLogs } from "@/lib/utils/capture-logs";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
 import { highlightCode } from "@/lib/utils/highlight";
+import { ShareIcon } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui";
 
 const PreviewComponent = dynamic(
     () => import("./artifactpreview").then((mod) => mod.default),
@@ -59,6 +68,36 @@ export function ArtifactsWindow({
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     const [html, setHtml] = useState("");
+
+    // Add these state variables
+    const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+    const [shareableLink, setShareableLink] = useState("");
+
+    // Add this function to generate a shareable link
+    const generateShareableLink = useCallback(async () => {
+        if (currentArtifact) {
+            try {
+                const response = await fetch("/api/artifacts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(currentArtifact)
+                });
+
+                if (response.ok) {
+                    const { id } = await response.json();
+                    const link = `${window.location.origin}/artifacts/${id}`;
+                    setShareableLink(link);
+                    setIsShareDialogOpen(true);
+                } else {
+                    console.error("Failed to save artifact");
+                }
+            } catch (error) {
+                console.error("Error saving artifact:", error);
+            }
+        }
+    }, [currentArtifact]);
 
     useEffect(() => {
         setConsoleLogs([]);
@@ -255,128 +294,174 @@ export function ArtifactsWindow({
     if (!isOpen) return null;
 
     return (
-        <div className="max-w-[45%] w-[45%] overflow-x-hidden bg-background border-l flex flex-col h-full">
-            <div className="flex items-center justify-between px-4 py-2 border-b">
-                <h3 className="text-md font-medium truncate pr-4">
-                    {currentArtifact?.title || "Artifacts"}
-                </h3>
-                <div className="flex items-center gap-4">
-                    {currentArtifact?.type !== "application/code" && (
-                        <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+        <>
+            <div className="max-w-[45%] w-[45%] overflow-x-hidden bg-background border-l flex flex-col h-full">
+                <div className="flex items-center justify-between px-4 py-2 border-b">
+                    <h3 className="text-md font-medium truncate pr-4">
+                        {currentArtifact?.title || "Artifacts"}
+                    </h3>
+                    <div className="flex items-center gap-4">
+                        {currentArtifact?.type !== "application/code" && (
+                            <div className="flex items-center gap-2 px-1 py-1 rounded-full bg-muted">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-3 py-1 rounded-full ${
+                                        activeTab === "preview"
+                                            ? "bg-background text-foreground hover:bg-white"
+                                            : "text-muted-foreground"
+                                    }`}
+                                    onClick={() => setActiveTab("preview")}
+                                >
+                                    Preview
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-3 py-1 rounded-full ${
+                                        activeTab === "code"
+                                            ? "bg-background text-foreground hover:bg-white"
+                                            : "text-muted-foreground"
+                                    }`}
+                                    onClick={() => setActiveTab("code")}
+                                >
+                                    Code
+                                </Button>
+                            </div>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={onClose}
+                        >
+                            <XIcon className="w-5 h-5" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </div>
+                </div>
+                <div className="flex-grow overflow-hidden">
+                    {activeTab === "preview" &&
+                        currentArtifact?.type !== "application/code" && (
+                            <div className="h-full overflow-y-auto">
+                                {renderArtifactPreview(currentArtifact!)}
+                            </div>
+                        )}
+                    {(activeTab === "code" ||
+                        currentArtifact?.type === "application/code") &&
+                        currentArtifact &&
+                        renderCode(currentArtifact)}
+                </div>
+                <div className="border-t flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={handleCopyCode}
+                            disabled={
+                                !currentArtifact || !currentArtifact.content
+                            }
+                        >
+                            {isCopied ? (
+                                <CheckCircleIcon className="w-5 h-5" />
+                            ) : (
+                                <CopyIcon className="w-5 h-5" />
+                            )}
+                            <span className="sr-only">Copy</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={handleDownload}
+                            disabled={
+                                !currentArtifact || !currentArtifact.content
+                            }
+                        >
+                            {isDownloaded ? (
+                                <CheckCircleIcon className="w-5 h-5" />
+                            ) : (
+                                <DownloadIcon className="w-5 h-5" />
+                            )}
+                            <span className="sr-only">Download</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={handleRefreshPreview}
+                            disabled={
+                                !currentArtifact || !currentArtifact.content
+                            }
+                        >
+                            <RefreshIcon className="w-5 h-5" />
+                            <span className="sr-only">Refresh Preview</span>
+                        </Button>
+                        {currentArtifact?.type !== "application/code" && (
                             <Button
                                 variant="ghost"
-                                size="sm"
-                                className={`px-3 py-1 rounded-full ${
-                                    activeTab === "preview"
-                                        ? "bg-background text-foreground hover:bg-white"
-                                        : "text-muted-foreground"
-                                }`}
-                                onClick={() => setActiveTab("preview")}
+                                size="icon"
+                                className="rounded-full"
+                                onClick={generateShareableLink}
+                                disabled={
+                                    !currentArtifact || !currentArtifact.content
+                                }
                             >
-                                Preview
+                                <ShareIcon className="w-5 h-5" />
+                                <span className="sr-only">Share</span>
                             </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`px-3 py-1 rounded-full ${
-                                    activeTab === "code"
-                                        ? "bg-background text-foreground hover:bg-white"
-                                        : "text-muted-foreground"
-                                }`}
-                                onClick={() => setActiveTab("code")}
-                            >
-                                Code
-                            </Button>
-                        </div>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={onClose}
-                    >
-                        <XIcon className="w-5 h-5" />
-                        <span className="sr-only">Close</span>
-                    </Button>
-                </div>
-            </div>
-            <div className="flex-grow overflow-hidden">
-                {activeTab === "preview" &&
-                    currentArtifact?.type !== "application/code" && (
-                        <div className="h-full overflow-y-auto">
-                            {renderArtifactPreview(currentArtifact!)}
-                        </div>
-                    )}
-                {(activeTab === "code" ||
-                    currentArtifact?.type === "application/code") &&
-                    currentArtifact &&
-                    renderCode(currentArtifact)}
-            </div>
-            <div className="border-t flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={handleCopyCode}
-                        disabled={!currentArtifact || !currentArtifact.content}
-                    >
-                        {isCopied ? (
-                            <CheckCircleIcon className="w-5 h-5" />
-                        ) : (
-                            <CopyIcon className="w-5 h-5" />
                         )}
-                        <span className="sr-only">Copy</span>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={handleDownload}
-                        disabled={!currentArtifact || !currentArtifact.content}
-                    >
-                        {isDownloaded ? (
-                            <CheckCircleIcon className="w-5 h-5" />
-                        ) : (
-                            <DownloadIcon className="w-5 h-5" />
-                        )}
-                        <span className="sr-only">Download</span>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={handleRefreshPreview}
-                        disabled={!currentArtifact || !currentArtifact.content}
-                    >
-                        <RefreshIcon className="w-5 h-5" />
-                        <span className="sr-only">Refresh Preview</span>
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={handlePreviousArtifact}
-                        disabled={currentArtifactIndex <= 0}
-                    >
-                        <ChevronLeftIcon className="w-5 h-5" />
-                        <span className="sr-only">Previous</span>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={handleNextArtifact}
-                        disabled={currentArtifactIndex >= artifacts.length - 1}
-                    >
-                        <ChevronRightIcon className="w-5 h-5" />
-                        <span className="sr-only">Next</span>
-                    </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={handlePreviousArtifact}
+                            disabled={currentArtifactIndex <= 0}
+                        >
+                            <ChevronLeftIcon className="w-5 h-5" />
+                            <span className="sr-only">Previous</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={handleNextArtifact}
+                            disabled={
+                                currentArtifactIndex >= artifacts.length - 1
+                            }
+                        >
+                            <ChevronRightIcon className="w-5 h-5" />
+                            <span className="sr-only">Next</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
+            <Dialog
+                open={isShareDialogOpen}
+                onOpenChange={setIsShareDialogOpen}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Share Artifact</DialogTitle>
+                        <DialogDescription>
+                            Copy the link below to share this artifact:
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Input value={shareableLink} readOnly />
+                    <Button
+                        onClick={() => {
+                            navigator.clipboard.writeText(shareableLink);
+                            setIsShareDialogOpen(false);
+                        }}
+                    >
+                        Copy Link
+                    </Button>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
 
