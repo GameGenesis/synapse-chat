@@ -28,7 +28,8 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
 export const findRelevantMemories = async (
     userQuery: string,
     userId: string,
-    limit: number = 4
+    limit: number = 4,
+    similarityThreshold: number = 0.5
 ) => {
     const userQueryEmbedding = await generateEmbedding(userQuery);
 
@@ -50,7 +51,7 @@ export const findRelevantMemories = async (
     }));
 
     const relevantMemories = memories
-        .filter((memory: any) => memory.similarity > 0.5)
+        .filter((memory: any) => memory.similarity > similarityThreshold)
         .sort((a: any, b: any) => b.similarity - a.similarity)
         .slice(0, limit);
 

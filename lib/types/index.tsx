@@ -69,12 +69,13 @@ export type State = {
 export type Settings = {
     model: ModelKey;
     temperature: number;
-    topP: number;
     maxTokens: number;
+    topP: number;
     messageLimit: number;
     enableArtifacts: boolean;
     enableInstructions: boolean;
     enableSafeguards: boolean;
+    enableMemory: boolean;
     customInstructions: string;
     toolChoice: ToolChoice;
 };
@@ -83,14 +84,15 @@ export type Action =
     | { type: "SET_CHAT_ID"; payload: string | null }
     | { type: "SET_MODEL"; payload: ModelKey }
     | { type: "SET_TEMPERATURE"; payload: number }
-    | { type: "SET_TOP_P"; payload: number }
     | { type: "SET_MAX_TOKENS"; payload: number }
+    | { type: "SET_TOP_P"; payload: number }
     | { type: "SET_MESSAGE_LIMIT"; payload: number }
     | { type: "SET_ENABLE_ARTIFACTS"; payload: boolean }
     | { type: "SET_ENABLE_INSTRUCTIONS"; payload: boolean }
     | { type: "SET_ENABLE_SAFEGUARDS"; payload: boolean }
     | { type: "SET_ENABLE_TOOLS"; payload: boolean }
     | { type: "SET_ENABLE_PASTE_TO_FILE"; payload: boolean }
+    | { type: "SET_ENABLE_MEMORY"; payload: boolean }
     | { type: "SET_CUSTOM_INSTRUCTIONS"; payload: string }
     | { type: "SET_TOOL_CHOICE"; payload: ToolChoice };
 

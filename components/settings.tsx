@@ -382,6 +382,21 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         }
                                     />
                                 </div>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="enableMemory">
+                                        Enable Memory
+                                    </Label>
+                                    <Switch
+                                        id="enableMemory"
+                                        checked={state.enableMemory}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_MEMORY",
+                                                payload: checked
+                                            })
+                                        }
+                                    />
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>

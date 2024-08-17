@@ -85,6 +85,7 @@ export async function POST(req: Request) {
         enableArtifacts,
         enableInstructions,
         enableSafeguards,
+        enableMemory,
         customInstructions,
         toolChoice
     } = settings;
@@ -111,7 +112,9 @@ export async function POST(req: Request) {
     )) as any;
 
     const lastMessage = messages[messages.length - 1].content;
-    const relevantMemories = await findRelevantMemories(lastMessage, userId); // This can be a tool as well
+    const relevantMemories = enableMemory
+        ? await findRelevantMemories(lastMessage, userId)
+        : []; // This can be a tool as well
 
     // Add relevant memories to the system prompt
     const memoriesPrompt =
@@ -132,7 +135,9 @@ export async function POST(req: Request) {
               customInstructions
           );
 
-    extractMemory(lastMessage, userId);
+    if (enableMemory) {
+        extractMemory(lastMessage, userId);
+    }
 
     const data = new StreamData();
     const result = await streamText({

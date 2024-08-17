@@ -48,6 +48,7 @@ Each memory should be a single, clear sentence that captures the essence of the 
 - Graduated from Harvard University with a degree in Computer Science.
 - Moved to a new city, San Francisco, for a job at Google.
 - Daughter has a milk allergy.
+- Enjoys working out at the gym.
 
 ### Examples of bad memory extractions:
 - John did some stuff. (Too vague)
@@ -78,21 +79,22 @@ Remember, the goal is to store only truly significant information that may be va
         maxTokens: 512
     });
 
-    console.log(JSON.stringify(object));
     const memories = object.memories;
 
     if (!memories || memories.length === 0) {
         return;
     }
 
+    console.log("MEMORY UPDATED: ", memories.join(", "))
+
     const embeddedMemories = await generateEmbeddings(memories);
 
-  // Store memories in the database
-  await User.findByIdAndUpdate(
-    userId,
-    { $push: { memories: { $each: embeddedMemories } } },
-    { new: true }
-  );
+    // Store memories in the database
+    await User.findByIdAndUpdate(
+        userId,
+        { $push: { memories: { $each: embeddedMemories } } },
+        { new: true }
+    );
 
-  return embeddedMemories;
+    return embeddedMemories;
 };

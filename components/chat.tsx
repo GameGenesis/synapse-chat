@@ -15,6 +15,7 @@ import SettingsMenu from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
     DEFAULT_ENABLE_INSTRUCTIONS,
+    DEFAULT_ENABLE_MEMORY,
     DEFAULT_ENABLE_PASTE_TO_FILE,
     DEFAULT_ENABLE_SAFEGUARDS,
     DEFAULT_MAX_TOKENS,
@@ -46,10 +47,10 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, model: action.payload };
         case "SET_TEMPERATURE":
             return { ...state, temperature: action.payload };
-        case "SET_TOP_P":
-            return { ...state, topP: action.payload };
         case "SET_MAX_TOKENS":
             return { ...state, maxTokens: action.payload };
+        case "SET_TOP_P":
+            return { ...state, topP: action.payload };
         case "SET_MESSAGE_LIMIT":
             return { ...state, messageLimit: action.payload };
         case "SET_ENABLE_ARTIFACTS":
@@ -60,6 +61,8 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, enableSafeguards: action.payload };
         case "SET_ENABLE_PASTE_TO_FILE":
             return { ...state, enablePasteToFile: action.payload };
+        case "SET_ENABLE_MEMORY":
+            return { ...state, enableMemory: action.payload };
         case "SET_CUSTOM_INSTRUCTIONS":
             return { ...state, customInstructions: action.payload };
         case "SET_TOOL_CHOICE":
@@ -81,6 +84,7 @@ export function Chat({ userId }: { userId: string }) {
         enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
         enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
         enablePasteToFile: DEFAULT_ENABLE_PASTE_TO_FILE,
+        enableMemory: DEFAULT_ENABLE_MEMORY,
         toolChoice: DEFAULT_TOOL_CHOICE,
         customInstructions: ""
     });
