@@ -3,6 +3,7 @@ import { models, getModel } from "./model-provider";
 import { z } from "zod";
 import { generateEmbedding, generateEmbeddings } from "@/lib/utils/embeddings";
 import User from "@/models/user";
+import { date } from "@/app/api/chat/config";
 
 export const extractMemory = async (message: string, userId: string) => {
     if (!message || !userId) {
@@ -67,6 +68,7 @@ Each memory should be a single, clear sentence that captures the essence of the 
 - If important information is identified, output an array containing each extracted memory as a single, clear sentence.
 - Preferably extract a maximum of one to two important memories per message.
 
+The current date is ${date}.
 Remember, the goal is to store only truly significant information that may be valuable for future reference or decision-making.
 `,
         schema: z.object({
