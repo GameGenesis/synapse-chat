@@ -30,12 +30,14 @@ First, analyze the message step by step using innerThinking to determine if any 
 5. Extract factual information that may be useful in the future
 6. Always remember information that the user specifically instructs the assistant to remember (e.g. "Remember that I'm allergic to eggs.")
 7. Only remember realistic information, not hypotheticals
+8. Ensure the user is speaking about their own life (usually using first person) and not providing general information about another unrelated public or imaginary figure
 
 ### Guidelines for formulating memories:
 1. Be very concise and to the point, but descriptive
 2. Focus on the most crucial information
 3. Avoid unnecessary details
 4. Use clear and straightforward language in a single sentence
+5. Include generalizable types or tags for the memory in parentheses after the memory.
 
 Each memory should be a single, clear sentence that captures the essence of the information. This information should be related to the user and the user's circumstances. Do not include multiple separate pieces of information in one memory.
 
@@ -45,12 +47,12 @@ Each memory should be a single, clear sentence that captures the essence of the 
 - The detail about John's new job in San Francisco is relevant for his future career path, so it should be captured.
 
 ### Examples of good memory extractions:
-- User's name is John.
-- John got married to Sarah on June 15, 2023.
-- Graduated from Harvard University with a degree in Computer Science.
-- Moved to a new city, San Francisco, for a job at Google.
-- Daughter has a milk allergy.
-- Enjoys working out at the gym.
+- User's name is John (personal).
+- John got married to Sarah on June 15, 2023 (relationships, family).
+- Graduated from Harvard University with a degree in Computer Science (education).
+- Moved to a new city, San Francisco, for a job at Google (career, professional life).
+- Daughter has a milk allergy (dietary, allergy).
+- Enjoys working out at the gym (lifestyle, hobby, interest).
 
 ### Examples of bad memory extractions:
 - John did some stuff. (Too vague)
@@ -75,7 +77,7 @@ Remember, the goal is to store only truly significant information that may be va
             memories: z
                 .array(z.string())
                 .describe(
-                    "The information to store as a memory or memories. Keep this brief, concise, but descriptive."
+                    "The information to store as a memory or memories. Keep this brief, concise, but descriptive. Include generalizable types or tags for the memory (e.g. hobby, dietary, etc.) in parenthesis. "
                 )
                 
         }),
