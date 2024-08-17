@@ -26,7 +26,7 @@ First, analyze the message step by step using innerThinking to determine if any 
 1. Focus on significant events, achievements, or milestones related to the user
 2. Include important personal information (e.g., names, relationships, dates)
 3. Capture unique experiences or notable changes in circumstances
-4. Identify strong emotions or impactful realizations
+4. Identify strong emotions, opinions, preferences, or impactful realizations
 5. Extract factual information that may be useful in the future
 6. Always remember information that the user specifically instructs the assistant to remember (e.g. "Remember that I'm allergic to eggs.")
 7. Only remember realistic information, not hypotheticals
@@ -53,6 +53,7 @@ Each memory should be a single, clear sentence that captures the essence of the 
 - Moved to a new city, San Francisco, for a job at Google (career, professional life).
 - Daughter has a milk allergy (dietary, allergy).
 - Enjoys working out at the gym (lifestyle, hobby, interest).
+- Doesn't trust BBC News (preference, opinion, news, search).
 
 ### Examples of bad memory extractions:
 - John did some stuff. (Too vague)
