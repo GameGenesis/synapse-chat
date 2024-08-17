@@ -20,7 +20,7 @@ export const captureConsoleLogs = (iframe: HTMLIFrameElement, callback: (log: st
       })();
     `;
     
-    iframe.contentDocument?.head.appendChild(script);
+    iframe.contentDocument?.head?.appendChild(script);
   
     const handleMessage = (event: MessageEvent) => {
       if (event.source === iframe.contentWindow) {
