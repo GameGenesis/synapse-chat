@@ -1,13 +1,14 @@
 "use client";
 
 import { Chat } from "@/components/chat";
-import { Toaster } from "react-hot-toast";
+import { generateId } from "ai";
 
 export default function Page() {
+    const id = generateId();
+
     return (
         <>
-            <Toaster position="top-center" />
-            <Chat userId="1" />
+            <Chat userId="1" chatId={id} />
         </>
     );
 }

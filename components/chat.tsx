@@ -32,7 +32,8 @@ import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/lib/utils/save-chat";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
-import { generateId } from "ai";
+import { Message } from "ai";
+import { usePathname, useRouter } from "next/navigation";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -72,9 +73,9 @@ const reducer = (state: State, action: Action): State => {
     }
 };
 
-export function Chat({ userId }: { userId: string }) {
+export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     const [state, dispatch] = useReducer(reducer, {
-        chatId: null,
+        chatId: chatId || null,
         model: DEFAULT_MODEL,
         temperature: DEFAULT_TEMPERATURE,
         topP: DEFAULT_TOPP,
@@ -100,7 +101,6 @@ export function Chat({ userId }: { userId: string }) {
     const lastProcessedMessageRef = useRef<string | null>(null);
     const lastDataIndexRef = useRef<number | undefined>();
     const shouldSaveRef = useRef(false);
-    const chatIdRef = useRef<string | null>(null);
     const combinedMessagesRef = useRef<CombinedMessage[]>([]);
 
     const [showContinueButton, setShowContinueButton] = useState(false);
@@ -153,9 +153,67 @@ export function Chat({ userId }: { userId: string }) {
         async onToolCall({ toolCall }) {}
     });
 
+    const router = useRouter();
+    const path = usePathname();
+
     useEffect(() => {
-        chatIdRef.current = state.chatId;
-    }, [state.chatId]);
+        if (!path.includes("chat") && messages.length === 1) {
+            window.history.replaceState({}, "", `/chat/${state.chatId}`);
+        }
+    }, [chatId, messages, path]);
+
+    useEffect(() => {
+        const messagesLength = messages?.length;
+        if (messagesLength === 2) {
+            router.refresh();
+        }
+    }, [messages, router]);
+
+    useEffect(() => {
+        const loadExistingChat = async () => {
+            if (chatId) {
+                try {
+                    const response = await fetch(`/api/chat/${chatId}`);
+                    if (response.ok) {
+                        const chatData = await response.json();
+                        const newCombinedMessages = chatData.messages.slice();
+                        const newMessages = newCombinedMessages.map(
+                            (message: CombinedMessage) => ({
+                                id: message.id,
+                                role: message.role,
+                                content: message.originalContent,
+                                toolInvocations: message.toolInvocations
+                            })
+                        ) as Message[];
+                        setMessages(newMessages);
+                        setCombinedMessages(newCombinedMessages);
+                        setArtifacts(
+                            newCombinedMessages
+                                ?.map(
+                                    (message: CombinedMessage) =>
+                                        message.artifact
+                                )
+                                .filter(
+                                    (artifact: Artifact | undefined) =>
+                                        artifact !== undefined
+                                ) as Artifact[]
+                        );
+                    } else {
+                        console.error("Failed to load chat data");
+                    }
+                } catch (error) {
+                    console.error("Error loading chat data:", error);
+                }
+            }
+        };
+
+        dispatch({
+            type: "SET_CHAT_ID",
+            payload: chatId
+        });
+
+        loadExistingChat();
+    }, [chatId]);
 
     useEffect(() => {
         if (combinedMessages.length > 0) {
@@ -166,15 +224,6 @@ export function Chat({ userId }: { userId: string }) {
     }, [combinedMessages]);
 
     const save = useCallback(async () => {
-        if (!chatIdRef.current) {
-            const newChatId = generateId();
-            dispatch({
-                type: "SET_CHAT_ID",
-                payload: newChatId
-            });
-            chatIdRef.current = newChatId;
-        }
-
         if (
             !combinedMessagesRef.current ||
             combinedMessagesRef.current.length === 0
@@ -186,7 +235,7 @@ export function Chat({ userId }: { userId: string }) {
         console.log("Saving...");
         await saveChat(
             userId,
-            chatIdRef.current,
+            state.chatId!,
             combinedMessagesRef.current,
             state
         );
@@ -545,28 +594,14 @@ export function Chat({ userId }: { userId: string }) {
                             dispatch({ type: "SET_MODEL", payload: newModel })
                         }
                         onOpenSettings={() => setIsSettingsOpen(true)}
-                        onNewChat={() => {
-                            stop();
-                            save().then(() => {
-                                setMessages([]);
-                                setCombinedMessages([]);
-                                setArtifacts([]);
-                                setCurrentArtifactIndex(-1);
-                                setIsArtifactsOpen(false);
-                                setShowContinueButton(false);
-                                dispatch({
-                                    type: "SET_CHAT_ID",
-                                    payload: generateId()
-                                });
-                            });
-                        }}
                     />
                     <div
                         ref={messagesContainerRef}
                         className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
                     >
                         <div className="flex-shrink h-full p-4 space-y-4 max-w-[700px] mx-auto">
-                            {combinedMessages.length === 0 ? (
+                            {combinedMessages.length === 0 &&
+                            !path.includes("chat") ? (
                                 <DefaultPrompts addMessage={append} />
                             ) : (
                                 <Messages

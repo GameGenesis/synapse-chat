@@ -1,23 +1,17 @@
 import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface Props {
-    onNewChat: () => void;
-    onClose: () => void;
-}
-
-const Sidebar = ({ onNewChat, onClose }: Props) => {
+const Sidebar = () => {
+    const router = useRouter();
     return (
         <div className="flex flex-col h-full bg-background mt-2">
             <div className="p-4 border-b">
                 <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => {
-                        onNewChat();
-                        onClose();
-                    }}
+                    onClick={() => router.push("/chat")}
                 >
                     <MessageSquarePlusIcon className="mr-2 h-5 w-5" />
                     New chat

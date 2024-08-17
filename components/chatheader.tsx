@@ -32,18 +32,9 @@ import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
-
-interface Props {
-    artifacts: boolean;
-    isArtifactsOpen: boolean;
-    setIsArtifactsOpen: (open: boolean) => void;
-    selectedModel: ModelKey;
-    onModelSelect: (model: ModelKey) => void;
-    onOpenSettings: () => void;
-    onNewChat: () => void;
-}
 
 export const modelInfo: Partial<
     Record<
@@ -136,15 +127,24 @@ export const modelInfo: Partial<
     }
 };
 
+interface Props {
+    artifacts: boolean;
+    isArtifactsOpen: boolean;
+    setIsArtifactsOpen: (open: boolean) => void;
+    selectedModel: ModelKey;
+    onModelSelect: (model: ModelKey) => void;
+    onOpenSettings: () => void;
+}
+
 const ChatHeader = ({
     artifacts,
     isArtifactsOpen,
     setIsArtifactsOpen,
     selectedModel,
     onModelSelect,
-    onOpenSettings,
-    onNewChat
+    onOpenSettings
 }: Props) => {
+    const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -154,14 +154,6 @@ const ChatHeader = ({
 
     const getModelDisplayName = (modelKey: ModelKey) => {
         return modelInfo[modelKey]?.name;
-    };
-
-    const getModelDescription = (modelKey: ModelKey) => {
-        return modelInfo[modelKey]?.description;
-    };
-
-    const getModelIcon = (modelKey: ModelKey) => {
-        return modelInfo[modelKey]?.icon || SparkleIcon;
     };
 
     const groupedModels = useMemo(() => {
@@ -195,18 +187,15 @@ const ChatHeader = ({
                             side="left"
                             className="w-[300px] sm:w-[400px] p-0"
                         >
-                            <Sidebar
-                                onNewChat={onNewChat}
-                                onClose={() => setIsSidebarOpen(false)}
-                            />
+                            <Sidebar />
                         </SheetContent>
                     </Sheet>
                     <Button
                         variant="outline"
                         size="icon"
                         className="hidden md:flex"
-                        onClick={onNewChat}
                         aria-label="Open new chat"
+                        onClick={() => router.push("/chat")}
                     >
                         <MessageSquarePlusIcon className="h-5 w-5" />
                     </Button>

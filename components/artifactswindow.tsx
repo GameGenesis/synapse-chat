@@ -85,7 +85,7 @@ export function ArtifactsWindow({
     }, []);
 
     const handlePublishArtifact = useCallback(async () => {
-        if (currentArtifact && !currentArtifact.shareableURL) {
+        if (currentArtifact && !currentArtifact?.shareableURL) {
             setIsPublishing(true);
             try {
                 const response = await fetch("/api/artifacts", {
@@ -463,21 +463,21 @@ export function ArtifactsWindow({
                     <DialogHeader>
                         <DialogTitle>Share Artifact</DialogTitle>
                         <DialogDescription>
-                            {currentArtifact.shareableURL
+                            {currentArtifact?.shareableURL
                                 ? "Copy the link below to share this artifact:"
                                 : "Publish this artifact to generate a shareable link."}
                         </DialogDescription>
                     </DialogHeader>
-                    {currentArtifact.shareableURL ? (
+                    {currentArtifact?.shareableURL ? (
                         <>
                             <Input
-                                value={currentArtifact.shareableURL}
+                                value={currentArtifact?.shareableURL}
                                 readOnly
                             />
                             <Button
                                 onClick={() => {
                                     navigator.clipboard.writeText(
-                                        currentArtifact.shareableURL!
+                                        currentArtifact?.shareableURL!
                                     );
                                     setIsShareDialogOpen(false);
                                 }}
