@@ -21,7 +21,7 @@ import {
     extractMemory
 } from "@/lib/utils/memory-manager";
 
-export const maxDuration = 1000;
+export const maxDuration = 100; // Timeout in seconds
 
 const shouldUseAdvancedModel = (message: string): boolean =>
     Object.values(keywordCategories).some((category) =>
