@@ -29,7 +29,7 @@ export const findRelevantMemories = async (
     userQuery: string,
     userId: string,
     limit: number = 4,
-    similarityThreshold: number = 0.5
+    similarityThreshold: number = 0.3
 ) => {
     const userQueryEmbedding = await generateEmbedding(userQuery);
 

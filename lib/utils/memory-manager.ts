@@ -20,14 +20,16 @@ First, analyze the message step by step using innerThinking to determine if any 
 ### Step-by-Step Analysis (InnerThinking):
 - Begin by carefully reading the message.
 - Reflect on each piece of information, evaluating whether it is significant enough to be stored for the long term.
-- Consider the potential future value of this information. Would it aid in decision-making or provide valuable context later?
+- Consider the potential future value of this information. Would it aid in decision-making or provide valuable context on the user later?
 
 ### Guidelines for identifying important long-term memories:
-1. Focus on significant events, achievements, or milestones
+1. Focus on significant events, achievements, or milestones related to the user
 2. Include important personal information (e.g., names, relationships, dates)
 3. Capture unique experiences or notable changes in circumstances
 4. Identify strong emotions or impactful realizations
 5. Extract factual information that may be useful in the future
+6. Always remember information that the user specifically instructs the assistant to remember (e.g. "Remember that I'm allergic to eggs.")
+7. Only remember realistic information, not hypotheticals
 
 ### Guidelines for formulating memories:
 1. Be very concise and to the point, but descriptive
@@ -35,7 +37,7 @@ First, analyze the message step by step using innerThinking to determine if any 
 3. Avoid unnecessary details
 4. Use clear and straightforward language in a single sentence
 
-Each memory should be a single, clear sentence that captures the essence of the information. Do not include multiple separate pieces of information in one memory.
+Each memory should be a single, clear sentence that captures the essence of the information. This information should be related to the user and the user's circumstances. Do not include multiple separate pieces of information in one memory.
 
 ### Examples of InnerThinking
 - This message mentions that John graduated. Graduation is a significant milestone, so this should be stored.
@@ -52,8 +54,10 @@ Each memory should be a single, clear sentence that captures the essence of the 
 
 ### Examples of bad memory extractions:
 - John did some stuff. (Too vague)
+- Ryan Reynolds was born on October 23, 1976. (Not related to the user - unless the user is Ryan Reynolds)
 - John is feeling good today. (Not relevant for long-term memory)
 - John got married to Sarah on June 15, 2023, and they had a beautiful ceremony with 150 guests at a beachside resort. (Too detailed for a single memory and contains unnecessary information)
+- User is a magical fairy princess. (Not realistic or factual)
 
 ### Final Output Format:
 - If no information in the message meets the criteria for long-term memory, return an empty array.
@@ -73,6 +77,7 @@ Remember, the goal is to store only truly significant information that may be va
                 .describe(
                     "The information to store as a memory or memories. Keep this brief, concise, but descriptive."
                 )
+                
         }),
         prompt: message,
         temperature: 0.3,
@@ -85,7 +90,7 @@ Remember, the goal is to store only truly significant information that may be va
         return;
     }
 
-    console.log("MEMORY UPDATED: ", memories.join(", "))
+    console.log("MEMORY UPDATED: ", memories.join(", "));
 
     const embeddedMemories = await generateEmbeddings(memories);
 
