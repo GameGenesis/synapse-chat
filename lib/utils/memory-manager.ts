@@ -1,11 +1,16 @@
-import { generateObject } from "ai"
-import { models, getModel } from "./model-provider"
-import { z } from "zod"
+import { generateObject } from "ai";
+import { models, getModel } from "./model-provider";
+import { z } from "zod";
+import { generateEmbeddings } from "./embeddings";
+import User from "@/models/user";
 
-export const extractMemory = async (message: string) => {
-    console.log(message);
-    const {object} = await generateObject({
-        model: getModel(models.llama_3_70b_tool_use),
+export const extractMemory = async (message: string, userId: string) => {
+    if (!message || !userId) {
+        return;
+    }
+
+    const { object } = await generateObject({
+        model: getModel(models.gpt4omini),
         system: `
 You are an expert in memory analysis. You will be analyzing a message to identify any information that constitutes an important long-term memory to permanently store. Your task is to carefully consider the content, decide if any elements should be remembered for the long term, and if so, extract concise, descriptive, and relevant memories from the given message.
 
@@ -57,14 +62,37 @@ Each memory should be a single, clear sentence that captures the essence of the 
 Remember, the goal is to store only truly significant information that may be valuable for future reference or decision-making.
 `,
         schema: z.object({
-            innerThinking: z.string().describe("Use this property to think step by step on whether anything in the provided message constitutes a permanent memory."),
-            memories: z.array(z.string()).describe("The information to store as a memory or memories. Keep this brief, concise, but descriptive.")
+            innerThinking: z
+                .string()
+                .describe(
+                    "Use this property to think step by step on whether anything in the provided message constitutes a permanent memory."
+                ),
+            memories: z
+                .array(z.string())
+                .describe(
+                    "The information to store as a memory or memories. Keep this brief, concise, but descriptive."
+                )
         }),
         prompt: message,
         temperature: 0.3,
         maxTokens: 512
-    })
+    });
 
     console.log(JSON.stringify(object));
-    return object;
-}
+    const memories = object.memories;
+
+    if (!memories || memories.length === 0) {
+        return;
+    }
+
+    const embeddedMemories = await generateEmbeddings(memories);
+
+  // Store memories in the database
+  await User.findByIdAndUpdate(
+    userId,
+    { $push: { memories: { $each: embeddedMemories } } },
+    { new: true }
+  );
+
+  return embeddedMemories;
+};

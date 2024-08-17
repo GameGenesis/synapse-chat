@@ -7,7 +7,7 @@ export default function Page() {
     return (
         <>
             <Toaster position="top-center" />
-            <Chat />
+            <Chat userId="1" />
         </>
     );
 }

@@ -69,7 +69,7 @@ const reducer = (state: State, action: Action): State => {
     }
 };
 
-export function Chat() {
+export function Chat({ userId }: { userId: string }) {
     const [state, dispatch] = useReducer(reducer, {
         chatId: null,
         model: DEFAULT_MODEL,
@@ -126,6 +126,7 @@ export function Chat() {
         data
     } = useChat({
         body: {
+            userId,
             settings: state
         },
         onResponse: (response: Response) => {
@@ -179,9 +180,14 @@ export function Chat() {
 
         shouldSaveRef.current = false;
         console.log("Saving...");
-        await saveChat(chatIdRef.current, combinedMessagesRef.current, state);
+        await saveChat(
+            userId,
+            chatIdRef.current,
+            combinedMessagesRef.current,
+            state
+        );
         console.log("Save completed");
-    }, [state]);
+    }, [state, userId]);
 
     const processMessage = useCallback(
         (content: string, index: number) => {

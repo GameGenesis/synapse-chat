@@ -11,7 +11,8 @@ const buildPrompt = (
     enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
     useTools: boolean,
-    customInstructions?: string
+    memoriesPrompt: string = "",
+    customInstructions?: string,
 ) => {
     let defaultPrompt = ""
     if (enableDefaultPrompt) {
@@ -21,7 +22,7 @@ const buildPrompt = (
         )
     }
     
-    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${useTools ? toolsPrompt : ""}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${useTools ? toolsPrompt : ""}${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
         customInstructions ?
         `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>` : ""
     }`;

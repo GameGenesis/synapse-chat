@@ -11,6 +11,8 @@ const groq = createOpenAI({
     apiKey: process.env.GROQ_API_KEY
 });
 
+export const embeddingModel = openai.embedding("text-embedding-3-small")
+
 export enum ModelProvider {
     OpenAI = "OpenAI",
     Anthropic = "Anthropic",

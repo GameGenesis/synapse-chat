@@ -30,24 +30,11 @@ const messageSchema: Schema = new Schema({
     states: { type: [stateSchema] }
 });
 
-const settingsSchema: Schema = new Schema({
-    model: { type: String, required: true },
-    temperature: { type: Number, min: 0, max: 1, required: true },
-    topP: { type: Number, min: 0, max: 1, required: true },
-    maxTokens: { type: Number, required: true },
-    enableArtifacts: { type: Boolean, required: true },
-    enableInstructions: { type: Boolean, required: true },
-    enableSafeguards: { type: Boolean, required: true },
-    enablePasteToFile: { type: Boolean, required: true },
-    toolChoice: { type: Schema.Types.Mixed, required: true },
-    customInstructions: { type: String }
-});
-
 const chatSchema: Schema = new Schema(
     {
         _id: { type: String, required: true },
-        messages: { type: [messageSchema], required: true },
-        settings: { type: settingsSchema, required: true }
+        userId: { type: String, required: true, ref: 'User' },
+        messages: { type: [messageSchema], required: true }
     },
     { timestamps: true }
 );

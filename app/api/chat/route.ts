@@ -16,6 +16,7 @@ import {
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 import { limitMessages } from "@/lib/utils/message-manager";
+import { findRelevantMemories } from "@/lib/utils/embeddings";
 import { extractMemory } from "@/lib/utils/memory-manager";
 
 export const maxDuration = 1000;
@@ -73,7 +74,7 @@ const cloneObject = (obj: object) => {
 };
 
 export async function POST(req: Request) {
-    const { messages, settings } = await req.json();
+    const { userId, messages, settings } = await req.json();
 
     const {
         model,
@@ -102,16 +103,6 @@ export async function POST(req: Request) {
         maxTokens: finalMaxTokens
     } = useAgents ? DEFAULT_AGENT_SETTINGS : { temperature, topP, maxTokens };
 
-    const system = useAgents
-    ? `${agentsPrompt}${toolsPrompt}`
-    : buildPrompt(
-          enableArtifacts && !unsupportedArtifactUseModels.includes(model),
-          enableInstructions,
-          enableSafeguards,
-          finalToolChoice !== "none",
-          customInstructions
-      );
-
     console.log("MODE:", model, ", MODEL:", modelToUse);
 
     const limitedMessages = (await limitMessages(
@@ -119,7 +110,29 @@ export async function POST(req: Request) {
         messageLimit
     )) as any;
 
-    extractMemory(messages[messages.length - 1].content);
+    const lastMessage = messages[messages.length - 1].content;
+    const relevantMemories = await findRelevantMemories(lastMessage, userId); // This can be a tool as well
+
+    // Add relevant memories to the system prompt
+    const memoriesPrompt =
+        relevantMemories.length > 0
+            ? `\n\nRelevant memories:\n${relevantMemories.join("\n")}`
+            : "";
+
+    console.log(memoriesPrompt);
+
+    const system = useAgents
+        ? `${agentsPrompt}${toolsPrompt}${memoriesPrompt}`
+        : buildPrompt(
+              enableArtifacts && !unsupportedArtifactUseModels.includes(model),
+              enableInstructions,
+              enableSafeguards,
+              finalToolChoice !== "none",
+              memoriesPrompt,
+              customInstructions
+          );
+
+    extractMemory(lastMessage, userId);
 
     const data = new StreamData();
     const result = await streamText({
