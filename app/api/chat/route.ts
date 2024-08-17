@@ -1,4 +1,4 @@
-import { convertToCoreMessages, StreamData, streamText } from "ai";
+import { convertToCoreMessages, CoreMessage, StreamData, streamText } from "ai";
 import {
     getModel,
     ModelKey,
@@ -16,7 +16,10 @@ import {
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 import { limitMessages } from "@/lib/utils/message-manager";
-import { findRelevantMemories, extractMemory } from "@/lib/utils/memory-manager";
+import {
+    findRelevantMemories,
+    extractMemory
+} from "@/lib/utils/memory-manager";
 
 export const maxDuration = 1000;
 
@@ -110,32 +113,27 @@ export async function POST(req: Request) {
         messageLimit
     )) as any;
 
-    const lastMessage = messages[messages.length - 1].content;
+    const userMessages = messages.filter(
+        (message: CoreMessage) => message.role === "user"
+    );
+    const lastUserMessage = userMessages[userMessages.length - 1].content;
     const relevantMemories = enableMemory
-        ? await findRelevantMemories(lastMessage, userId)
+        ? await findRelevantMemories(lastUserMessage, userId)
         : []; // This can be a tool as well
 
-    // Add relevant memories to the system prompt
-    const memoriesPrompt =
-        relevantMemories.length > 0
-            ? `\n\nRelevant memories:\n${relevantMemories.join("\n")}`
-            : "";
-
-    console.log(memoriesPrompt);
-
     const system = useAgents
-        ? `${agentsPrompt}${toolsPrompt}${memoriesPrompt}`
+        ? `${agentsPrompt}${toolsPrompt}${relevantMemories.joing("\n")}`
         : buildPrompt(
               enableArtifacts && !unsupportedArtifactUseModels.includes(model),
               enableInstructions,
               enableSafeguards,
               finalToolChoice !== "none",
-              memoriesPrompt,
+              relevantMemories,
               customInstructions
           );
 
     if (enableMemory) {
-        extractMemory(lastMessage, userId);
+        extractMemory(lastUserMessage, userId);
     }
 
     const data = new StreamData();

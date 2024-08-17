@@ -3,12 +3,10 @@ import { z } from "zod";
 import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/ai-sdk";
-import {
-    BingClient,
-    JinaClient,
-    WeatherClient,
-    WikipediaClient
-} from "@agentic/stdlib";
+import { BingClient } from "@agentic/bing";
+import { JinaClient } from "@agentic/jina";
+import { WeatherClient } from "@agentic/weather";
+import { WikipediaClient } from "@agentic/wikipedia";
 import { YoutubeTranscript } from "youtube-transcript";
 import formatTime from "@/lib/utils/format";
 import { createAgentNetwork } from "@/lib/agents";

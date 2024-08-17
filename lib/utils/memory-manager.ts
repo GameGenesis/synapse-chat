@@ -65,7 +65,7 @@ Each memory should be a single, clear sentence that captures the essence of the 
 ### Final Output Format:
 - If no information in the message meets the criteria for long-term memory, return an empty array.
 - If important information is identified, output an array containing each extracted memory as a single, clear sentence.
-- Preferably extract a maximum of one memory per message.
+- Preferably extract a maximum of one to two important memories per message.
 
 Remember, the goal is to store only truly significant information that may be valuable for future reference or decision-making.
 `,
@@ -97,11 +97,15 @@ Remember, the goal is to store only truly significant information that may be va
     const embeddedMemories = await generateEmbeddings(memories);
 
     // Store memories in the database
-    await User.findByIdAndUpdate(
-        userId,
-        { $push: { memories: { $each: embeddedMemories } } },
-        { new: true }
-    );
+    try {
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { memories: { $each: embeddedMemories } } },
+            { new: true }
+        );
+    } catch (error) {
+        console.warn(`Encountered error while trying to store extracted memory: ${error}`)
+    }
 
     return embeddedMemories;
 };
@@ -114,7 +118,14 @@ export const findRelevantMemories = async (
 ) => {
     const userQueryEmbedding = await generateEmbedding(userQuery);
 
-    const user = await User.findById(userId);
+    let user = null;
+
+    try {
+        user = await User.findById(userId);
+    } catch(error) {
+        console.warn(`Error retrieving user: ${error}`);
+    }
+
     if (!user) {
         console.warn(`User not found for ID: ${userId}`);
         return [];

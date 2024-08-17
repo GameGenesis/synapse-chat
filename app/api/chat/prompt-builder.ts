@@ -11,20 +11,35 @@ const buildPrompt = (
     enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
     useTools: boolean,
-    memoriesPrompt: string = "",
-    customInstructions?: string,
+    memories?: string[],
+    customInstructions?: string
 ) => {
-    let defaultPrompt = ""
+    let defaultPrompt = "";
     if (enableDefaultPrompt) {
         defaultPrompt = assistantPrompt.replace(
             "{{SAFEGUARDS}}",
             enableSafeguards ? safetyPrompt.trim() : ""
-        )
+        );
     }
-    
-    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${useTools ? toolsPrompt : ""}${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
-        customInstructions ?
-        `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>` : ""
+
+    const memoriesPrompt =
+        memories && memories.length > 0
+            ? `
+You will be provided a list of the most relevant memories to the user's prompt. These may or may not be useful to answering the question.
+<relevant_memories>
+${memories.join("\n")}
+<relevant_memories>
+`
+            : "";
+
+    console.log(memoriesPrompt);
+
+    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${
+        useTools ? toolsPrompt : ""
+    }${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+        customInstructions
+            ? `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>`
+            : ""
     }`;
 };
 
