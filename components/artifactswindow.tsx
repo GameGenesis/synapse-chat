@@ -69,13 +69,18 @@ export function ArtifactsWindow({
 
     const [html, setHtml] = useState("");
 
-    // Add these state variables
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
     const [shareableLink, setShareableLink] = useState("");
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isPublished, setIsPublished] = useState(false);
 
-    // Add this function to generate a shareable link
-    const generateShareableLink = useCallback(async () => {
-        if (currentArtifact) {
+    const handleShareClick = useCallback(() => {
+        setIsShareDialogOpen(true);
+    }, []);
+
+    const handlePublishArtifact = useCallback(async () => {
+        if (currentArtifact && !isPublished) {
+            setIsPublishing(true);
             try {
                 const response = await fetch("/api/artifacts", {
                     method: "POST",
@@ -89,15 +94,17 @@ export function ArtifactsWindow({
                     const { id } = await response.json();
                     const link = `${window.location.origin}/artifacts/${id}`;
                     setShareableLink(link);
-                    setIsShareDialogOpen(true);
+                    setIsPublished(true);
                 } else {
-                    console.error("Failed to save artifact");
+                    console.error("Failed to publish artifact");
                 }
             } catch (error) {
-                console.error("Error saving artifact:", error);
+                console.error("Error publishing artifact:", error);
+            } finally {
+                setIsPublishing(false);
             }
         }
-    }, [currentArtifact]);
+    }, [currentArtifact, isPublished]);
 
     useEffect(() => {
         setConsoleLogs([]);
@@ -403,7 +410,7 @@ export function ArtifactsWindow({
                                 variant="ghost"
                                 size="icon"
                                 className="rounded-full"
-                                onClick={generateShareableLink}
+                                onClick={handleShareClick}
                                 disabled={
                                     !currentArtifact || !currentArtifact.content
                                 }
@@ -447,18 +454,35 @@ export function ArtifactsWindow({
                     <DialogHeader>
                         <DialogTitle>Share Artifact</DialogTitle>
                         <DialogDescription>
-                            Copy the link below to share this artifact:
+                            {isPublished
+                                ? "Copy the link below to share this artifact:"
+                                : "Publish this artifact to generate a shareable link."}
                         </DialogDescription>
                     </DialogHeader>
-                    <Input value={shareableLink} readOnly />
-                    <Button
-                        onClick={() => {
-                            navigator.clipboard.writeText(shareableLink);
-                            setIsShareDialogOpen(false);
-                        }}
-                    >
-                        Copy Link
-                    </Button>
+                    {isPublished ? (
+                        <>
+                            <Input value={shareableLink} readOnly />
+                            <Button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(
+                                        shareableLink
+                                    );
+                                    setIsShareDialogOpen(false);
+                                }}
+                            >
+                                Copy Link
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            onClick={handlePublishArtifact}
+                            disabled={isPublishing}
+                        >
+                            {isPublishing
+                                ? "Publishing..."
+                                : "Publish Artifact"}
+                        </Button>
+                    )}
                 </DialogContent>
             </Dialog>
         </>
