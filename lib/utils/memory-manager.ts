@@ -1,7 +1,7 @@
-import { generateObject } from "ai";
+import { cosineSimilarity, generateObject } from "ai";
 import { models, getModel } from "./model-provider";
 import { z } from "zod";
-import { generateEmbeddings } from "./embeddings";
+import { generateEmbedding, generateEmbeddings } from "@/lib/utils/embeddings";
 import User from "@/models/user";
 
 export const extractMemory = async (message: string, userId: string) => {
@@ -79,7 +79,6 @@ Remember, the goal is to store only truly significant information that may be va
                 .describe(
                     "The information to store as a memory or memories. Keep this brief, concise, but descriptive. Include generalizable types or tags for the memory (e.g. hobby, dietary, etc.) in parenthesis. "
                 )
-                
         }),
         prompt: message,
         temperature: 0.3,
@@ -104,4 +103,37 @@ Remember, the goal is to store only truly significant information that may be va
     );
 
     return embeddedMemories;
+};
+
+export const findRelevantMemories = async (
+    userQuery: string,
+    userId: string,
+    limit: number = 4,
+    similarityThreshold: number = 0.3
+) => {
+    const userQueryEmbedding = await generateEmbedding(userQuery);
+
+    const user = await User.findById(userId);
+    if (!user) {
+        console.warn(`User not found for ID: ${userId}`);
+        return [];
+    }
+
+    if (!user.memories || user.memories.length === 0) {
+        console.log(`No memories found for user: ${userId}`);
+        return [];
+    }
+
+    const memories = user.memories.map((memory: any) => ({
+        content: memory.content,
+        embedding: memory.embedding,
+        similarity: cosineSimilarity(userQueryEmbedding, memory.embedding)
+    }));
+
+    const relevantMemories = memories
+        .filter((memory: any) => memory.similarity > similarityThreshold)
+        .sort((a: any, b: any) => b.similarity - a.similarity)
+        .slice(0, limit);
+
+    return relevantMemories.map((memory: any) => memory.content);
 };

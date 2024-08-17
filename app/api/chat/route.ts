@@ -16,8 +16,7 @@ import {
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 import { limitMessages } from "@/lib/utils/message-manager";
-import { findRelevantMemories } from "@/lib/utils/embeddings";
-import { extractMemory } from "@/lib/utils/memory-manager";
+import { findRelevantMemories, extractMemory } from "@/lib/utils/memory-manager";
 
 export const maxDuration = 1000;
 
