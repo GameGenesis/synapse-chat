@@ -25,7 +25,8 @@ const buildPrompt = (
     const memoriesPrompt =
         memories && memories.length > 0
             ? `
-You will be provided a list of the most relevant memories to the user's prompt. These may or may not be useful to answering the question.
+You will be provided a list of the most relevant memories to the user's prompt. These memories may or may not be directly useful in answering the question, but they can help make the interaction more personalized and dynamic.
+If the memories don't directly answer the prompt, you may use them to personalize your response or add context that makes the conversation more engaging and tailored to the user.
 <relevant_memories>
 ${memories.join("\n")}
 <relevant_memories>

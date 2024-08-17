@@ -104,7 +104,9 @@ Remember, the goal is to store only truly significant information that may be va
             { new: true }
         );
     } catch (error) {
-        console.warn(`Encountered error while trying to store extracted memory: ${error}`)
+        console.warn(
+            `Encountered error while trying to store extracted memory: ${error}`
+        );
     }
 
     return embeddedMemories;
@@ -114,7 +116,7 @@ export const findRelevantMemories = async (
     userQuery: string,
     userId: string,
     limit: number = 4,
-    similarityThreshold: number = 0.3
+    similarityThreshold: number = 0.25 // A number between -1 and 1 representing the cosine similarity threshold between the two vectors.
 ) => {
     const userQueryEmbedding = await generateEmbedding(userQuery);
 
@@ -122,7 +124,7 @@ export const findRelevantMemories = async (
 
     try {
         user = await User.findById(userId);
-    } catch(error) {
+    } catch (error) {
         console.warn(`Error retrieving user: ${error}`);
     }
 
