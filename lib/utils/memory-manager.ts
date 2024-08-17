@@ -10,13 +10,26 @@ export const extractMemory = async (message: string, userId: string) => {
         return;
     }
 
+    // Fetch existing memories
+    const user = await User.findById(userId);
+    if (!user) {
+        console.warn(`User not found for ID: ${userId}`);
+        return;
+    }
+
+    const existingMemories = user.memories.map((memory: any) => ({
+        id: memory._id,
+        content: memory.content
+    }));
+
     const { object } = await generateObject({
         model: getModel(models.gpt4omini),
         system: `
-You are an expert in memory analysis. You will be analyzing a message to identify any information that constitutes an important long-term memory to permanently store. Your task is to carefully consider the content, decide if any elements should be remembered for the long term, and if so, extract concise, descriptive, and relevant memories from the given message.
+You are an expert in memory analysis and management. You will be analyzing a message to identify any information that constitutes an important long-term memory to permanently store or update.
+You will decide whether to create new memories, update existing ones, or delete outdated ones based on the content of the message. You have access to the user's existing memories for context. Carefully consider the content, decide if any elements should be remembered for the long term, and if so, extract concise, descriptive, and relevant memories from the given message.
 
 ## Instructions
-First, analyze the message step by step using innerThinking to determine if any information should be stored as a long-term memory. Consider whether any information is worth storing as a long-term memory. Follow the guidelines below.
+First, analyze the message step by step using innerThinking to determine whether any information is worth storing as a long-term memory. Follow the guidelines below.
 
 ### Step-by-Step Analysis (InnerThinking):
 - Begin by carefully reading the message.
@@ -32,6 +45,18 @@ First, analyze the message step by step using innerThinking to determine if any 
 6. Always remember information that the user specifically instructs the assistant to remember (e.g. "Remember that I'm allergic to eggs.")
 7. Only remember realistic information, not hypotheticals
 8. Ensure the user is speaking about their own life (usually using first person) and not providing general information about another unrelated public or imaginary figure
+
+### Decide the action to take:
+- \'create\': If it's new, important information not present in existing memories.
+- \'update\': If it contradicts or significantly adds to an existing memory. Updating a memory completely replaces it so it is important that this is a notable change that completely replaces the old memory.
+- \'delete\': If it explicitly states that previous information is no longer true. Make sure to only delete relevant memories as this is a permanent change. This is very important.
+- No Action: If the information is already present or not important enough to store.
+
+### Guidelines for formatting actions:
+For each action, provide the following:
+- Action type: \'create\', \'update\', or \'delete\'
+- Content: The memory content (for create and update actions)
+- Target ID: The existing memory id to update or delete (for update and delete actions)
 
 ### Guidelines for formulating memories:
 1. Be very concise and to the point, but descriptive
@@ -64,12 +89,12 @@ Each memory should be a single, clear sentence that captures the essence of the 
 - User is a magical fairy princess. (Not realistic or factual)
 
 ### Final Output Format:
-- If no information in the message meets the criteria for long-term memory, return an empty array.
-- If important information is identified, output an array containing each extracted memory as a single, clear sentence.
-- Preferably extract a maximum of one to two important memories per message.
+- If no information in the message meets the criteria for a long-term memory action, return an empty array.
+- If important information is identified, output an array containing each action.
+- Preferably extract a maximum of one to two important memories per message. The extracted memory or memories should be a single, clear sentence with the corresponding tags in parentheses.
 
 The current date is ${date}.
-Remember, the goal is to store only truly significant information that may be valuable for future reference or decision-making.
+Remember, the goal is to store only truly significant information that may be valuable for future reference or decision-making in the format "Content (tags)".
 `,
         schema: z.object({
             innerThinking: z
@@ -77,41 +102,77 @@ Remember, the goal is to store only truly significant information that may be va
                 .describe(
                     "Use this property to think step by step on whether anything in the provided message constitutes a permanent memory."
                 ),
-            memories: z
-                .array(z.string())
-                .describe(
-                    "The information to store as a memory or memories. Keep this brief, concise, but descriptive. Include generalizable types or tags for the memory (e.g. hobby, dietary, etc.) in parenthesis. "
-                )
+            actions: z.array(
+                z.object({
+                    type: z.enum(["create", "update", "delete"]),
+                    content: z
+                        .string()
+                        .optional()
+                        .describe(
+                            "Include this if the action type is `create` or `update`. The new or updated information to store as a memory. Keep this brief, concise, but descriptive. Include generalizable types or tags for the memory (e.g. hobby, dietary, etc.) in parenthesis. "
+                        ),
+                    targetID: z
+                        .string()
+                        .optional()
+                        .describe(
+                            "Include this if the action type is `delete` or `update`. This is the id of the memory to be updated or deleted."
+                        )
+                })
+            )
         }),
-        prompt: message,
+        prompt: `
+Here is the message to analyze:
+<message>
+${message}
+</message>
+
+For context, here are the user's existing memories and their \`id\`s:
+<existing_memories>
+${JSON.stringify(existingMemories)}
+</existing_memories>
+
+Analyze the message and, if necessary, decide which memories to create, update, or delete based on the existing memories and the new information provided.
+`,
         temperature: 0.3,
         maxTokens: 512
     });
 
-    const memories = object.memories;
+    const actions = object.actions;
 
-    if (!memories || memories.length === 0) {
+    if (!actions || actions.length === 0) {
         return;
     }
 
-    console.log("MEMORY UPDATED: ", memories.join(", "));
+    console.log(JSON.stringify(actions));
 
-    const embeddedMemories = await generateEmbeddings(memories);
-
-    // Store memories in the database
-    try {
-        await User.findByIdAndUpdate(
-            userId,
-            { $push: { memories: { $each: embeddedMemories } } },
-            { new: true }
-        );
-    } catch (error) {
-        console.warn(
-            `Encountered error while trying to store extracted memory: ${error}`
-        );
+    for (const action of actions) {
+        switch (action.type) {
+            case "create":
+                if (action.content) {
+                    await createMemory(userId, action.content);
+                    console.log("Memory created:", action.content);
+                }
+                break;
+            case "update":
+                if (action.content && action.targetID) {
+                        await updateMemory(
+                            userId,
+                            action.targetID,
+                            action.content
+                        );
+                        console.log("Memory updated:", action.content);
+                }
+                break;
+            case "delete":
+                if (action.targetID) {
+                        await deleteMemory(userId, action.targetID);
+                        console.log("Memory deleted");
+                }
+                break;
+        }
     }
 
-    return embeddedMemories;
+    return actions;
 };
 
 export const findRelevantMemories = async (
@@ -168,4 +229,86 @@ export const findRelevantMemories = async (
 
     // If there's a memory with similarity > 0, return it; otherwise, return an empty array
     return mostRelevantMemory ? [mostRelevantMemory.content] : [];
+};
+
+export const createMemory = async (userId: string, content: string) => {
+    if (!userId || !content) {
+        throw new Error("User ID and memory content are required");
+    }
+
+    const embeddedMemory = await generateEmbeddings([content]);
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $push: { memories: embeddedMemory[0] } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
+
+        return embeddedMemory[0];
+    } catch (error) {
+        console.error(`Error creating memory: ${error}`);
+        throw error;
+    }
+};
+
+export const updateMemory = async (
+    userId: string,
+    memoryId: string,
+    newContent: string
+) => {
+    if (!userId || !memoryId || !newContent) {
+        throw new Error("User ID, memory ID, and new content are required");
+    }
+
+    const newEmbedding = await generateEmbedding(newContent);
+
+    try {
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId, "memories._id": memoryId },
+            {
+                $set: {
+                    "memories.$.content": newContent,
+                    "memories.$.embedding": newEmbedding
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            throw new Error("User or memory not found");
+        }
+
+        return { content: newContent, embedding: newEmbedding };
+    } catch (error) {
+        console.error(`Error updating memory: ${error}`);
+        throw error;
+    }
+};
+
+export const deleteMemory = async (userId: string, memoryId: string) => {
+    if (!userId || !memoryId) {
+        throw new Error("User ID and memory ID are required");
+    }
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { memories: { _id: memoryId } } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
+
+        return true;
+    } catch (error) {
+        console.error(`Error deleting memory: ${error}`);
+        throw error;
+    }
 };
