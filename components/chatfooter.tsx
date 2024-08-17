@@ -219,10 +219,10 @@ const ChatFooter = ({
                 }
             });
         } else if (enablePasteToFile && textItems.length > 0) {
-            event.preventDefault();
             textItems.forEach((item) => {
                 item.getAsString((text) => {
                     if (text.length > LARGE_TEXT_THRESHOLD) {
+                        event.preventDefault();
                         const file = new File(
                             [text],
                             `pasted-text-${Date.now()}`,
@@ -230,21 +230,6 @@ const ChatFooter = ({
                         );
                         addFile(file);
                         toast.success("Pasted text converted to file");
-                    } else {
-                        // If text is smaller than the threshold, paste it at the cursor position
-                        const textarea = event.currentTarget;
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-                        const newInput =
-                            input.slice(0, start) + text + input.slice(end);
-                        handleInputChange({
-                            target: { value: newInput }
-                        } as React.ChangeEvent<HTMLTextAreaElement>);
-                        // Set cursor position after pasted text
-                        setTimeout(() => {
-                            textarea.selectionStart = textarea.selectionEnd =
-                                start + text.length;
-                        }, 0);
                     }
                 });
             });
