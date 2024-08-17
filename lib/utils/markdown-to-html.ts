@@ -25,6 +25,8 @@ const markdownToHtml = (markdown: string) => {
         openLinksInNewWindow: true,
         simplifiedAutoLink: true,
         emoji: true,
+        encodeEmails: false,
+        ghCompatibleHeaderId: true,
         extensions: [
             showdownKatex,
             showdownFootnotes,
