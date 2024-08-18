@@ -198,7 +198,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         };
 
         loadExistingChat();
-    }, [chatId]);
+    }, [chatId, setMessages]);
 
     useEffect(() => {
         if (combinedMessages.length > 0) {
@@ -220,7 +220,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         console.log("Saving...");
         await saveChat(userId, chatId, combinedMessagesRef.current, state);
         console.log("Save completed");
-    }, [state, userId]);
+    }, [state, userId, chatId]);
 
     const processMessage = useCallback(
         (content: string, index: number) => {
