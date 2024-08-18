@@ -80,7 +80,7 @@ Analyze the message and, if necessary, decide which memories to create, update, 
 export const findRelevantMemories = async (
     userQuery: string,
     userId: string,
-    limit: number = 4,
+    limit: number = 3,
     similarityThreshold: number = 0.25 // A number between -1 and 1 representing the cosine similarity threshold between the two vectors.
 ) => {
     const userQueryEmbedding = await generateEmbedding(userQuery);
