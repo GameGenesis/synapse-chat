@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
-import { Action, Artifact, CombinedMessage, Data, State } from "@/lib/types";
+import { Action, Artifact, CombinedMessage, Data, Settings } from "@/lib/types";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import SettingsMenu from "./settings";
@@ -40,10 +40,8 @@ const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     ssr: false
 });
 
-const reducer = (state: State, action: Action): State => {
+const reducer = (state: Settings, action: Action): Settings => {
     switch (action.type) {
-        case "SET_CHAT_ID":
-            return { ...state, chatId: action.payload };
         case "SET_MODEL":
             return { ...state, model: action.payload };
         case "SET_TEMPERATURE":
@@ -75,7 +73,6 @@ const reducer = (state: State, action: Action): State => {
 
 export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     const [state, dispatch] = useReducer(reducer, {
-        chatId: chatId || null,
         model: DEFAULT_MODEL,
         temperature: DEFAULT_TEMPERATURE,
         topP: DEFAULT_TOPP,
@@ -158,16 +155,9 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
     useEffect(() => {
         if (!path.includes("chat") && messages.length === 1) {
-            window.history.replaceState({}, "", `/chat/${state.chatId}`);
+            window.history.replaceState({}, "", `/chat/${chatId}`);
         }
     }, [chatId, messages, path]);
-
-    useEffect(() => {
-        const messagesLength = messages?.length;
-        if (messagesLength === 2) {
-            router.refresh();
-        }
-    }, [messages, router]);
 
     useEffect(() => {
         const loadExistingChat = async () => {
@@ -207,11 +197,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             }
         };
 
-        dispatch({
-            type: "SET_CHAT_ID",
-            payload: chatId
-        });
-
         loadExistingChat();
     }, [chatId]);
 
@@ -233,12 +218,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
         shouldSaveRef.current = false;
         console.log("Saving...");
-        await saveChat(
-            userId,
-            state.chatId!,
-            combinedMessagesRef.current,
-            state
-        );
+        await saveChat(userId, chatId, combinedMessagesRef.current, state);
         console.log("Save completed");
     }, [state, userId]);
 
@@ -576,7 +556,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                     save();
                     setIsSettingsOpen(false);
                 }}
-                state={state}
+                settings={state}
                 dispatch={dispatch}
             />
             <div className="flex flex-grow overflow-hidden">

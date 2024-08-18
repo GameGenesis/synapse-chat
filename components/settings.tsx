@@ -22,7 +22,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from "@/components/ui/accordion";
-import { Action, State, ToolChoice } from "@/lib/types";
+import { Action, Settings, ToolChoice } from "@/lib/types";
 import {
     Select,
     SelectContent,
@@ -56,26 +56,28 @@ import {
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    state: State;
+    settings: Settings;
     dispatch: React.Dispatch<Action>;
 }
 
-const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
+const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
     const [toolChoice, setToolChoice] = useState<ToolChoice>("auto");
     const [openCombobox, setOpenCombobox] = useState(false);
     const [selectedTool, setSelectedTool] = useState<string>(
-        typeof state.toolChoice === "object" ? state.toolChoice.toolName : ""
+        typeof settings.toolChoice === "object"
+            ? settings.toolChoice.toolName
+            : ""
     );
 
     useEffect(() => {
-        const newMaxPossibleOutput = models[state.model].maxTokens || 4096;
+        const newMaxPossibleOutput = models[settings.model].maxTokens || 4096;
         setMaxPossibleOutput(newMaxPossibleOutput);
         dispatch({
             type: "SET_MAX_TOKENS",
-            payload: Math.min(state.maxTokens, newMaxPossibleOutput)
+            payload: Math.min(settings.maxTokens, newMaxPossibleOutput)
         });
-    }, [state.model, state.maxTokens, dispatch]);
+    }, [settings.model, settings.maxTokens, dispatch]);
 
     const handleSetMaxTokens = (value: number) => {
         dispatch({
@@ -139,7 +141,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         min={0}
                                         max={1}
                                         step={0.01}
-                                        value={[state.temperature]}
+                                        value={[settings.temperature]}
                                         onValueChange={(value) =>
                                             dispatch({
                                                 type: "SET_TEMPERATURE",
@@ -150,7 +152,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     />
                                     <Input
                                         type="number"
-                                        value={state.temperature}
+                                        value={settings.temperature}
                                         onChange={(e) =>
                                             dispatch({
                                                 type: "SET_TEMPERATURE",
@@ -172,7 +174,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         min={1}
                                         max={maxPossibleOutput}
                                         step={1}
-                                        value={[state.maxTokens]}
+                                        value={[settings.maxTokens]}
                                         onValueChange={(value) =>
                                             handleSetMaxTokens(value[0])
                                         }
@@ -180,7 +182,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     />
                                     <Input
                                         type="number"
-                                        value={state.maxTokens}
+                                        value={settings.maxTokens}
                                         onChange={(e) =>
                                             handleSetMaxTokens(
                                                 Number(e.target.value)
@@ -201,7 +203,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         min={0}
                                         max={1}
                                         step={0.01}
-                                        value={[state.topP]}
+                                        value={[settings.topP]}
                                         onValueChange={(value) =>
                                             dispatch({
                                                 type: "SET_TOP_P",
@@ -212,7 +214,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     />
                                     <Input
                                         type="number"
-                                        value={state.topP}
+                                        value={settings.topP}
                                         onChange={(e) =>
                                             dispatch({
                                                 type: "SET_TOP_P",
@@ -265,7 +267,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                         min={0}
                                         max={20}
                                         step={1}
-                                        value={[state.messageLimit]}
+                                        value={[settings.messageLimit]}
                                         onValueChange={(value) =>
                                             dispatch({
                                                 type: "SET_MESSAGE_LIMIT",
@@ -276,7 +278,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     />
                                     <Input
                                         type="number"
-                                        value={state.messageLimit}
+                                        value={settings.messageLimit}
                                         onChange={(e) =>
                                             dispatch({
                                                 type: "SET_MESSAGE_LIMIT",
@@ -303,7 +305,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </Label>
                                     <Switch
                                         id="enableArtifacts"
-                                        checked={state.enableArtifacts}
+                                        checked={settings.enableArtifacts}
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_ARTIFACTS",
@@ -311,7 +313,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                             })
                                         }
                                         disabled={unsupportedArtifactUseModels.includes(
-                                            state.model
+                                            settings.model
                                         )}
                                     />
                                 </div>
@@ -321,7 +323,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </Label>
                                     <Switch
                                         id="enableInstructions"
-                                        checked={state.enableInstructions}
+                                        checked={settings.enableInstructions}
                                         onCheckedChange={(checked) => {
                                             dispatch({
                                                 type: "SET_ENABLE_INSTRUCTIONS",
@@ -342,14 +344,14 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </Label>
                                     <Switch
                                         id="enableSafeguards"
-                                        checked={state.enableSafeguards}
+                                        checked={settings.enableSafeguards}
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_SAFEGUARDS",
                                                 payload: checked
                                             })
                                         }
-                                        disabled={!state.enableInstructions}
+                                        disabled={!settings.enableInstructions}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -373,7 +375,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </div>
                                     <Switch
                                         id="enablePasteToFile"
-                                        checked={state.enablePasteToFile}
+                                        checked={settings.enablePasteToFile}
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_PASTE_TO_FILE",
@@ -388,7 +390,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </Label>
                                     <Switch
                                         id="enableMemory"
-                                        checked={state.enableMemory}
+                                        checked={settings.enableMemory}
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_MEMORY",
@@ -405,7 +407,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                         <AccordionContent>
                             <div className="space-y-4 p-1">
                                 {unsupportedToolUseModels.includes(
-                                    state.model
+                                    settings.model
                                 ) && (
                                     <p>
                                         Tool Use is disabled for this model.
@@ -425,7 +427,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                                 : "specific"
                                         }
                                         disabled={unsupportedToolUseModels.includes(
-                                            state.model
+                                            settings.model
                                         )}
                                     >
                                         <SelectTrigger className="w-full">
@@ -528,7 +530,8 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                             <div className="pt-1">
                                 <div
                                     className={`p-1 bg-background rounded-md border relative group overflow-hidden ${
-                                        state.customInstructions.length >= 3000
+                                        settings.customInstructions.length >=
+                                        3000
                                             ? "focus:border-red-500 focus-within:border-red-500"
                                             : "focus:border-primary focus-within:border-primary"
                                     }`}
@@ -536,7 +539,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     <div className="absolute inset-x-0 bottom-0 h-[1px] bg-transparent transition-all duration-200 group-focus-within:h-[3px] group-focus:h-[3px]">
                                         <div
                                             className={`absolute inset-0 ${
-                                                state.customInstructions
+                                                settings.customInstructions
                                                     .length >= 3000
                                                     ? "bg-red-500"
                                                     : "bg-primary"
@@ -546,7 +549,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     </div>
                                     <textarea
                                         id="customInstructions"
-                                        value={state.customInstructions}
+                                        value={settings.customInstructions}
                                         onChange={(e) =>
                                             dispatch({
                                                 type: "SET_CUSTOM_INSTRUCTIONS",
@@ -560,7 +563,7 @@ const SettingsMenu = ({ isOpen, onClose, state, dispatch }: Props) => {
                                     />
                                     <div className="flex justify-end pr-1 pb-1 w-full">
                                         <span className="text-sm text-muted-foreground">
-                                            {state.customInstructions.length}
+                                            {settings.customInstructions.length}
                                             /3000
                                         </span>
                                     </div>
