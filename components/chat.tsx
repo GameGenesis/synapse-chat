@@ -1,31 +1,17 @@
+"use client";
+
 import React, {
     useState,
     useEffect,
     useRef,
     useCallback,
-    useReducer,
     useLayoutEffect
 } from "react";
 import { Messages, AssistantMessage } from "./messages";
 import { useChat } from "ai/react";
-import { Action, Artifact, CombinedMessage, Data, Settings } from "@/lib/types";
-import ChatHeader from "./chatheader";
+import { Artifact, CombinedMessage, Data } from "@/lib/types";
 import ChatFooter from "./chatfooter";
-import SettingsMenu from "./settings";
-import {
-    DEFAULT_ENABLE_ARTIFACTS,
-    DEFAULT_ENABLE_INSTRUCTIONS,
-    DEFAULT_ENABLE_MEMORY,
-    DEFAULT_ENABLE_PASTE_TO_FILE,
-    DEFAULT_ENABLE_SAFEGUARDS,
-    DEFAULT_MAX_TOKENS,
-    DEFAULT_MESSAGE_LIMIT,
-    DEFAULT_MODEL,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TOOL_CHOICE,
-    DEFAULT_TOPP,
-    maxToolRoundtrips
-} from "@/app/api/chat/config";
+import { maxToolRoundtrips } from "@/app/api/chat/config";
 import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
 import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
@@ -33,66 +19,27 @@ import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/lib/utils/save-chat";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
 import { Message } from "ai";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useChatContext } from "@/lib/hooks/use-chat-context";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
     ssr: false
 });
 
-const reducer = (state: Settings, action: Action): Settings => {
-    switch (action.type) {
-        case "SET_MODEL":
-            return { ...state, model: action.payload };
-        case "SET_TEMPERATURE":
-            return { ...state, temperature: action.payload };
-        case "SET_MAX_TOKENS":
-            return { ...state, maxTokens: action.payload };
-        case "SET_TOP_P":
-            return { ...state, topP: action.payload };
-        case "SET_MESSAGE_LIMIT":
-            return { ...state, messageLimit: action.payload };
-        case "SET_ENABLE_ARTIFACTS":
-            return { ...state, enableArtifacts: action.payload };
-        case "SET_ENABLE_INSTRUCTIONS":
-            return { ...state, enableInstructions: action.payload };
-        case "SET_ENABLE_SAFEGUARDS":
-            return { ...state, enableSafeguards: action.payload };
-        case "SET_ENABLE_PASTE_TO_FILE":
-            return { ...state, enablePasteToFile: action.payload };
-        case "SET_ENABLE_MEMORY":
-            return { ...state, enableMemory: action.payload };
-        case "SET_CUSTOM_INSTRUCTIONS":
-            return { ...state, customInstructions: action.payload };
-        case "SET_TOOL_CHOICE":
-            return { ...state, toolChoice: action.payload };
-        default:
-            return state;
-    }
-};
-
 export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
-    const [state, dispatch] = useReducer(reducer, {
-        model: DEFAULT_MODEL,
-        temperature: DEFAULT_TEMPERATURE,
-        topP: DEFAULT_TOPP,
-        maxTokens: DEFAULT_MAX_TOKENS,
-        messageLimit: DEFAULT_MESSAGE_LIMIT,
-        enableArtifacts: DEFAULT_ENABLE_ARTIFACTS,
-        enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
-        enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
-        enablePasteToFile: DEFAULT_ENABLE_PASTE_TO_FILE,
-        enableMemory: DEFAULT_ENABLE_MEMORY,
-        toolChoice: DEFAULT_TOOL_CHOICE,
-        customInstructions: ""
-    });
+    const {
+        state,
+        artifacts,
+        setArtifacts,
+        isArtifactsOpen,
+        setIsArtifactsOpen,
+        combinedMessages,
+        setCombinedMessages
+    } = useChatContext();
 
     const [activeTab, setActiveTab] = useState("preview");
-    const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [currentArtifactIndex, setCurrentArtifactIndex] = useState(-1);
-
-    const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
@@ -101,10 +48,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     const combinedMessagesRef = useRef<CombinedMessage[]>([]);
 
     const [showContinueButton, setShowContinueButton] = useState(false);
-
-    const [combinedMessages, setCombinedMessages] = useState<CombinedMessage[]>(
-        []
-    );
 
     const [regeneratingMessageId, setRegeneratingMessageId] = useState<
         string | null
@@ -150,7 +93,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         async onToolCall({ toolCall }) {}
     });
 
-    const router = useRouter();
     const path = usePathname();
 
     useEffect(() => {
@@ -549,32 +491,13 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     }, [combinedMessages, scrollToBottom]);
 
     return (
-        <div className="flex flex-col h-screen w-full overflow-hidden">
-            <SettingsMenu
-                isOpen={isSettingsOpen}
-                onClose={() => {
-                    save();
-                    setIsSettingsOpen(false);
-                }}
-                settings={state}
-                dispatch={dispatch}
-            />
+        <div className="flex flex-col h-full w-full overflow-hidden">
             <div className="flex flex-grow overflow-hidden">
                 <div
                     className={`flex flex-col ${
                         isArtifactsOpen ? "w-[55%]" : "w-full"
                     } h-full bg-background transition-all duration-300`}
                 >
-                    <ChatHeader
-                        artifacts={artifacts && artifacts.length > 0}
-                        isArtifactsOpen={isArtifactsOpen}
-                        setIsArtifactsOpen={setIsArtifactsOpen}
-                        selectedModel={state.model}
-                        onModelSelect={(newModel) =>
-                            dispatch({ type: "SET_MODEL", payload: newModel })
-                        }
-                        onOpenSettings={() => setIsSettingsOpen(true)}
-                    />
                     <div
                         ref={messagesContainerRef}
                         className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"

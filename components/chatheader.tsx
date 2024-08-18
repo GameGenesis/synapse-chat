@@ -1,3 +1,5 @@
+"use client";
+
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +34,8 @@ import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useChatContext } from "@/lib/hooks/use-chat-context";
+import Link from "next/link";
 
 const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
 
@@ -127,29 +130,20 @@ export const modelInfo: Partial<
     }
 };
 
-interface Props {
-    artifacts: boolean;
-    isArtifactsOpen: boolean;
-    setIsArtifactsOpen: (open: boolean) => void;
-    selectedModel: ModelKey;
-    onModelSelect: (model: ModelKey) => void;
-    onOpenSettings: () => void;
-}
-
-const ChatHeader = ({
-    artifacts,
-    isArtifactsOpen,
-    setIsArtifactsOpen,
-    selectedModel,
-    onModelSelect,
-    onOpenSettings
-}: Props) => {
-    const router = useRouter();
+const ChatHeader = () => {
+    const {
+        state,
+        dispatch,
+        artifacts,
+        isArtifactsOpen,
+        setIsArtifactsOpen,
+        setIsSettingsOpen
+    } = useChatContext();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [open, setOpen] = useState(false);
 
     const handleModelChange = (model: ModelKey) => {
-        onModelSelect(model);
+        dispatch({ type: "SET_MODEL", payload: model });
     };
 
     const getModelDisplayName = (modelKey: ModelKey) => {
@@ -191,13 +185,15 @@ const ChatHeader = ({
                         </SheetContent>
                     </Sheet>
                     <Button
+                        asChild
                         variant="outline"
                         size="icon"
                         className="hidden md:flex"
                         aria-label="Open new chat"
-                        onClick={() => router.push("/chat")}
                     >
-                        <MessageSquarePlusIcon className="h-5 w-5" />
+                        <a href="/">
+                            <MessageSquarePlusIcon className="h-5 w-5" />
+                        </a>
                     </Button>
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
@@ -207,7 +203,7 @@ const ChatHeader = ({
                                 aria-expanded={open}
                                 className="gap-1 rounded-md px-3 h-10 text-lg justify-between"
                             >
-                                {getModelDisplayName(selectedModel)}
+                                {getModelDisplayName(state.model)}
                                 <ChevronDownIcon className="w-4 h-4 text-muted-foreground ml-2 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
@@ -264,7 +260,7 @@ const ChatHeader = ({
                     </Popover>
                 </div>
                 <div className="flex space-x-2">
-                    {artifacts && !isArtifactsOpen && (
+                    {artifacts.length > 0 && !isArtifactsOpen && (
                         <Button
                             variant="outline"
                             size="default"
@@ -278,9 +274,9 @@ const ChatHeader = ({
                     <Button
                         variant="default"
                         size="icon"
-                        onClick={onOpenSettings}
+                        onClick={() => setIsSettingsOpen(true)}
                         aria-label="Open settings"
-                        disabled={selectedModel === "agents"}
+                        disabled={state.model === "agents"}
                     >
                         <SettingsIcon className="h-4 w-4" />
                     </Button>

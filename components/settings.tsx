@@ -1,3 +1,5 @@
+"use client";
+
 import React, { memo, useEffect, useState } from "react";
 import {
     Dialog,
@@ -52,15 +54,15 @@ import {
     unsupportedArtifactUseModels,
     unsupportedToolUseModels
 } from "@/lib/utils/model-provider";
+import { useChatContext } from "@/lib/hooks/use-chat-context";
 
-interface Props {
-    isOpen: boolean;
-    onClose: () => void;
-    settings: Settings;
-    dispatch: React.Dispatch<Action>;
-}
-
-const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
+const SettingsMenu = () => {
+    const {
+        state: settings,
+        dispatch,
+        isSettingsOpen,
+        setIsSettingsOpen
+    } = useChatContext();
     const [maxPossibleOutput, setMaxPossibleOutput] = useState(4096);
     const [toolChoice, setToolChoice] = useState<ToolChoice>("auto");
     const [openCombobox, setOpenCombobox] = useState(false);
@@ -109,7 +111,7 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogContent className="sm:max-w-[550px]">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold">

@@ -1,20 +1,20 @@
 import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
-    const router = useRouter();
     return (
         <div className="flex flex-col h-full bg-background mt-2">
             <div className="p-4 border-b">
                 <Button
+                    asChild
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => router.push("/chat")}
                 >
-                    <MessageSquarePlusIcon className="mr-2 h-5 w-5" />
-                    New chat
+                    <a href="/">
+                        <MessageSquarePlusIcon className="mr-2 h-5 w-5" />
+                        New chat
+                    </a>
                 </Button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
