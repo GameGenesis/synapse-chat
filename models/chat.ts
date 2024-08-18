@@ -26,8 +26,10 @@ const messageSchema: Schema = new Schema({
 const chatSchema: Schema = new Schema(
     {
         _id: { type: String, required: true },
-        userId: { type: String, required: true, ref: 'User' },
-        messages: { type: [messageSchema], required: true }
+        userId: { type: String, required: true, ref: "User" },
+        name: { type: String, default: "New Chat", required: true },
+        messages: { type: [messageSchema], required: true },
+        public: { type: Boolean, default: false, required: true }
     },
     { timestamps: true }
 );
