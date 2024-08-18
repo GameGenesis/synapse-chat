@@ -1,11 +1,11 @@
-import { CombinedMessage, State } from "@/lib/types";
+import { CombinedMessage, Settings } from "@/lib/types";
 import toast from "react-hot-toast";
 
 const saveChat = async (
     userId: string,
     chatId: string,
     messages: CombinedMessage[],
-    settings: State,
+    settings: Settings,
     setIsSaving?: (value: boolean) => void
 ) => {
     if (setIsSaving) {
@@ -27,7 +27,7 @@ const saveChat = async (
         });
 
         if (!response.ok) {
-            throw new Error('Failed to save chat');
+            throw new Error("Failed to save chat");
         }
 
         const data = await response.json();
