@@ -33,7 +33,7 @@ import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/lib/utils/save-chat";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
 import { Message } from "ai";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -150,7 +150,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         async onToolCall({ toolCall }) {}
     });
 
-    const router = useRouter();
     const path = usePathname();
 
     useEffect(() => {

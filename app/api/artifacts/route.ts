@@ -11,6 +11,8 @@ export async function POST(req: NextRequest) {
             ...artifactData,
             userId: "1"
         });
+        const shareableURL = `${process.env.NEXT_PUBLIC_URL}/artifacts/${artifact._id}`;
+        artifact.shareableURL = shareableURL;
         await artifact.save();
 
         return NextResponse.json({ id: artifact._id }, { status: 201 });

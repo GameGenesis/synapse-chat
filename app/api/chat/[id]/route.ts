@@ -10,7 +10,6 @@ export async function GET(
         await dbConnect();
 
         const chatId = params.id;
-
         const chat = await Chat.findById(chatId);
 
         if (!chat) {
