@@ -18,7 +18,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { userId, chatId, messages, settings } = body;
+        const { userId, chatId, chatName, messages, settings } = body;
 
         if (
             !userId ||
@@ -60,7 +60,8 @@ export async function POST(req: Request) {
         // Update or create chat
         const chatUpdate = {
             userId,
-            messages
+            messages,
+            name: chatName
         };
 
         const chatOptions = {
@@ -87,6 +88,7 @@ export async function POST(req: Request) {
                 success: true,
                 userId: user._id,
                 chatId: chat._id,
+                chatName,
                 isNewChat
             },
             { status: isNewChat ? 201 : 200 }

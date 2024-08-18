@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 const saveChat = async (
     userId: string,
     chatId: string,
+    chatName: string,
     messages: CombinedMessage[],
     settings: Settings,
     setIsSaving?: (value: boolean) => void
@@ -21,6 +22,7 @@ const saveChat = async (
             body: JSON.stringify({
                 userId,
                 chatId,
+                chatName,
                 messages,
                 settings
             })

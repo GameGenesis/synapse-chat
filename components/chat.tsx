@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
     useState,
     useEffect,
@@ -72,6 +74,8 @@ const reducer = (state: Settings, action: Action): Settings => {
 };
 
 export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
+    const path = usePathname();
+
     const [state, dispatch] = useReducer(reducer, {
         model: DEFAULT_MODEL,
         temperature: DEFAULT_TEMPERATURE,
@@ -150,8 +154,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         async onToolCall({ toolCall }) {}
     });
 
-    const path = usePathname();
-
     useEffect(() => {
         if (!path.includes("chat") && messages.length === 1) {
             window.history.replaceState({}, "", `/chat/${chatId}`);
@@ -202,8 +204,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     useEffect(() => {
         if (combinedMessages.length > 0) {
             combinedMessagesRef.current = combinedMessages;
-        } else {
-            console.log("SAVE: ITS EMPTY!!");
         }
     }, [combinedMessages]);
 
@@ -217,7 +217,13 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
         shouldSaveRef.current = false;
         console.log("Saving...");
-        await saveChat(userId, chatId, combinedMessagesRef.current, state);
+        await saveChat(
+            userId,
+            chatId,
+            combinedMessagesRef.current[0].originalContent.slice(0, 50),
+            combinedMessagesRef.current,
+            state
+        );
         console.log("Save completed");
     }, [state, userId, chatId]);
 
