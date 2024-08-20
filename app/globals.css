@@ -91,3 +91,13 @@
 pre {
     @apply text-wrap;
 }
+
+/* These list styles are to fix issue with showdown markdown cutting off ordered lists with double/triple digit numbers */
+
+ol {
+    @apply ml-4
+}
+
+ul {
+    @apply ml-4
+}
