@@ -112,7 +112,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
                 <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1 overflow-hidden mb-2">
-                <div className="flex items-center justify-between align-middle">
+                <div className="flex items-center justify-between align-middle pt-1 pr-1">
                     <div className="font-bold text-lg">{USER_NAME}</div>
                     <CopyButton content={message.originalContent} />
                 </div>
@@ -432,7 +432,7 @@ export const AssistantMessage = ({
                     <AvatarFallback>OA</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 overflow-hidden mb-2">
-                    <div className="flex items-center justify-between align-middle">
+                    <div className="flex items-center justify-between align-middle pt-1 pr-1">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-lg">Assistant</span>
                             {typeof message !== "string" && message.model && (
