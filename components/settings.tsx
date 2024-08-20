@@ -301,12 +301,36 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                             <p className="text-sm text-muted-foreground mb-4">
                                 Enabling too many features may compromise the
                                 effectiveness of specific features or tools.
+                                Features such as Artifacts, Logic Mode, and
+                                Memory perform better with more advanced models.
                             </p>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="enableArtifacts">
-                                        Enable Artifacts
-                                    </Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Label htmlFor="enableArtifacts">
+                                            Enable Artifacts
+                                        </Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-96 overflow-auto">
+                                                        Artifact generation is
+                                                        disabled for the
+                                                        following models:{" "}
+                                                        <strong>
+                                                            {unsupportedArtifactUseModels.join(
+                                                                ", "
+                                                            )}
+                                                        </strong>
+                                                        .
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                     <Switch
                                         id="enableArtifacts"
                                         checked={settings.enableArtifacts}
@@ -322,9 +346,41 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="enableInstructions">
-                                        Enable Default Instructions
-                                    </Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Label htmlFor="enableInstructions">
+                                            Enable Default Instructions
+                                        </Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-96 overflow-auto">
+                                                        This controls whether
+                                                        the chatbot uses the
+                                                        default supplied
+                                                        internal instructions.
+                                                        These instructions
+                                                        supply the personality,
+                                                        behavior, and some of
+                                                        the abilities of the
+                                                        chatbot.
+                                                        <br />
+                                                        <br />
+                                                        <strong>Note: </strong>
+                                                        It is highly recommended
+                                                        to keep this setting
+                                                        enabled, unless there
+                                                        are supplied custom
+                                                        instructions that
+                                                        explicitly specify chat
+                                                        behavior.
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                     <Switch
                                         id="enableInstructions"
                                         checked={settings.enableInstructions}
@@ -359,32 +415,30 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <Label htmlFor="enableLogicMode">
-                                            Enable Logic Mode
-                                        </Label>
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p className="max-w-96 overflow-auto">
-                                                        Logic Mode usually
-                                                        performs better with
-                                                        larger and more advanced
-                                                        models.
-                                                    </p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </div>
+                                    <Label htmlFor="enableLogicMode">
+                                        Enable Logic Mode
+                                    </Label>
                                     <Switch
                                         id="enableLogicMode"
                                         checked={settings.enableLogicMode}
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_LOGIC_MODE",
+                                                payload: checked
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="enableMemory">
+                                        Enable Memory
+                                    </Label>
+                                    <Switch
+                                        id="enableMemory"
+                                        checked={settings.enableMemory}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_MEMORY",
                                                 payload: checked
                                             })
                                         }
@@ -403,7 +457,7 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                                 <TooltipContent>
                                                     <p className="max-w-96 overflow-auto">
                                                         Pastes long-form text as
-                                                        a plaintext file
+                                                        a plaintext file.
                                                     </p>
                                                 </TooltipContent>
                                             </Tooltip>
@@ -415,21 +469,6 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                         onCheckedChange={(checked) =>
                                             dispatch({
                                                 type: "SET_ENABLE_PASTE_TO_FILE",
-                                                payload: checked
-                                            })
-                                        }
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="enableMemory">
-                                        Enable Memory
-                                    </Label>
-                                    <Switch
-                                        id="enableMemory"
-                                        checked={settings.enableMemory}
-                                        onCheckedChange={(checked) =>
-                                            dispatch({
-                                                type: "SET_ENABLE_MEMORY",
                                                 payload: checked
                                             })
                                         }
