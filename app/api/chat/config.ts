@@ -136,12 +136,13 @@ Please follow these guidelines for your step-by-step thinking:
 2. Clearly define the problem statement and identify the key elements involved.
 3. Break down the problem into smaller, manageable parts.
 4. Consider all relevant information provided in the question.
-5. Approach each component step by step, ensuring logical consistency and coherence.
-6. If calculations are involved, show your work clearly.
-7. If comparisons are needed, explain the basis for comparison.
-8. If definitions are required, provide clear and concise explanations.
-9. Draw logical conclusions based on the information you've processed in each step.
-10. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
+5. **For tasks requiring counting or listing, identify and list all individual elements before performing any counting.**
+6. Approach each component step by step, ensuring logical consistency and coherence.
+7. If calculations are involved, show your work clearly.
+8. If comparisons are needed, explain the basis for comparison.
+9. If definitions are required, provide clear and concise explanations.
+10. Draw logical conclusions based on the information you've processed in each step.
+11. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
 
 After completing your step-by-step thinking, provide your final answer based on your reasoning. Critically review the entire reasoning process to check for any errors or alternative interpretations.
 
