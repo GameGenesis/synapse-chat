@@ -10,6 +10,7 @@ import {
     DialogTitle,
     DialogDescription
 } from "@/components/ui/dialog";
+import { extractTitleFromArticle } from "@/lib/utils/format";
 
 interface ReadUrlCardProps {
     result: string;
@@ -29,11 +30,30 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
     const { title, publishedTime, content, processedContent, previewContent } =
         useMemo(() => {
             const lines = result.split("\n");
-            const title =
-                lines[0].replace("Title: ", "").slice(0, 100) +
-                (lines[0].length > 100 ? "..." : "");
-            const publishedTime = lines[4].replace("Published Time: ", "");
-            const content = lines.slice(6).join("\n");
+
+            // Title
+            const title = extractTitleFromArticle(lines);
+            const truncatedTitle =
+                title.slice(0, 100) + (title.length > 100 ? "..." : "");
+
+            // Time
+            const publishedTimeLine = lines.find((line) =>
+                line.startsWith("Published Time:")
+            );
+            let publishedTime = publishedTimeLine
+                ? new Date(
+                      publishedTimeLine.replace("Published Time:", "").trim()
+                  )
+                : null;
+            if (publishedTime && isNaN(publishedTime.getTime())) {
+                publishedTime = null; // Set to null if date is invalid
+            }
+
+            const content = lines
+                .slice(6)
+                .join("\n")
+                .replace("Markdown Content:", "")
+                .trim();
 
             let processedContent: string;
             let previewContent: string;
@@ -58,7 +78,7 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
             }
 
             return {
-                title,
+                title: truncatedTitle,
                 publishedTime,
                 content,
                 processedContent,
@@ -80,9 +100,11 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
             <Card className="w-full">
                 <CardContent className="p-4">
                     <h3 className="text-xl font-semibold mb-2">{title}</h3>
-                    <p className="text-sm text-gray-500 mb-1">
-                        Published: {new Date(publishedTime).toLocaleString()}
-                    </p>
+                    {publishedTime && (
+                        <p className="text-sm text-gray-500 mb-1">
+                            Published: {publishedTime.toLocaleString()}
+                        </p>
+                    )}
                     <Link
                         href={url}
                         target="_blank"

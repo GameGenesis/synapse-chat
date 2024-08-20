@@ -8,7 +8,7 @@ import { JinaClient } from "@agentic/jina";
 import { WeatherClient } from "@agentic/weather";
 import { WikipediaClient } from "@agentic/wikipedia";
 import { YoutubeTranscript } from "youtube-transcript";
-import formatTime from "@/lib/utils/format";
+import { formatTime } from "@/lib/utils/format";
 import { createAgentNetwork } from "@/lib/agents";
 import executeJavaScript from "@/lib/tools/eval";
 
@@ -135,11 +135,12 @@ export const tools = {
         }
     }),
     execute_javascript: tool({
-        description: "Executes JavaScript code in the browser and returns the result. This tool is useful for evaluating mathematical expressions, running small code snippets, or performing simple calculations.",
+        description:
+            "Executes JavaScript code in the browser and returns the result. This tool is useful for evaluating mathematical expressions, running small code snippets, or performing simple calculations.",
         parameters: z.object({
             javascript: z.string().describe("The JavaScript code to execute.")
         }),
-        execute: async({javascript}) => ({
+        execute: async ({ javascript }) => ({
             result: executeJavaScript(javascript)
         })
     }),
