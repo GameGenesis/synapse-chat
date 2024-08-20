@@ -436,11 +436,18 @@ export const AssistantMessage = ({
         if (
             !readURLInvocation ||
             readURLInvocation.state !== "result" ||
-            !readURLInvocation.result
+            !readURLInvocation.result ||
+            readURLInvocation.result === ""
         )
             return null;
 
-        return <ReadUrlCard result={readURLInvocation.result} />;
+        return (
+            <ReadUrlCard
+                result={readURLInvocation.result}
+                url={readURLInvocation.args.url}
+                returnFormat={readURLInvocation.args.returnFormat || "markdown"}
+            />
+        );
     };
 
     return (
