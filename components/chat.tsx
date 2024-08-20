@@ -166,7 +166,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
     useEffect(() => {
         const loadExistingChat = async () => {
-            if (chatId) {
+            if (path.includes("chat") && chatId) {
                 try {
                     const response = await fetch(`/api/chat/${chatId}`);
                     if (response.ok) {
@@ -203,7 +203,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         };
 
         loadExistingChat();
-    }, [chatId, setMessages]);
+    }, [chatId, path, setMessages]);
 
     useEffect(() => {
         if (combinedMessages.length > 0) {
