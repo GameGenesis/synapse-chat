@@ -197,41 +197,50 @@ const ChatFooter = ({
     };
 
     const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-        const items = event.clipboardData.items;
-        const imageItems = Array.from(items).filter(
-            (item) => item.type.indexOf("image") !== -1
-        );
-        const textItems = Array.from(items).filter(
-            (item) => item.type === "text/plain"
-        );
+        try {
+            const items = event.clipboardData.items;
+            const imageItems = Array.from(items).filter(
+                (item) => item.type.indexOf("image") !== -1
+            );
+            const textItems = Array.from(items).filter(
+                (item) => item.type === "text/plain"
+            );
 
-        if (imageItems.length > 0) {
-            event.preventDefault();
-            imageItems.forEach((item) => {
-                const blob = item.getAsFile();
-                if (blob) {
-                    const file = new File(
-                        [blob],
-                        `pasted-image-${Date.now()}.png`,
-                        { type: "image/png" }
-                    );
-                    addFile(file);
-                }
-            });
-        } else if (enablePasteToFile && textItems.length > 0) {
-            const text = event.clipboardData.getData("text/plain");
-
-            if (text.length > LARGE_TEXT_THRESHOLD) {
+            if (imageItems.length > 0) {
                 event.preventDefault();
-                const file = new File([text], `pasted-text-${Date.now()}.txt`, {
-                    type: "text/plain"
-                });
-                addFile(file);
-                toast.success("Pasted text converted to file");
+                for (const item of imageItems) {
+                    const blob = item.getAsFile();
+                    if (blob) {
+                        const fileExtension = blob.type.split("/")[1] || "png";
+                        const file = new File(
+                            [blob],
+                            `image-${Date.now()}.${fileExtension}`,
+                            { type: blob.type }
+                        );
+                        addFile(file);
+                    }
+                }
             }
-            // If text is shorter, do nothing and allow default paste behavior
+
+            if (enablePasteToFile && textItems.length > 0) {
+                const text = event.clipboardData.getData("text/plain");
+
+                if (text.length > LARGE_TEXT_THRESHOLD) {
+                    event.preventDefault();
+                    const file = new File([text], `pasted-text-${Date.now()}`, {
+                        type: "text/plain"
+                    });
+                    addFile(file);
+                    toast.success("Pasted text converted to file");
+                }
+                // If text is shorter, do nothing and allow default paste behavior
+            }
+        } catch (error) {
+            console.error("Error handling paste:", error);
+            toast.error(
+                "An error occurred while processing the pasted content"
+            );
         }
-        // For all other cases, allow default paste behavior
     };
 
     const addFile = (file: File) => {
