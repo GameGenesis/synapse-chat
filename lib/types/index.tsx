@@ -72,8 +72,8 @@ export type Settings = {
     enableInstructions: boolean;
     enableSafeguards: boolean;
     enableLogicMode: boolean;
-    enablePasteToFile: boolean;
     enableMemory: boolean;
+    enablePasteToFile: boolean;
     customInstructions: string;
     toolChoice: ToolChoice;
 };

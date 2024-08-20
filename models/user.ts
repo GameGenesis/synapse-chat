@@ -14,8 +14,9 @@ const settingsSchema: Schema = new Schema({
     enableArtifacts: { type: Boolean, required: true },
     enableInstructions: { type: Boolean, required: true },
     enableSafeguards: { type: Boolean, required: true },
-    enablePasteToFile: { type: Boolean, required: true },
+    enableLogicMode: { type: Boolean, required: true },
     enableMemory: { type: Boolean, required: true },
+    enablePasteToFile: { type: Boolean, required: true },
     toolChoice: { type: Schema.Types.Mixed, required: true },
     customInstructions: { type: String }
 });
