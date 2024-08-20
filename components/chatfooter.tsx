@@ -219,21 +219,19 @@ const ChatFooter = ({
                 }
             });
         } else if (enablePasteToFile && textItems.length > 0) {
-            textItems.forEach((item) => {
-                item.getAsString((text) => {
-                    if (text.length > LARGE_TEXT_THRESHOLD) {
-                        event.preventDefault();
-                        const file = new File(
-                            [text],
-                            `pasted-text-${Date.now()}`,
-                            { type: "text/plain" }
-                        );
-                        addFile(file);
-                        toast.success("Pasted text converted to file");
-                    }
+            const text = event.clipboardData.getData("text/plain");
+
+            if (text.length > LARGE_TEXT_THRESHOLD) {
+                event.preventDefault();
+                const file = new File([text], `pasted-text-${Date.now()}.txt`, {
+                    type: "text/plain"
                 });
-            });
+                addFile(file);
+                toast.success("Pasted text converted to file");
+            }
+            // If text is shorter, do nothing and allow default paste behavior
         }
+        // For all other cases, allow default paste behavior
     };
 
     const addFile = (file: File) => {
