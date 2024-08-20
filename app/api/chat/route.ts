@@ -87,6 +87,7 @@ export async function POST(req: Request) {
         enableArtifacts,
         enableInstructions,
         enableSafeguards,
+        enableLogicMode,
         enableMemory,
         customInstructions,
         toolChoice
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
               enableArtifacts && !unsupportedArtifactUseModels.includes(model),
               enableInstructions,
               enableSafeguards,
-              true,
+              enableLogicMode,
               finalToolChoice !== "none",
               relevantMemories,
               customInstructions

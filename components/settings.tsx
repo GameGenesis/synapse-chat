@@ -355,6 +355,21 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
+                                    <Label htmlFor="enableLogicMode">
+                                        Enable Logic Mode
+                                    </Label>
+                                    <Switch
+                                        id="enableLogicMode"
+                                        checked={settings.enableLogicMode}
+                                        onCheckedChange={(checked) =>
+                                            dispatch({
+                                                type: "SET_ENABLE_LOGIC_MODE",
+                                                payload: checked
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <Label htmlFor="enablePasteToFile">
                                             Enable Paste to File

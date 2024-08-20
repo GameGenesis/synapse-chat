@@ -71,6 +71,7 @@ export type Settings = {
     enableArtifacts: boolean;
     enableInstructions: boolean;
     enableSafeguards: boolean;
+    enableLogicMode: boolean;
     enablePasteToFile: boolean;
     enableMemory: boolean;
     customInstructions: string;
@@ -87,6 +88,7 @@ export type Action =
     | { type: "SET_ENABLE_ARTIFACTS"; payload: boolean }
     | { type: "SET_ENABLE_INSTRUCTIONS"; payload: boolean }
     | { type: "SET_ENABLE_SAFEGUARDS"; payload: boolean }
+    | { type: "SET_ENABLE_LOGIC_MODE"; payload: boolean }
     | { type: "SET_ENABLE_TOOLS"; payload: boolean }
     | { type: "SET_ENABLE_PASTE_TO_FILE"; payload: boolean }
     | { type: "SET_ENABLE_MEMORY"; payload: boolean }

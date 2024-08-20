@@ -7,6 +7,7 @@ export const DEFAULT_MAX_TOKENS = 4096;
 export const DEFAULT_ENABLE_ARTIFACTS = false; // Enable this in prod
 export const DEFAULT_ENABLE_INSTRUCTIONS = true;
 export const DEFAULT_ENABLE_SAFEGUARDS = false;
+export const DEFAULT_ENABLE_LOGIC_MODE = false;
 export const DEFAULT_ENABLE_PASTE_TO_FILE = true;
 export const DEFAULT_ENABLE_MEMORY = true;
 export const DEFAULT_TOOL_CHOICE = "auto";
@@ -136,7 +137,7 @@ Please follow these guidelines for your step-by-step thinking:
 2. Clearly define the problem statement and identify the key elements involved.
 3. Break down the problem into smaller, manageable parts.
 4. Consider all relevant information provided in the question.
-5. **For tasks requiring counting or listing, identify and list all individual elements before performing any counting.**
+5. **For tasks requiring counting or listing, identify and list all individual elements before performing any counting.** (e.g. When counting how many letter "r"s are in the word "strawberry", first list all the letters of the word "strawberry", then count the "r"s)
 6. Approach each component step by step, ensuring logical consistency and coherence.
 7. If calculations are involved, show your work clearly.
 8. If comparisons are needed, explain the basis for comparison.

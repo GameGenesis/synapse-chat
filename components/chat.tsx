@@ -17,6 +17,7 @@ import SettingsMenu from "./settings";
 import {
     DEFAULT_ENABLE_ARTIFACTS,
     DEFAULT_ENABLE_INSTRUCTIONS,
+    DEFAULT_ENABLE_LOGIC_MODE,
     DEFAULT_ENABLE_MEMORY,
     DEFAULT_ENABLE_PASTE_TO_FILE,
     DEFAULT_ENABLE_SAFEGUARDS,
@@ -60,6 +61,8 @@ const reducer = (state: Settings, action: Action): Settings => {
             return { ...state, enableInstructions: action.payload };
         case "SET_ENABLE_SAFEGUARDS":
             return { ...state, enableSafeguards: action.payload };
+        case "SET_ENABLE_LOGIC_MODE":
+            return { ...state, enableLogicMode: action.payload };
         case "SET_ENABLE_PASTE_TO_FILE":
             return { ...state, enablePasteToFile: action.payload };
         case "SET_ENABLE_MEMORY":
@@ -85,6 +88,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         enableArtifacts: DEFAULT_ENABLE_ARTIFACTS,
         enableInstructions: DEFAULT_ENABLE_INSTRUCTIONS,
         enableSafeguards: DEFAULT_ENABLE_SAFEGUARDS,
+        enableLogicMode: DEFAULT_ENABLE_LOGIC_MODE,
         enablePasteToFile: DEFAULT_ENABLE_PASTE_TO_FILE,
         enableMemory: DEFAULT_ENABLE_MEMORY,
         toolChoice: DEFAULT_TOOL_CHOICE,
