@@ -173,6 +173,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     useEffect(() => {
         const loadExistingChat = async () => {
             if (path.includes("chat") && chatId && shouldLoadChatRef.current) {
+                console.log("LOADING CHAT");
                 try {
                     const response = await fetch(`/api/chat/${chatId}`);
                     if (response.ok) {

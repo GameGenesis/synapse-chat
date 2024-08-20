@@ -16,10 +16,7 @@ import {
 } from "./config";
 import { ToolChoice } from "@/lib/types";
 import { limitMessages } from "@/lib/utils/message-manager";
-import {
-    findRelevantMemories,
-    extractMemory
-} from "@/lib/memory";
+import { findRelevantMemories, extractMemory } from "@/lib/memory";
 
 export const maxDuration = 100; // Timeout in seconds
 
@@ -71,10 +68,6 @@ const getToolsToUse = (
     };
 };
 
-const cloneObject = (obj: object) => {
-    return JSON.parse(JSON.stringify(obj));
-};
-
 export async function POST(req: Request) {
     const { userId, messages, settings } = await req.json();
 
@@ -93,13 +86,13 @@ export async function POST(req: Request) {
         toolChoice
     } = settings;
 
-    const modelToUse = determineModel(model, cloneObject(messages));
+    const modelToUse = determineModel(model, messages?.slice());
     const useAgents = model === "agents";
 
     const { toolChoice: finalToolChoice, tools: toolsToUse } = getToolsToUse(
         toolChoice,
         model,
-        cloneObject(messages)
+        messages?.slice()
     );
     const {
         temperature: finalTemperature,
