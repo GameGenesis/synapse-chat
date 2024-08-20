@@ -127,6 +127,7 @@ export async function POST(req: Request) {
               enableArtifacts && !unsupportedArtifactUseModels.includes(model),
               enableInstructions,
               enableSafeguards,
+              true,
               finalToolChoice !== "none",
               relevantMemories,
               customInstructions

@@ -3,13 +3,15 @@ import {
     assistantPrompt,
     toolsPrompt,
     imageSafetyPrompt,
-    safetyPrompt
+    safetyPrompt,
+    logicPrompt
 } from "./config";
 
 const buildPrompt = (
     enableArtifacts: boolean,
     enableDefaultPrompt: boolean,
     enableSafeguards: boolean,
+    enableLogicMode: boolean,
     useTools: boolean,
     memories?: string[],
     customInstructions?: string
@@ -38,7 +40,7 @@ ${memories.join("\n")}
 
     return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${
         useTools ? toolsPrompt : ""
-    }${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${
+    }${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${enableLogicMode ? logicPrompt : ""}${
         customInstructions
             ? `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>`
             : ""
