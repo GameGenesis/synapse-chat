@@ -298,6 +298,10 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                     <AccordionItem value="features">
                         <AccordionTrigger>Features</AccordionTrigger>
                         <AccordionContent>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Enabling too many features may compromise the
+                                effectiveness of specific features or tools.
+                            </p>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="enableArtifacts">
@@ -355,9 +359,26 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="enableLogicMode">
-                                        Enable Logic Mode
-                                    </Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Label htmlFor="enableLogicMode">
+                                            Enable Logic Mode
+                                        </Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-96 overflow-auto">
+                                                        Logic Mode usually
+                                                        performs better with
+                                                        larger and more advanced
+                                                        models.
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                     <Switch
                                         id="enableLogicMode"
                                         checked={settings.enableLogicMode}
@@ -380,7 +401,7 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                                     <InfoIcon className="h-4 w-4 text-gray-500" />
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    <p>
+                                                    <p className="max-w-96 overflow-auto">
                                                         Pastes long-form text as
                                                         a plaintext file
                                                     </p>
@@ -424,7 +445,7 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                 {unsupportedToolUseModels.includes(
                                     settings.model
                                 ) && (
-                                    <p>
+                                    <p className="text-sm text-muted-foreground mb-4">
                                         Tool Use is disabled for this model.
                                         Choose another model to be able to use
                                         tools.
