@@ -10,6 +10,7 @@ import { WikipediaClient } from "@agentic/wikipedia";
 import { YoutubeTranscript } from "youtube-transcript";
 import formatTime from "@/lib/utils/format";
 import { createAgentNetwork } from "@/lib/agents";
+import executeJavaScript from "@/lib/tools/eval";
 
 const openai = new OpenAI();
 
@@ -132,6 +133,15 @@ export const tools = {
                     .replaceAll("&amp;#39;", "'")
             };
         }
+    }),
+    execute_javascript: tool({
+        description: "Executes JavaScript code in the browser and returns the result. This tool is useful for evaluating mathematical expressions, running small code snippets, or performing simple calculations.",
+        parameters: z.object({
+            javascript: z.string().describe("The JavaScript code to execute.")
+        }),
+        execute: async({javascript}) => ({
+            result: executeJavaScript(javascript)
+        })
     }),
     // evaluate_math_expression: tool({
     //     description:

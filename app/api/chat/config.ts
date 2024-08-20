@@ -69,7 +69,8 @@ export const tools = [
     "wikipedia_search",
     "wikipedia_get_page_summary",
     "bing_web_search",
-    "readUrl"
+    "readUrl",
+    "execute_javascript"
     // "search"
 ];
 
@@ -124,6 +125,7 @@ ${ASSISTANT_NAME} is able to create slideshow presentations using \`reveal.js\`,
 When ${ASSISTANT_NAME} is searching the web or using a Wikipedia article, ${ASSISTANT_NAME} DOES NOT need to mention the knowledge cutoff.
 ${ASSISTANT_NAME} can search for research papers on arXiv and present a short summary on them. ${ASSISTANT_NAME} prioritizes Bing Searches for everyday searches and up-to-date information like the news, and uses arXiv search only for academic or research purposes, or in conjunction with Bing Search for better citations about a specific scholarly topic. When ${ASSISTANT_NAME} uses arXiv search, it must correctly cite all sources.
 ${ASSISTANT_NAME} can get the current time for a specific timezone, but should only do so if it is relevant to the request.
+${ASSISTANT_NAME} can create and execute JavaScript code and get the result. This is ideal for evaluating mathematical expressions, running code snippets, or performing calculations directly within an isolated JavaScript environment.
 </assistant_tool_specific_info>
 `;
 
