@@ -102,10 +102,10 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     const [isArtifactsOpen, setIsArtifactsOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    const shouldLoadChatRef = useRef(true);
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
     const lastDataIndexRef = useRef<number | undefined>();
+    const shouldLoadChatRef = useRef(false);
     const shouldSaveRef = useRef(false);
     const combinedMessagesRef = useRef<CombinedMessage[]>([]);
 
@@ -164,6 +164,10 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             shouldLoadChatRef.current = false;
             window.history.replaceState({}, "", `/chat/${chatId}`);
         }
+
+        if (path.includes("chat") && (!messages || messages.length === 0)) {
+            shouldLoadChatRef.current = true;
+        }
     }, [chatId, messages, path]);
 
     useEffect(() => {
@@ -207,7 +211,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         };
 
         loadExistingChat();
-    }, [chatId, path, setMessages]);
+    }, [chatId, path, setMessages, shouldLoadChatRef]);
 
     useEffect(() => {
         if (combinedMessages.length > 0) {
