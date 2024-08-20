@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLinkIcon, GlobeIcon } from "lucide-react";
 import Link from "next/link";
-import showdown from "showdown";
 import {
     Dialog,
     DialogContent,
@@ -11,6 +10,7 @@ import {
     DialogDescription
 } from "@/components/ui/dialog";
 import { extractTitleFromArticle } from "@/lib/utils/format";
+import markdownToHtml from "@/lib/utils/markdown-to-html";
 
 interface ReadUrlCardProps {
     result: string;
@@ -24,7 +24,6 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
     returnFormat = "text"
 }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const converter = useMemo(() => new showdown.Converter(), []);
 
     // Parse the result string
     const { title, publishedTime, content, processedContent, previewContent } =
@@ -65,7 +64,7 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
                         content.replace(/<[^>]*>/g, "").slice(0, 150) + "...";
                     break;
                 case "markdown":
-                    processedContent = converter.makeHtml(content);
+                    processedContent = markdownToHtml(content);
                     previewContent = content.slice(0, 150) + "...";
                     break;
                 case "screenshot":
@@ -84,7 +83,7 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
                 processedContent,
                 previewContent
             };
-        }, [result, returnFormat, converter]);
+        }, [result, returnFormat]);
 
     // Function to safely get hostname
     const getHostname = useMemo(() => {
