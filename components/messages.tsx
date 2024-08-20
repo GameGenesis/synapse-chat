@@ -26,6 +26,7 @@ import { USER_NAME } from "@/app/api/chat/config";
 import { Message } from "ai";
 import dynamic from "next/dynamic";
 import { models } from "@/lib/utils/model-provider";
+import ReadUrlCard from "./tools/readurl";
 
 const ImageGallery = dynamic(
     () => import("@/components/tools").then((mod) => mod.ImageGallery),
@@ -424,6 +425,24 @@ export const AssistantMessage = ({
         return <WeatherCard weather={weatherInvocation.result} />;
     };
 
+    const renderReadURLCard = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const readURLInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "readUrl"
+        );
+
+        if (
+            !readURLInvocation ||
+            readURLInvocation.state !== "result" ||
+            !readURLInvocation.result
+        )
+            return null;
+
+        return <ReadUrlCard result={readURLInvocation.result} />;
+    };
+
     return (
         <>
             <div className="flex items-start gap-4">
@@ -498,6 +517,7 @@ export const AssistantMessage = ({
                         {renderWikipediaSummary()}
                         {renderImages()}
                         {renderSources()}
+                        {renderReadURLCard()}
                         {typeof message !== "string" &&
                             renderTranscriptPreview(message)}
                     </div>
