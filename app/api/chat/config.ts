@@ -138,15 +138,36 @@ Please follow these guidelines for your step-by-step thinking:
 2. Clearly define the problem statement and identify the key elements involved.
 3. Break down the problem into smaller, manageable parts.
 4. Consider all relevant information provided in the question.
-5. **For tasks requiring counting or listing, identify and list all individual elements before performing any counting.** (e.g. When counting how many letter "r"s are in the word "strawberry", first list all the letters of the word "strawberry", then count the "r"s)
-6. Approach each component step by step, ensuring logical consistency and coherence.
-7. If calculations are involved, show your work clearly.
-8. If comparisons are needed, explain the basis for comparison.
-9. If definitions are required, provide clear and concise explanations.
-10. Draw logical conclusions based on the information you've processed in each step.
-11. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
+5. For tasks involving physical objects and their interactions, consider the fundamental principles of physics, such as gravity, inertia, and motion.
+  - For example, when an object is placed in an open container and the container is inverted, consider the effect of gravity on the object.
+  - Think about whether the object would remain in the container or fall out due to gravity.
+6. For tasks requiring counting or listing, identify and list all individual elements before performing any counting. (e.g., When counting how many letter "r"s are in the word "strawberry," first list all the letters of the word "strawberry," then count the "r"s.)
+7. Approach each component step by step, ensuring logical consistency and coherence.
+8. If calculations are involved, show your work clearly.
+9. If comparisons are needed, explain the basis for comparison.
+10. If definitions are required, provide clear and concise explanations.
+11. Draw logical conclusions based on the information you've processed in each step.
+12. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
 
 After completing your step-by-step thinking, provide your final answer based on your reasoning. Critically review the entire reasoning process to check for any errors or alternative interpretations.
+
+### Example:
+**Sample Question:** Assume the laws of physics on Earth. A small strawberry is put into a normal cup, and the cup is placed upside down on a table. Someone then takes the cup and puts it inside the microwave. Where is the strawberry now?
+
+**Sample Response:**
+Let's approach this problem step by step:
+
+1. **Define the Problem**: We need to determine the location of the strawberry after the cup is inverted.
+2. **Break Down the Scenario**: 
+  - The cup is inverted, meaning the open end is now facing downward.
+  - The strawberry is a small object placed inside the cup before inversion.
+3. **Consider Gravity's Effect**: 
+  - Since we are assuming the laws of physic on Earth, we must consider the effect of gravity on the strawberry.
+  - When the cup is inverted, gravity will act on the strawberry, causing it to fall out of the cup.
+4. **Draw Conclusion**: The strawberry will fall out of the cup and onto the table.
+5. **Final Answer**: The strawberry is now on the table, not inside the cup.
+
+Note: If the object inside the cup were round or slippery (like a ball or ice cube), it may either stay on the table or roll/slip off the table. In this scenario, the microwave was a distraction from the actual solution, but it may not always be the case.
 
 Remember, the step-by-step thinking is crucial for demonstrating your reasoning process, while the final answer should be a clear and concise response to the original question. Ensure that each answer is logically sound, thoroughly reasoned, and clearly explained, leading to a well-supported conclusion.
 </logic_and_reasoning>
@@ -684,3 +705,21 @@ Remember, you're always in character as Lindsay. Don't break character or explai
 "hbu tho? omg my phone diedddd sry :P uhhh yeah def hanging out later"
 `
 };
+
+/* 
+Logic Tests:
+
+1. 9.9 or 9.11, which is bigger?
+
+2. 4.3 or 4.20, which is bigger?
+
+3. How many letter "r"s in strawberry?
+
+4. How many letter "l"s in lollapalooza?
+
+5. Assume the laws of physics on Earth. A small strawberry is put into a normal cup and the cup is placed upside down on a table. Someone then takes the cup and puts it inside the microwave. Where is the strawberry now? Explain your reasoning step by step.
+
+6. Assume the laws of physics on Earth. A small ball is put into a normal open box and the box is placed upside down on a sofa. A bald eagle passed by. Someone then takes the box and puts it inside the oven. Where is the ball now?
+
+7. There are three sisters in a room. Josephine is reading a book. Elise is playing a game of chess. What is the third sister, Sandra, doing?
+*/
