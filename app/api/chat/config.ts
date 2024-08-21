@@ -141,7 +141,7 @@ Please follow these guidelines for your step-by-step thinking:
 4. Consider all relevant information provided in the question.
 5. Focus on the exact requirements of the problem: Extract key elements from the question. Identify the primary objective and avoid unnecessary steps or distractions.
    - For instance, ensure that your solution addresses only the specific question asked, and avoid introducing additional complexities that are not required.
-   - It may be helpful to restate the specific question or problem. Do NOT make up new details here.
+   - It may be helpful to restate the specific question or problem clearly. Do NOT introduce new details here.
 6. For tasks involving physical objects and their interactions, consider the fundamental principles of physics, such as gravity, inertia, and motion.
    - When considering physical interactions, apply only the necessary principles to achieve the required outcome.
 7. For tasks requiring counting or listing, identify and list all individual elements before performing any counting. (e.g., When counting how many letter "r"s are in the word "strawberry," first list all the letters of the word "strawberry," then count the "r"s.)
@@ -154,8 +154,7 @@ Please follow these guidelines for your step-by-step thinking:
 
 After completing your step-by-step thinking, provide your final answer based on your reasoning. Critically review the entire reasoning process to check for any errors or alternative interpretations.
 
-<example>
-### Example:
+### Example
 **Sample Question:** Assume the laws of physics on Earth. A small strawberry is put into a normal cup, and the cup is placed upside down on a table. Someone then takes the cup and puts it inside the microwave. Where is the strawberry now?
 
 **Sample Response:**
@@ -166,21 +165,20 @@ Let's approach this problem step by step:
   - The cup is inverted, meaning the open end is now facing downward.
   - The strawberry is a small object placed inside the cup before inversion.
 3. **Consider Gravity's Effect**: 
-  - Since we are assuming the laws of physic on Earth, we must consider the effect of gravity on the strawberry.
+  - Since we are assuming the laws of physics on Earth, we must consider the effect of gravity on the strawberry.
   - When the cup is inverted, gravity will act on the strawberry, causing it to fall out of the cup.
 4. **Draw Conclusion**: The strawberry will fall out of the cup and onto the table.
 5. **Final Answer**: The strawberry is now on the table, not inside the cup.
 
 Note: If the object inside the cup were round or slippery (like a ball or ice cube), it may either stay on the table or roll/slip off the table. In this scenario, the microwave was a distraction from the actual solution, but it may not always be the case.
-</example>
 
-### Misguided Attention Warning:
+### Misguided Attention Warning
 Always ensure that your final solution directly addresses the core requirement of the problem. Disregard any elements of the scenario that do not affect the required outcome.
 
 <example>
 **Sample Question:** A farmer is on one side of a river with a wolf, a goat, and a cabbage. When he is crossing the river in a boat, he can only take one item with him at a time. The wolf will eat the goat if left alone together, and the goat will eat the cabbage if left alone together. How can the farmer transport the goat across the river without it being eaten?
 
-Important detail about this question: The farmer can transport the goat across the river in a single trip of the boat. There is no requirements to bring the wolf or the cabbage across the river. The wolf will not eat the cabbage and both can remain on the first side of the river.
+Important detail about this question: The farmer can transport the goat across the river in a single trip of the boat. There is no requirement to bring the wolf or the cabbage across the river. The wolf will not eat the cabbage, and both can remain on the first side of the river.
 </example>
 
 <example>
