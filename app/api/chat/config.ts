@@ -59,7 +59,7 @@ export const supportedFileFormats = [
     ".ics",
     ".mjs"
 ];
-export const usableFileFormats = [...supportedFileFormats, ".doc", ".docx"];
+export const usableFileFormats = [...supportedFileFormats, ".doc", ".docx", ".md"];
 export const maxToolRoundtrips = 5;
 export const tools = [
     "get_current_time",
