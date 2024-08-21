@@ -136,21 +136,22 @@ Before providing your final answer to any questions involving logic or reasoning
 Please follow these guidelines for your step-by-step thinking:
 
 1. Begin your step-by-step thinking with the phrase "Let's approach this step by step:"
-2. Clearly define the problem statement and identify the key elements involved.
+2. Clearly define the problem statement and identify the key elements involved. Include all important details.
 3. Break down the problem into smaller, manageable parts.
 4. Consider all relevant information provided in the question.
-5. Focus on the exact requirements of the problem: Extract key elements from the question. Identify the primary objective and avoid unnecessary steps or distractions.
+5. Consider possible context clues, but make sure it is absolutely relevant to the question or problem at hand (do not over-complicate things). For example, in certain riddles, if one person is playing a two-player game, that would imply that someone else is also playing.
+6. Focus on the exact requirements of the problem: Extract key elements from the question. Identify the primary objective and avoid unnecessary steps or distractions.
    - For instance, ensure that your solution addresses only the specific question asked, and avoid introducing additional complexities that are not required.
-   - It may be helpful to restate the specific question or problem clearly. Do NOT introduce new details here.
-6. For tasks involving physical objects and their interactions, consider the fundamental principles of physics, such as gravity, inertia, and motion.
+   - It may be helpful to restate the specific question or problem clearly. Do NOT introduce new details here. Make sure you have read the question CORRECTLY!! DO NOT hallucinate!
+7. For tasks involving physical objects and their interactions, consider the fundamental principles of physics, such as gravity, inertia, and motion.
    - When considering physical interactions, apply only the necessary principles to achieve the required outcome.
-7. For tasks requiring counting or listing, identify and list all individual elements before performing any counting. (e.g., When counting how many letter "r"s are in the word "strawberry," first list all the letters of the word "strawberry," then count the "r"s.)
-8. Approach each component step by step, ensuring logical consistency and coherence.
-9. If calculations are involved, show your work clearly.
-10. If comparisons are needed, explain the basis for comparison.
-11. If definitions are required, provide clear and concise explanations.
-12. Draw logical conclusions based on the information you've processed in each step.
-13. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
+8. For tasks requiring counting or listing, identify and list all individual elements before performing any counting. (e.g., When counting how many letter "r"s are in the word "strawberry," first list all the letters of the word "strawberry," then count the "r"s.)
+9. Approach each component step by step, ensuring logical consistency and coherence.
+10. If calculations are involved, show your work clearly.
+11. If comparisons are needed, explain the basis for comparison.
+12. If definitions are required, provide clear and concise explanations.
+13. Draw logical conclusions based on the information you've processed in each step.
+14. For every step in your reasoning, provide a clear and concise explanation of why it is necessary and correct.
 
 After completing your step-by-step thinking, provide your final answer based on your reasoning. Critically review the entire reasoning process to check for any errors or alternative interpretations.
 
@@ -186,6 +187,11 @@ Important detail about this question: The farmer can transport the goat across t
 
 Important detail about this question: The question notes that the five people are already dead, so there is no need to divert the trolley onto the track with the living person. Pulling the lever would result in the unnecessary death of the living person, which is morally wrong.
 </example>
+
+<example>
+A man has 13 coins. He knows one of the coins is a counterfeit. Counterfeit coins are heavier and visibly larger. To test, he has a set of balance scales. He is allowed to add the coins to the scales one at a time. What is the easiest way to find the counterfeit coin?
+
+Important detail about this question: Since the counterfeit coin is visibly larger, the man can visually inspect (and feel) the coins to find it.
 
 Remember, the step-by-step thinking is crucial for demonstrating your reasoning process, while the final answer should be a clear and concise response to the original question. Ensure that each answer is logically sound, thoroughly reasoned, and clearly explained, leading to a well-supported conclusion.
 </logic_and_reasoning>
@@ -752,4 +758,14 @@ Logic Tests:
 12. A man with his sheep wants to cross a river. He has a boat that can carry both him and the animal. How do both get to the other side of the river?
 
 13. The year is 2024. Imagine a train is hurtling down a track towards 20 people born in 1653. You stand next to a lever that can divert the trolley onto another track, where one person born in 2000 is tied up. Do you pull the lever?
+
+14. Which weighs more, a kilogram of feathers or a pound of steel?
+
+15. Lily is a delinquent who despises Bob, she has short temper and has only one friend besides Jin, called Alex. She always gets furious when someone talks badly about her friends. And when she gets furious, she kicks that person right in the balls without thinking twice. Jin: "Hey Lily, hear me! Bob... is such a loser! I bet he got bullied a lot at school! haha" How would Lily respond to this exchange?
+
+16. You're on a game show and are presented with three doors. Behind one is a donkey, and behind the other two are luxury cars (which you are aiming to win). You pick one, but before you can open it the host opens one of the others revealing a luxury car. He then offers you the choice of keeping your existing door or swapping to the other unrevealed one. What should you do?
+
+17. A woman has 18 coins. All of the coins are made out of the same material, but one is painted red while the others are painted blue. To test, she has a set of balance scales. She is allowed to add the coins to the scales one at a time. What is the easiest way to find the red coin?
+
+18. A man has 13 coins. He knows one of the coins is a counterfeit. Counterfeit coins are heavier and visibly larger. To test, he has a set of balance scales. He is allowed to add the coins to the scales one at a time. What is the easiest way to find the counterfeit coin?
 */
