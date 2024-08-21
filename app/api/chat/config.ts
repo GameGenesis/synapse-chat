@@ -719,7 +719,9 @@ Logic Tests:
 
 5. Assume the laws of physics on Earth. A small strawberry is put into a normal cup and the cup is placed upside down on a table. Someone then takes the cup and puts it inside the microwave. Where is the strawberry now? Explain your reasoning step by step.
 
-6. Assume the laws of physics on Earth. A small ball is put into a normal open box and the box is placed upside down on a sofa. A bald eagle passed by. Someone then takes the box and puts it inside the oven. Where is the ball now?
+6. Assume the laws of physics on Earth. A small ball is put into a normal open box and the box is placed upside down on a sofa. A bald eagle passes by. Someone then takes the box and puts it inside the oven. Where is the ball now?
 
-7. There are three sisters in a room. Josephine is reading a book. Elise is playing a game of chess. What is the third sister, Sandra, doing?
+7. Assume the laws of physics on Earth. A small ball is put into a closed box and the box is placed upside down on a sofa. A bald eagle passes by. A kind fellow then takes the box and chucks it into the furnace. Where is the ball now?
+
+8. There are three sisters in a room. Josephine is reading a book. Elise is playing a game of chess. What is the third sister, Sandra, doing?
 */
