@@ -23,7 +23,9 @@ export async function POST(req: Request) {
         if (
             !userId ||
             !chatId ||
+            !messages ||
             !Array.isArray(messages) ||
+            !settings ||
             typeof settings !== "object"
         ) {
             return NextResponse.json(
