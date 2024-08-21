@@ -36,8 +36,6 @@ ${memories.join("\n")}
 `
             : "";
 
-    console.log(memoriesPrompt);
-
     return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${
         useTools ? toolsPrompt : ""
     }${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${enableLogicMode ? logicPrompt : ""}${
