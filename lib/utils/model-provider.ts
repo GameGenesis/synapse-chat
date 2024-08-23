@@ -48,6 +48,7 @@ export type ModelKey =
     | "gptLatest"
     | "claudeLatest"
     | "azureLatest"
+    | "mathgpt"
     | "auto"
     | "agents";
 
@@ -156,6 +157,13 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         model: "gpt-4o",
         name: "GPT-4o",
         provider: ModelProvider.Azure
+    },
+
+    // Custom models
+    mathgpt: {
+        model: "ft:gpt-4o-mini-2024-07-18:kajoo-ai:math:9zEV9oj4",
+        name: "MathGPT",
+        provider: ModelProvider.OpenAI
     },
 
     // Other

@@ -18,6 +18,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import {
     BlendIcon,
     BookOpenIcon,
+    CalculatorIcon,
     GaugeIcon,
     LayoutPanelLeftIcon,
     LightbulbIcon,
@@ -112,6 +113,13 @@ export const modelInfo: Partial<
         description: "Open source Mixtral of experts model from Mistral AI.",
         icon: BlendIcon,
         provider: ModelProvider.Groq
+    },
+    mathgpt: {
+        name: "MathGPT",
+        description:
+            "Custom GPT-4o mini model that excels at advanced math questions.",
+        icon: CalculatorIcon,
+        provider: ModelProvider.Other
     },
     auto: {
         name: "Auto",
