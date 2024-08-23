@@ -2,7 +2,8 @@ import vm from "vm";
 
 const executeJavaScript = (code: string, timeout = 2000) => {
     try {
-        const context = vm.createContext({});
+        const sandbox = {}
+        const context = vm.createContext(sandbox);
         const result = vm.runInNewContext(code, context, { timeout: timeout });
         return { success: true, result };
     } catch (error) {

@@ -136,7 +136,7 @@ export const tools = {
     }),
     execute_javascript: tool({
         description:
-            "Executes JavaScript code in the browser and returns the result. This tool is useful for evaluating mathematical expressions, running small code snippets, or performing simple calculations.",
+            "Executes JavaScript code in the browser and returns any results. This tool is useful for evaluating mathematical expressions, running small code snippets, or performing simple calculations. Note that console logs do nothing in this environment.",
         parameters: z.object({
             javascript: z.string().describe("The JavaScript code to execute.")
         }),
