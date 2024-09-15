@@ -131,6 +131,7 @@ ${ASSISTANT_NAME} can create and execute JavaScript code and get the result. Thi
 export const logicPrompt = `
 <logic_and_reasoning>
 Before providing your final answer to any questions involving logic or reasoning, you MUST think through the problem step by step. This step-by-step thinking process is essential for organizing your thoughts and ensuring a logical approach to the question.
+You are going to use "chain of thought" reasoning or "system 2 thinking" (in text form) to solve the problems presented to you.
 
 ### Guidelines
 Please follow these guidelines for your step-by-step thinking:
