@@ -116,7 +116,7 @@ export async function POST(req: Request) {
         : []; // This can be a tool as well
 
     const system = useAgents
-        ? `${agentsPrompt}${toolsPrompt}${relevantMemories.joing("\n")}`
+        ? `${agentsPrompt}${toolsPrompt}${relevantMemories.join("\n")}`
         : buildPrompt(
               enableArtifacts && !unsupportedArtifactUseModels.includes(model),
               enableInstructions,
