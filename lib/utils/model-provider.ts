@@ -1,10 +1,11 @@
 import { openai, createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
+import { anthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
 
-const anthropic = createAnthropic({
-    headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" }
-});
+// Syntax to create with custom headers:
+// const anthropic = createAnthropic({
+//     headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" }
+// });
 
 const groq = createOpenAI({
     baseURL: "https://api.groq.com/openai/v1",
@@ -61,11 +62,11 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 16384
     },
     gpt4o: {
-        model: "gpt-4o-2024-08-06",
+        model: "gpt-4o",
         name: "GPT-4o",
         provider: ModelProvider.OpenAI,
         maxTokens: 16384
-    }, // Change back to gpt-4o (latest)
+    },
     gpt4omini: {
         model: "gpt-4o-mini",
         name: "GPT-4o mini",
@@ -91,13 +92,13 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 4096
     },
     claude35sonnet: {
-        model: "claude-3-5-sonnet-20240620",
+        model: "claude-3-5-sonnet-latest",
         name: "Claude 3.5 Sonnet",
         provider: ModelProvider.Anthropic,
         maxTokens: 8192
     },
     claude3opus: {
-        model: "claude-3-opus-20240229",
+        model: "claude-3-opus-latest",
         name: "Claude 3 Opus",
         provider: ModelProvider.Anthropic
     },
@@ -149,7 +150,7 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         provider: ModelProvider.OpenAI
     },
     claudeLatest: {
-        model: "claude-3-5-sonnet-20240620",
+        model: "claude-3-5-sonnet-latest",
         name: "Claude 3.5 Sonnet",
         provider: ModelProvider.Anthropic
     },
