@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLinkIcon, GlobeIcon } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Dialog,
     DialogContent,
@@ -28,6 +29,17 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
     // Parse the result string
     const { title, publishedTime, content, processedContent, previewContent } =
         useMemo(() => {
+            // Handle screenshot mode separately
+            if (returnFormat === "screenshot") {
+                return {
+                    title: "Page Screenshot",
+                    publishedTime: null,
+                    content: result,
+                    processedContent: `<img src="${result}" alt="Screenshot of the webpage" style="max-width: 100%; height: auto;">`,
+                    previewContent: "Screenshot available. Click to view."
+                };
+            }
+
             const lines = result.split("\n");
 
             // Title
@@ -66,10 +78,6 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
                 case "markdown":
                     processedContent = markdownToHtml(content);
                     previewContent = content.slice(0, 150) + "...";
-                    break;
-                case "screenshot":
-                    processedContent = `<img src="${content}" alt="Screenshot of the webpage" style="max-width: 100%; height: auto;">`;
-                    previewContent = "Screenshot available. Click to view.";
                     break;
                 default: // 'text'
                     processedContent = content;
@@ -143,7 +151,7 @@ const ReadUrlCard: React.FC<ReadUrlCardProps> = ({
                     <div className="flex-grow overflow-auto">
                         <div className="flex flex-col h-full w-full">
                             {returnFormat === "screenshot" ? (
-                                <img
+                                <Image
                                     src={content}
                                     alt="Screenshot of the webpage"
                                     style={{ maxWidth: "100%", height: "auto" }}
