@@ -27,7 +27,8 @@ import {
     DEFAULT_TEMPERATURE,
     DEFAULT_TOOL_CHOICE,
     DEFAULT_TOPP,
-    maxToolRoundtrips
+    maxToolRoundtrips,
+    maxSteps
 } from "@/app/api/chat/config";
 import ContinueButton from "./continuebutton";
 import dynamic from "next/dynamic";
@@ -153,6 +154,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             console.error("Chat error:", error);
         },
         maxToolRoundtrips,
+        maxSteps,
         keepLastMessageOnError: true,
 
         // run client-side tools that are automatically executed:

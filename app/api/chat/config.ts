@@ -63,6 +63,7 @@ export const supportedFileFormats = [
 ];
 export const usableFileFormats = [...supportedFileFormats, ".doc", ".docx", ".md"];
 export const maxToolRoundtrips = 5;
+export const maxSteps = 5;
 export const tools = [
     "get_current_time",
     "generate_dalle_image",
