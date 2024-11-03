@@ -154,5 +154,5 @@ export async function POST(req: Request) {
         }
     });
 
-    return result.toAIStreamResponse({ data });
+    return result.toDataStreamResponse({ data });
 }
