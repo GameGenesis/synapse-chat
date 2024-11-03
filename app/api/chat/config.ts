@@ -59,7 +59,8 @@ export const supportedFileFormats = [
     ".shtml",
     ".sh",
     ".ics",
-    ".mjs"
+    ".mjs",
+    ".pdf" // Only work with Claude 3.5 Sonnet
 ];
 export const usableFileFormats = [...supportedFileFormats, ".doc", ".docx", ".md"];
 export const maxToolRoundtrips = 5;
