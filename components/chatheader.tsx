@@ -27,7 +27,8 @@ import {
     MessagesSquareIcon,
     SettingsIcon,
     SparklesIcon,
-    WrenchIcon
+    WrenchIcon,
+    FileStackIcon
 } from "lucide-react";
 import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
@@ -87,22 +88,29 @@ export const modelInfo: Partial<
         icon: ZapIcon,
         provider: ModelProvider.OpenAI
     },
+    llama32_90b_vision: {
+        name: "Llama 3.2 90B Vision",
+        description:
+            "Multi-modal open source model with image reasoning from Meta using Groq.",
+        icon: FileStackIcon,
+        provider: ModelProvider.Groq
+    },
     llama31_70b: {
-        name: "Llama 3.1 70B (Groq)",
+        name: "Llama 3.1 70B",
         description:
             "Capable and versatile open source model from Meta using Groq.",
         icon: BookOpenIcon,
         provider: ModelProvider.Groq
     },
     llama31_8b: {
-        name: "Llama 3.1 8B (Groq)",
+        name: "Llama 3.1 8B",
         description:
             "Instant responses from Llama 3.1 8B using Groq LPU AI inference.",
         icon: GaugeIcon,
         provider: ModelProvider.Groq
     },
     llama_3_70b_tool_use: {
-        name: "Llama 3 70B Tools (Groq)",
+        name: "Llama 3 70B Tools",
         description:
             "Previous gen Llama model from Groq specifically designed for advanced tool use.",
         icon: WrenchIcon,
