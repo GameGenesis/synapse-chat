@@ -46,7 +46,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { InfoIcon, Check, ChevronsUpDown } from "lucide-react";
-import { tools } from "@/app/api/chat/config";
+import {
+    MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS,
+    tools
+} from "@/app/api/chat/config";
 import {
     models,
     unsupportedArtifactUseModels,
@@ -606,7 +609,7 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                 <div
                                     className={`p-1 bg-background rounded-md border relative group overflow-hidden ${
                                         settings.customInstructions.length >=
-                                        3000
+                                        MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS
                                             ? "focus:border-red-500 focus-within:border-red-500"
                                             : "focus:border-primary focus-within:border-primary"
                                     }`}
@@ -615,7 +618,8 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                         <div
                                             className={`absolute inset-0 ${
                                                 settings.customInstructions
-                                                    .length >= 3000
+                                                    .length >=
+                                                MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS
                                                     ? "bg-red-500"
                                                     : "bg-primary"
                                             }`}
@@ -631,7 +635,9 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                                 payload: e.target.value
                                             })
                                         }
-                                        maxLength={3000}
+                                        maxLength={
+                                            MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS
+                                        }
                                         rows={4}
                                         placeholder="Enter your custom instructions"
                                         className="resize-none focus:border-none border-none outline-none w-full h-full p-2"
@@ -639,7 +645,10 @@ const SettingsMenu = ({ isOpen, onClose, settings, dispatch }: Props) => {
                                     <div className="flex justify-end pr-1 pb-1 w-full">
                                         <span className="text-sm text-muted-foreground">
                                             {settings.customInstructions.length}
-                                            /3000
+                                            /
+                                            {
+                                                MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS
+                                            }
                                         </span>
                                     </div>
                                 </div>
