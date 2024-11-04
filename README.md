@@ -2,6 +2,18 @@
 
 An [AI chatbot](https://ai-chat-artifacts.onrender.com/) that supports chat artifacts (like Claude), Bing web search (like Perplexity.ai), multi-turn agentic workflows, open source models, advanced CoT logic and reasoning mode, memory, vision, file upload, and much more.
 
+## Setup
+1. Create a `.env` file and fill in the appropriate API keys from the `.env.example` file
+2. ```bash
+   $ npm install
+   ```
+3. ```bash
+   $ npm run build
+   ```
+4. ```bash
+   $ npm run start
+   ```
+
 ## Screenshots
 ### Choose from several frontier models from a variety of providers such as OpenAI, Anthropic, and Meta
 ![image](https://github.com/user-attachments/assets/cb5dd68c-f5f7-4b97-b584-9e74a0c267c9)
