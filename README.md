@@ -36,3 +36,8 @@ An [AI chatbot](https://ai-chat-artifacts.onrender.com/) that supports chat arti
 
 ### Customize several parameters
 ![image](https://github.com/user-attachments/assets/7d9ea2db-787e-4422-a6a8-c6d4fba927ce)
+
+### Publish artifacts and share them with others
+![image](https://github.com/user-attachments/assets/a706f5e8-42c8-48f1-87ca-43cdcbb315f4)
+![image](https://github.com/user-attachments/assets/b124cd4f-1f2e-4b56-acf9-dd9f576676ae)
+
