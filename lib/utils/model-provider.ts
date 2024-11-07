@@ -38,7 +38,7 @@ export type ModelKey =
     | "gpt35"
     | "claude35sonnet"
     | "claude3opus"
-    | "claude3haiku"
+    | "claude35haiku"
     | "azureGpt4o"
     | "llama32_90b"
     | "llama32_90b_vision"
@@ -106,9 +106,9 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "Claude 3 Opus",
         provider: ModelProvider.Anthropic
     },
-    claude3haiku: {
-        model: "claude-3-haiku-20240307",
-        name: "Claude 3 Haiku",
+    claude35haiku: {
+        model: "claude-3-5-haiku-latest",
+        name: "Claude 3.5 Haiku",
         provider: ModelProvider.Anthropic
     },
     azureGpt4o: {

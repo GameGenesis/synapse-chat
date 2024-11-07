@@ -62,10 +62,10 @@ export const modelInfo: Partial<
         icon: LightbulbIcon,
         provider: ModelProvider.Anthropic
     },
-    claude3haiku: {
-        name: "Claude 3 Haiku",
+    claude35haiku: {
+        name: "Claude 3.5 Haiku",
         description:
-            "Fastest and most compact model for near-instant responses.",
+            "Fastest and cheapest Anthropic model for near-instant responses.",
         icon: ZapIcon,
         provider: ModelProvider.Anthropic
     },
