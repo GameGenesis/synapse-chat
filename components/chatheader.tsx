@@ -52,7 +52,7 @@ export const modelInfo: Partial<
     claude35sonnet: {
         name: "Claude 3.5 Sonnet",
         description:
-            "Anthropic's latest model, great for various applications.",
+            "Anthropic's latest and most intelligent model, great for various applications.",
         icon: SparklesIcon,
         provider: ModelProvider.Anthropic
     },
@@ -64,8 +64,7 @@ export const modelInfo: Partial<
     },
     claude35haiku: {
         name: "Claude 3.5 Haiku",
-        description:
-            "Fastest and cheapest Anthropic model for near-instant responses.",
+        description: "Fastest Anthropic model for near-instant responses.",
         icon: ZapIcon,
         provider: ModelProvider.Anthropic
     },
