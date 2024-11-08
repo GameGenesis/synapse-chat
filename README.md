@@ -5,15 +5,37 @@ An [AI chatbot](https://ai-chat-artifacts.onrender.com/) that supports chat arti
 ## Setup
 1. Clone the repository
 2. Create a `.env` file and fill in the appropriate API keys from the `.env.example` file
-3. ```bash
+3. Install the dependencies:
+   ```bash
    $ npm install
    ```
-4. ```bash
+4. Build the project:
+   ```bash
    $ npm run build
    ```
-5. ```bash
+5. Start the server:
+   ```bash
    $ npm run start
    ```
+
+Make sure to replace any placeholders in the `.env.example` file with your actual API keys and configuration settings.
+
+## Features
+- **Chat Artifacts**: Supports chat artifacts similar to Claude.
+- **Bing Web Search**: Provides up-to-date results with Bing Search, similar to Perplexity.ai.
+- **Multi-turn Agentic Workflows**: Facilitates complex interactions with multiple turns.
+- **Open Source Models**: Integrates with various open-source models.
+- **Advanced CoT Logic and Reasoning**: Utilizes advanced Chain-of-Thought logic for better reasoning.
+- **Memory**: Remembers previous interactions to provide context-aware responses.
+- **Vision**: Supports image recognition and processing.
+- **File Upload**: Allows users to upload files for processing.
+- **Interactive Web Applications**: Generates interactive web applications using AI within the chat window.
+- **Image Search and Generation**: Searches for and generates images using DALLE-3.
+- **Interactive Charts**: Creates interactive charts using Mermaid.
+- **Slideshow Generation**: Compiles research and images into slideshows.
+- **Real-time Information**: Provides up-to-date time and weather information.
+- **Customization**: Offers various parameters for customization.
+- **Artifact Publication**: Allows users to publish and share artifacts.
 
 ## Screenshots
 ### Choose from several frontier models from a variety of providers such as OpenAI, Anthropic, and Meta
