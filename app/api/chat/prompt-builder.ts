@@ -2,9 +2,9 @@ import {
     artifactPrompt,
     assistantPrompt,
     toolsPrompt,
-    imageSafetyPrompt,
     safetyPrompt,
-    logicPrompt
+    logicPrompt,
+    latexPrompt
 } from "./config";
 
 const buildPrompt = (
@@ -16,14 +16,6 @@ const buildPrompt = (
     memories?: string[],
     customInstructions?: string
 ) => {
-    let defaultPrompt = "";
-    if (enableDefaultPrompt) {
-        defaultPrompt = assistantPrompt.replace(
-            "{{SAFEGUARDS}}",
-            enableSafeguards ? safetyPrompt.trim() : ""
-        );
-    }
-
     const memoriesPrompt =
         memories && memories.length > 0
             ? `
@@ -36,9 +28,11 @@ ${memories.join("\n")}
 `
             : "";
 
-    return `${enableArtifacts ? artifactPrompt : ""}${defaultPrompt}${
-        useTools ? toolsPrompt : ""
-    }${memoriesPrompt}${enableSafeguards ? imageSafetyPrompt.trim() : ""}${enableLogicMode ? logicPrompt : ""}${
+    return `${enableArtifacts ? artifactPrompt : ""}${
+        enableDefaultPrompt ? latexPrompt + assistantPrompt : ""
+    }${useTools ? toolsPrompt : ""}${memoriesPrompt}${
+        enableSafeguards ? safetyPrompt : ""
+    }${enableLogicMode ? logicPrompt : ""}${
         customInstructions
             ? `\n---\n<custom_user_instructions>${customInstructions}</custom_user_instructions>`
             : ""
