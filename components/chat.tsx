@@ -383,6 +383,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                 promptTokens,
                 completionTokens,
                 totalTokens,
+                cacheWriteTokens,
+                cacheReadTokens,
                 finishReason
             } =
                 data && data.length > 0
@@ -391,6 +393,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                           promptTokens: undefined,
                           completionTokens: undefined,
                           totalTokens: undefined,
+                          cacheWriteTokens: undefined,
+                          cacheReadTokens: undefined,
                           finishReason: undefined
                       };
 
@@ -478,6 +482,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                         promptTokens,
                         completionTokens,
                         totalTokens,
+                        cacheWriteTokens,
+                        cacheReadTokens,
                         finishReason,
                         states: [
                             {

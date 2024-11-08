@@ -487,6 +487,16 @@ export const AssistantMessage = ({
                                                     {message.promptTokens ||
                                                         "N/A"}
                                                 </span>
+                                                <span>
+                                                    Cache Write Tokens:{" "}
+                                                    {message.cacheWriteTokens ||
+                                                        0}
+                                                </span>
+                                                <span>
+                                                    Cache Read Tokens:{" "}
+                                                    {message.cacheReadTokens ||
+                                                        0}
+                                                </span>
                                             </div>
                                         </TooltipContent>
                                     </Tooltip>

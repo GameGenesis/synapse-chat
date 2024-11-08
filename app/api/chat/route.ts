@@ -151,27 +151,37 @@ export async function POST(req: Request) {
         toolChoice: finalToolChoice,
         onFinish: async (result) => {
             if (result.text) {
-                // Get Anthropic cache metadata
-                const anthropicMetadata = 
-                    result.experimental_providerMetadata?.anthropic;
-                const {
-                    cacheCreationInputTokens = 0,
-                    cacheReadInputTokens = 0
-                } = anthropicMetadata || {};
+                // Get cache metadata from providers
+                const metadata = result.experimental_providerMetadata;
 
-                // Get OpenAI cache metadata
-                const openaiMetadata = 
-                    result.experimental_providerMetadata?.openai;
-                const cachedPromptTokens = openaiMetadata?.cachedPromptTokens || 0;
+                // Extract Anthropic tokens with default values
+                const anthropicTokens = {
+                    cacheCreationInputTokens:
+                        metadata?.anthropic?.cacheCreationInputTokens ?? 0,
+                    cacheReadInputTokens:
+                        metadata?.anthropic?.cacheReadInputTokens ?? 0
+                };
 
-                console.log(`Cache creation input tokens: ${cacheCreationInputTokens}, Cache read input tokens: ${cacheReadInputTokens}, OpenAI cached prompt tokens: ${cachedPromptTokens}`);
+                // Extract OpenAI tokens with default value
+                const openaiTokens = {
+                    cachedPromptTokens:
+                        metadata?.openai?.cachedPromptTokens ?? 0
+                };
+
+                // Calculate total cache read/write tokens
+                const cacheReadTokens =
+                    (anthropicTokens.cacheReadInputTokens as number) +
+                    (openaiTokens.cachedPromptTokens as number);
+                const cacheWriteTokens =
+                    anthropicTokens.cacheCreationInputTokens;
+
                 data.append({
                     completionTokens: result.usage.completionTokens,
                     promptTokens: result.usage.promptTokens,
                     totalTokens: result.usage.totalTokens,
+                    cacheWriteTokens,
+                    cacheReadTokens,
                     finishReason: result.finishReason,
-                    cacheCreationInputTokens,
-                    cacheReadInputTokens
                 });
             }
             data.close();

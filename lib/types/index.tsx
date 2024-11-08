@@ -21,6 +21,8 @@ export interface Data {
     completionTokens?: number;
     promptTokens?: number;
     totalTokens?: number;
+    cacheWriteTokens?: number;
+    cacheReadTokens?: number;
     finishReason?: FinishReason;
     chatId?: string;
 }
@@ -54,6 +56,8 @@ export type CombinedMessage = {
     completionTokens?: number;
     promptTokens?: number;
     totalTokens?: number;
+    cacheWriteTokens?: number;
+    cacheReadTokens?: number;
     finishReason?: FinishReason;
     states: {
         content: string;

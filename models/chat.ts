@@ -19,6 +19,8 @@ const messageSchema: Schema = new Schema({
     completionTokens: { type: Number },
     promptTokens: { type: Number },
     totalTokens: { type: Number },
+    cacheWriteTokens: { type: Number },
+    cacheReadTokens: { type: Number },
     finishReason: { type: String },
     states: { type: [stateSchema] }
 });
