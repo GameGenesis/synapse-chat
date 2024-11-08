@@ -213,7 +213,7 @@ export const getModel = (modelConfig: ModelConfig) => {
         case ModelProvider.OpenAI:
             return openai(modelConfig.model);
         case ModelProvider.Anthropic:
-            return anthropic(modelConfig.model);
+            return anthropic(modelConfig.model, { cacheControl: true });
         case ModelProvider.Azure:
             return azure(modelConfig.model);
         case ModelProvider.Groq:
