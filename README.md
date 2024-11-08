@@ -5,15 +5,20 @@ An [AI chatbot](https://ai-chat-artifacts.onrender.com/) that supports chat arti
 ## Setup
 1. Clone the repository
 2. Create a `.env` file and fill in the appropriate API keys from the `.env.example` file
-3. ```bash
+3. Install the dependencies:
+   ```bash
    $ npm install
    ```
-4. ```bash
+4. Build the project:
+   ```bash
    $ npm run build
    ```
-5. ```bash
+5. Start the server:
+   ```bash
    $ npm run start
    ```
+
+Make sure to replace any placeholders in the `.env.example` file with your actual API keys and configuration settings.
 
 ## Features
 - **Chat Artifacts**: Supports chat artifacts similar to Claude.
