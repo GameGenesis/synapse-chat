@@ -80,8 +80,19 @@
     @apply text-gray-300;
 }
 
-.copy-code-button {
-    @apply text-[#abb2bf] hover:text-white transition-colors duration-200;
+.copy-code-button,
+.download-code-button {
+    @apply text-[#abb2bf] hover:text-white transition-colors duration-200 relative;
+}
+
+.copy-code-button:active,
+.download-code-button:active {
+    @apply scale-95 transition-transform duration-75;
+}
+
+.copy-code-button:focus-visible,
+.download-code-button:focus-visible {
+    @apply outline-none ring-2 ring-white ring-offset-1 ring-offset-gray-700;
 }
 
 .code-pre {
