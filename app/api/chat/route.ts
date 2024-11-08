@@ -134,20 +134,44 @@ export async function POST(req: Request) {
     const data = new StreamData();
     const result = await streamText({
         model: getModel(models[modelToUse]),
-        system,
         temperature: finalTemperature,
         topP: finalTopP,
         maxTokens: finalMaxTokens,
-        messages: convertToCoreMessages(limitedMessages),
+        messages: [
+            {
+                role: "system",
+                content: system,
+                experimental_providerMetadata: {
+                    anthropic: { cacheControl: { type: "ephemeral" } }
+                }
+            },
+            ...convertToCoreMessages(limitedMessages)
+        ],
         tools: toolsToUse,
         toolChoice: finalToolChoice,
         onFinish: async (result) => {
             if (result.text) {
+                // Get Anthropic cache metadata
+                const anthropicMetadata = 
+                    result.experimental_providerMetadata?.anthropic;
+                const {
+                    cacheCreationInputTokens = 0,
+                    cacheReadInputTokens = 0
+                } = anthropicMetadata || {};
+
+                // Get OpenAI cache metadata
+                const openaiMetadata = 
+                    result.experimental_providerMetadata?.openai;
+                const cachedPromptTokens = openaiMetadata?.cachedPromptTokens || 0;
+
+                console.log(`Cache creation input tokens: ${cacheCreationInputTokens}, Cache read input tokens: ${cacheReadInputTokens}, OpenAI cached prompt tokens: ${cachedPromptTokens}`);
                 data.append({
                     completionTokens: result.usage.completionTokens,
                     promptTokens: result.usage.promptTokens,
                     totalTokens: result.usage.totalTokens,
-                    finishReason: result.finishReason
+                    finishReason: result.finishReason,
+                    cacheCreationInputTokens,
+                    cacheReadInputTokens
                 });
             }
             data.close();
