@@ -12,6 +12,7 @@ import {
     agentsPrompt,
     DEFAULT_AGENT_SETTINGS,
     keywordCategories,
+    maxSteps,
     toolsPrompt
 } from "./config";
 import { ToolChoice } from "@/lib/types";
@@ -149,6 +150,8 @@ export async function POST(req: Request) {
         ],
         tools: toolsToUse,
         toolChoice: finalToolChoice,
+        maxSteps,
+        experimental_continueSteps: true,
         onFinish: async (result) => {
             if (result.text) {
                 // Get cache metadata from providers
