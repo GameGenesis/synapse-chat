@@ -15,6 +15,23 @@ An [AI chatbot](https://ai-chat-artifacts.onrender.com/) that supports chat arti
    $ npm run start
    ```
 
+## Features
+- **Chat Artifacts**: Supports chat artifacts similar to Claude.
+- **Bing Web Search**: Provides up-to-date results with Bing Search, similar to Perplexity.ai.
+- **Multi-turn Agentic Workflows**: Facilitates complex interactions with multiple turns.
+- **Open Source Models**: Integrates with various open-source models.
+- **Advanced CoT Logic and Reasoning**: Utilizes advanced Chain-of-Thought logic for better reasoning.
+- **Memory**: Remembers previous interactions to provide context-aware responses.
+- **Vision**: Supports image recognition and processing.
+- **File Upload**: Allows users to upload files for processing.
+- **Interactive Web Applications**: Generates interactive web applications using AI within the chat window.
+- **Image Search and Generation**: Searches for and generates images using DALLE-3.
+- **Interactive Charts**: Creates interactive charts using Mermaid.
+- **Slideshow Generation**: Compiles research and images into slideshows.
+- **Real-time Information**: Provides up-to-date time and weather information.
+- **Customization**: Offers various parameters for customization.
+- **Artifact Publication**: Allows users to publish and share artifacts.
+
 ## Screenshots
 ### Choose from several frontier models from a variety of providers such as OpenAI, Anthropic, and Meta
 ![image](https://github.com/user-attachments/assets/cb5dd68c-f5f7-4b97-b584-9e74a0c267c9)
