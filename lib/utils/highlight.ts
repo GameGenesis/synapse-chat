@@ -8,26 +8,35 @@ hljs.registerAliases(["racket", "scheme"], { languageName: "scheme" });
 const highlightCache = new Map<string, string>();
 
 export const highlightCode = (code: string, language: string) => {
+    // Check if the language exists in highlight.js
+    const isLanguageSupported = hljs.getLanguage(language) !== undefined;
     let value;
-    try {
-        value = hljs.highlight(code, { language }).value;
-    } catch (error) {
-        console.warn(
-            `Failed to highlight with language ${language}. Falling back to auto-detection.`
-        );
 
-        if (highlightCache.has(language)) {
-            const detectedLang = highlightCache.get(language)!;
-            value = hljs.highlight(code, { language: detectedLang }).value;
+    try {
+        if (isLanguageSupported) {
+            value = hljs.highlight(code, { language }).value;
+        } else if (highlightCache.has(language)) {
+            // If we've seen this unknown language before, use the cached detection
+            language = highlightCache.get(language)!;
+            value = hljs.highlight(code, { language }).value;
         } else {
+            // For unknown languages, use auto-detection
             const highlight = hljs.highlightAuto(code);
             value = highlight.value;
 
             if (highlight.language) {
                 language = highlight.language;
-                highlightCache.set(language, language);
+                highlightCache.set(language, highlight.language);
+            } else {
+                // If auto-detection fails, fallback to plaintext
+                language = "plaintext";
+                value = hljs.highlight(code, { language }).value;
             }
         }
+    } catch (error) {
+        language = "plaintext";
+        value = hljs.highlight(code, { language }).value;
     }
+
     return { value, language };
 };
