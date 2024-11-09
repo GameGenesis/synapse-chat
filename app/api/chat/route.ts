@@ -152,6 +152,9 @@ export async function POST(req: Request) {
         toolChoice: finalToolChoice,
         maxSteps,
         experimental_continueSteps: true,
+        headers: {
+            "anthropic-beta": "pdfs-2024-09-25"
+        },
         onFinish: async (result) => {
             if (result.text) {
                 // Get cache metadata from providers
