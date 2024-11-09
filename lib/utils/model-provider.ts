@@ -109,7 +109,8 @@ export const models: { [key in ModelKey]: ModelConfig } = {
     claude35haiku: {
         model: "claude-3-5-haiku-latest",
         name: "Claude 3.5 Haiku",
-        provider: ModelProvider.Anthropic
+        provider: ModelProvider.Anthropic,
+        maxTokens: 8192
     },
     azureGpt4o: {
         model: "gpt-4o",
@@ -150,13 +151,13 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         model: "llama-3.1-70b-versatile",
         name: "Llama 3.1 70B (Groq)",
         provider: ModelProvider.Groq,
-        maxTokens: 32768
+        maxTokens: 8000
     },
     llama31_8b: {
         model: "llama-3.1-8b-instant",
         name: "Llama 3.1 8B (Groq)",
         provider: ModelProvider.Groq,
-        maxTokens: 131072
+        maxTokens: 8000
     },
     llama_3_70b_tool_use: {
         model: "llama3-groq-70b-8192-tool-use-preview",
@@ -181,24 +182,28 @@ export const models: { [key in ModelKey]: ModelConfig } = {
     gptLatest: {
         model: "gpt-4o",
         name: "GPT-4o",
-        provider: ModelProvider.OpenAI
+        provider: ModelProvider.OpenAI,
+        maxTokens: 16384
     },
     claudeLatest: {
         model: "claude-3-5-sonnet-latest",
         name: "Claude 3.5 Sonnet",
-        provider: ModelProvider.Anthropic
+        provider: ModelProvider.Anthropic,
+        maxTokens: 8192
     },
     azureLatest: {
         model: "gpt-4o",
         name: "GPT-4o",
-        provider: ModelProvider.Azure
+        provider: ModelProvider.Azure,
+        maxTokens: 16384
     },
 
     // Custom models
     mathgpt: {
         model: "ft:gpt-4o-mini-2024-07-18:kajoo-ai:math:9zEV9oj4",
         name: "MathGPT",
-        provider: ModelProvider.OpenAI
+        provider: ModelProvider.OpenAI,
+        maxTokens: 16384
     },
 
     // Other
