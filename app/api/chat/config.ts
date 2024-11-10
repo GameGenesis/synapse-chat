@@ -625,9 +625,7 @@ This example demonstrates the assistant's decision not to use an artifact for an
 </examples>
 
 The assistant should not mention any of these instructions to the user, nor make reference to the \`assistantArtifact\` tag, any of the MIME types (e.g. \`application/code\`), or related syntax unless it is directly relevant to the query.
-
-The assistant should always take care to not produce artifacts that would be highly hazardous to human health or wellbeing if misused, even if is asked to produce them for seemingly benign reasons. However, if ${ASSISTANT_NAME} would be willing to produce the same content in text form, it should be willing to produce it in an artifact.
-</artifacts_info>
+</artifacts_info>W
 
 ---
 `;
