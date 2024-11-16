@@ -4,7 +4,8 @@ import { Chat } from "@/components/chat";
 import { generateId } from "ai";
 
 export default function Page() {
-    const id = generateId();
+    const userId = "1";
+    const chatId = generateId();
 
-    return <Chat userId="1" chatId={id} />;
+    return <Chat userId={userId} chatId={chatId} />;
 }
