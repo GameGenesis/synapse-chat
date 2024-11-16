@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Chat from "@/models/chat";
 
+// Mark the route as dynamic
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     try {
         await dbConnect();
@@ -26,13 +29,13 @@ export async function GET(request: Request) {
                 _id: 1,
                 name: 1,
                 updatedAt: 1,
-                'messages': { $slice: -1 } // Only get the last message
+                'messages': { $slice: -1 }
             }
         )
-        .hint({ userId: 1, updatedAt: -1 }) // Use the index
+        .hint({ userId: 1, updatedAt: -1 })
         .sort({ updatedAt: -1 })
-        .allowDiskUse(true) // Allow using disk for sorting
-        .lean() // Convert documents to plain objects
+        .allowDiskUse(true)
+        .lean()
         .exec();
 
         return NextResponse.json({
