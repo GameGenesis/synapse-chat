@@ -1,4 +1,3 @@
-// app/api/chats/route.ts
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Chat from "@/models/chat";
@@ -6,12 +5,20 @@ import Chat from "@/models/chat";
 // Mark the route as dynamic
 export const dynamic = 'force-dynamic';
 
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
+
 export async function GET(request: Request) {
     try {
         await dbConnect();
 
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
+        const before = searchParams.get('before'); // timestamp for cursor-based pagination
+        const limit = Math.min(
+            parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT)),
+            MAX_LIMIT
+        );
 
         if (!userId) {
             return NextResponse.json(
@@ -23,8 +30,14 @@ export async function GET(request: Request) {
             );
         }
 
+        // Build query object
+        const query: any = { userId };
+        if (before) {
+            query.updatedAt = { $lt: new Date(before) };
+        }
+
         const chats = await Chat.find(
-            { userId },
+            query,
             {
                 _id: 1,
                 name: 1,
@@ -34,9 +47,16 @@ export async function GET(request: Request) {
         )
         .hint({ userId: 1, updatedAt: -1 })
         .sort({ updatedAt: -1 })
+        .limit(limit)
         .allowDiskUse(true)
         .lean()
         .exec();
+
+        // Get the total count for initial load only
+        let total;
+        if (!before) {
+            total = await Chat.countDocuments({ userId });
+        }
 
         return NextResponse.json({
             success: true,
@@ -45,7 +65,9 @@ export async function GET(request: Request) {
                 name: chat.name,
                 updatedAt: chat.updatedAt,
                 lastMessage: chat.messages?.[0]?.originalContent || ''
-            }))
+            })),
+            ...(total !== undefined && { total }),
+            hasMore: chats.length === limit
         });
     } catch (error) {
         console.error("Error in GET /api/chats:", error);

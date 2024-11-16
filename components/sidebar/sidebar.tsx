@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { memo, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
@@ -18,19 +18,22 @@ interface Props {
     userId: string;
 }
 
-const CHAT_ITEM_HEIGHT = 76; // Height of each chat item
-const SCROLL_THRESHOLD = 100; // Pixels from bottom to trigger loading more
+const CHAT_ITEM_HEIGHT = 76;
+const INITIAL_LOAD_COUNT = 20;
+const SCROLL_THRESHOLD = 100;
 
 export const Sidebar = memo(function Sidebar({ userId }: Props) {
     const router = useRouter();
     const pathname = usePathname();
     const [chats, setChats] = useState<Chat[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [total, setTotal] = useState<number | null>(null);
 
     const parentRef = React.useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const virtualizer = useVirtualizer({
         count: chats.length,
@@ -40,22 +43,67 @@ export const Sidebar = memo(function Sidebar({ userId }: Props) {
     });
 
     const fetchChats = useCallback(
-        async (pageNum: number) => {
+        async (beforeTimestamp?: string) => {
+            // Abort previous request if it exists
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
+            // Create new abort controller
+            abortControllerRef.current = new AbortController();
+
             try {
-                setError(null);
-                const response = await fetch(
-                    `/api/chats?userId=${userId}&page=${pageNum}&limit=20`
-                );
+                const queryParams = new URLSearchParams({
+                    userId,
+                    limit: INITIAL_LOAD_COUNT.toString(),
+                    ...(beforeTimestamp && { before: beforeTimestamp })
+                });
+
+                const response = await fetch(`/api/chats?${queryParams}`, {
+                    signal: abortControllerRef.current.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch chats");
+                }
+
                 const data = await response.json();
 
                 if (!data.success) {
                     throw new Error(data.error || "Failed to fetch chats");
                 }
 
-                setChats((prev) =>
-                    pageNum === 1 ? data.chats : [...prev, ...data.chats]
-                );
-                setHasMore(data.chats.length === 20);
+                // Set total only on initial load
+                if (!beforeTimestamp && data.total !== undefined) {
+                    setTotal(data.total);
+                }
+
+                return {
+                    chats: data.chats,
+                    hasMore: data.hasMore
+                };
+            } catch (error) {
+                if (error instanceof Error && error.name === "AbortError") {
+                    // Ignore abort errors
+                    return null;
+                }
+                throw error;
+            }
+        },
+        [userId]
+    );
+
+    // Initial load
+    useEffect(() => {
+        const loadInitialChats = async () => {
+            try {
+                setIsInitialLoading(true);
+                setError(null);
+                const result = await fetchChats();
+                if (result) {
+                    setChats(result.chats);
+                    setHasMore(result.hasMore);
+                }
             } catch (error) {
                 console.error("Failed to fetch chats:", error);
                 setError(
@@ -64,35 +112,50 @@ export const Sidebar = memo(function Sidebar({ userId }: Props) {
                         : "Failed to fetch chats"
                 );
             } finally {
-                setIsLoading(false);
+                setIsInitialLoading(false);
             }
-        },
-        [userId]
-    );
+        };
 
-    useEffect(() => {
-        if (userId) {
-            fetchChats(1);
-        }
-    }, [userId, fetchChats]);
+        loadInitialChats();
 
+        // Cleanup function
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [fetchChats]);
+
+    // Handle scroll and load more
     const handleScroll = useCallback(
-        (e: React.UIEvent<HTMLDivElement>) => {
-            if (!hasMore || isLoading) return;
+        async (e: React.UIEvent<HTMLDivElement>) => {
+            if (!hasMore || isLoadingMore || chats.length === 0) return;
 
             const element = e.target as HTMLDivElement;
             const scrollBottom =
                 element.scrollHeight - element.scrollTop - element.clientHeight;
 
             if (scrollBottom < SCROLL_THRESHOLD) {
-                setPage((prev) => {
-                    const nextPage = prev + 1;
-                    fetchChats(nextPage);
-                    return nextPage;
-                });
+                try {
+                    setIsLoadingMore(true);
+                    const lastChat = chats[chats.length - 1];
+                    const result = await fetchChats(lastChat.updatedAt);
+
+                    if (result) {
+                        setChats((prevChats) => [
+                            ...prevChats,
+                            ...result.chats
+                        ]);
+                        setHasMore(result.hasMore);
+                    }
+                } catch (error) {
+                    console.error("Failed to load more chats:", error);
+                } finally {
+                    setIsLoadingMore(false);
+                }
             }
         },
-        [hasMore, isLoading, fetchChats]
+        [hasMore, isLoadingMore, chats, fetchChats]
     );
 
     const truncateText = useCallback((text: string, maxLength: number = 28) => {
@@ -133,7 +196,7 @@ export const Sidebar = memo(function Sidebar({ userId }: Props) {
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto py-2 px-2"
             >
-                {isLoading && page === 1 ? (
+                {isInitialLoading ? (
                     <SidebarSkeleton />
                 ) : error ? (
                     <div className="text-sm text-destructive p-4 text-center">
@@ -198,7 +261,7 @@ export const Sidebar = memo(function Sidebar({ userId }: Props) {
                         })}
                     </div>
                 )}
-                {isLoading && page > 1 && (
+                {isLoadingMore && (
                     <div className="py-2">
                         <div className="h-[72px] bg-muted animate-pulse rounded-lg" />
                     </div>
