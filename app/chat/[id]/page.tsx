@@ -22,5 +22,6 @@ export async function generateMetadata(
 }
 
 export default function Page({ params }: { params: { id: string } }) {
-    return <Chat userId="1" chatId={params.id} />;
+    const userId = "1";
+    return <Chat userId={userId} chatId={params.id} />;
 }
