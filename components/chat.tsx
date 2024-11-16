@@ -38,6 +38,7 @@ import saveChat from "@/lib/utils/save-chat";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
 import { Message } from "ai";
 import { usePathname } from "next/navigation";
+import { SidebarContainer } from "./sidebar";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -95,6 +96,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         toolChoice: DEFAULT_TOOL_CHOICE,
         customInstructions: ""
     });
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const [activeTab, setActiveTab] = useState("preview");
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -575,86 +578,97 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     }, [combinedMessages, scrollToBottom]);
 
     return (
-        <div className="flex flex-col h-screen w-full overflow-hidden">
-            <SettingsMenu
-                isOpen={isSettingsOpen}
-                onClose={() => {
-                    save();
-                    setIsSettingsOpen(false);
-                }}
-                settings={state}
-                dispatch={dispatch}
+        <div className="flex h-full w-full">
+            <SidebarContainer
+                userId={userId}
+                isOpen={isSidebarOpen}
+                onOpenChange={setIsSidebarOpen}
             />
-            <div className="flex flex-grow overflow-hidden">
-                <div
-                    className={`flex flex-col ${
-                        isArtifactsOpen ? "w-[55%]" : "w-full"
-                    } h-full bg-background transition-all duration-300`}
-                >
-                    <ChatHeader
-                        artifacts={artifacts && artifacts.length > 0}
-                        isArtifactsOpen={isArtifactsOpen}
-                        setIsArtifactsOpen={setIsArtifactsOpen}
-                        selectedModel={state.model}
-                        onModelSelect={(newModel) =>
-                            dispatch({ type: "SET_MODEL", payload: newModel })
-                        }
-                        onOpenSettings={() => setIsSettingsOpen(true)}
-                        userId={userId}
-                    />
+            <div className="flex flex-col h-screen w-full overflow-hidden">
+                <SettingsMenu
+                    isOpen={isSettingsOpen}
+                    onClose={() => {
+                        save();
+                        setIsSettingsOpen(false);
+                    }}
+                    settings={state}
+                    dispatch={dispatch}
+                />
+                <div className="flex flex-grow overflow-hidden">
                     <div
-                        ref={messagesContainerRef}
-                        className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
+                        className={`flex flex-col ${
+                            isArtifactsOpen ? "w-[55%]" : "w-full"
+                        } h-full bg-background transition-all duration-300`}
                     >
-                        <div className="flex-shrink h-full p-4 space-y-4 max-w-[700px] mx-auto">
-                            {combinedMessages.length === 0 &&
-                            !path.includes("chat") ? (
-                                <DefaultPrompts addMessage={append} />
-                            ) : (
-                                <Messages
-                                    messages={combinedMessages}
-                                    onArtifactClick={openArtifact}
-                                    onRegenerate={handleReload}
-                                    addMessage={append}
-                                />
-                            )}
-                            {error && (
-                                <AssistantMessage
-                                    message="Encountered an Error"
-                                    onRegenerate={reload}
-                                    isLatestResponse
-                                />
-                            )}
-                            <div ref={messagesEndRef} />
+                        <ChatHeader
+                            artifacts={artifacts && artifacts.length > 0}
+                            isArtifactsOpen={isArtifactsOpen}
+                            setIsArtifactsOpen={setIsArtifactsOpen}
+                            selectedModel={state.model}
+                            onModelSelect={(newModel) =>
+                                dispatch({
+                                    type: "SET_MODEL",
+                                    payload: newModel
+                                })
+                            }
+                            onOpenSettings={() => setIsSettingsOpen(true)}
+                            isSidebarOpen={isSidebarOpen}
+                            onSidebarOpenChange={setIsSidebarOpen}
+                        />
+                        <div
+                            ref={messagesContainerRef}
+                            className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
+                        >
+                            <div className="flex-shrink h-full p-4 space-y-4 max-w-[700px] mx-auto">
+                                {combinedMessages.length === 0 &&
+                                !path.includes("chat") ? (
+                                    <DefaultPrompts addMessage={append} />
+                                ) : (
+                                    <Messages
+                                        messages={combinedMessages}
+                                        onArtifactClick={openArtifact}
+                                        onRegenerate={handleReload}
+                                        addMessage={append}
+                                    />
+                                )}
+                                {error && (
+                                    <AssistantMessage
+                                        message="Encountered an Error"
+                                        onRegenerate={reload}
+                                        isLatestResponse
+                                    />
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
                         </div>
+                        <ContinueButton
+                            show={showContinueButton}
+                            onHide={() => setShowContinueButton(false)}
+                            appendMessage={append}
+                        />
+                        <ChatFooter
+                            input={input}
+                            handleInputChange={handleInputChange}
+                            handleSubmit={handleSubmit}
+                            isLoading={isLoading}
+                            handleStop={() => {
+                                stop();
+                                shouldSaveRef.current = true;
+                            }}
+                            enablePasteToFile={state.enablePasteToFile}
+                        />
                     </div>
-                    <ContinueButton
-                        show={showContinueButton}
-                        onHide={() => setShowContinueButton(false)}
-                        appendMessage={append}
-                    />
-                    <ChatFooter
-                        input={input}
-                        handleInputChange={handleInputChange}
-                        handleSubmit={handleSubmit}
-                        isLoading={isLoading}
-                        handleStop={() => {
-                            stop();
-                            shouldSaveRef.current = true;
-                        }}
-                        enablePasteToFile={state.enablePasteToFile}
+                    <ArtifactsWindow
+                        isOpen={isArtifactsOpen}
+                        onClose={() => setIsArtifactsOpen(false)}
+                        artifacts={artifacts}
+                        currentArtifactIndex={currentArtifactIndex}
+                        setCurrentArtifactIndex={setCurrentArtifactIndex}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        isStreamingArtifactRef={isStreamingArtifactRef}
                     />
                 </div>
-                <ArtifactsWindow
-                    isOpen={isArtifactsOpen}
-                    onClose={() => setIsArtifactsOpen(false)}
-                    artifacts={artifacts}
-                    currentArtifactIndex={currentArtifactIndex}
-                    setCurrentArtifactIndex={setCurrentArtifactIndex}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    isStreamingArtifactRef={isStreamingArtifactRef}
-                />
             </div>
         </div>
     );

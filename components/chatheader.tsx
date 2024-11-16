@@ -1,4 +1,3 @@
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
     Command,
@@ -28,15 +27,14 @@ import {
     SettingsIcon,
     SparklesIcon,
     WrenchIcon,
-    FileStackIcon
+    FileStackIcon,
+    PanelLeftIcon,
+    PanelRightIcon
 } from "lucide-react";
-import { AutoIcon, MenuIcon, SparkleIcon, ZapIcon } from "./icons";
+import { AutoIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
 import { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-
-const Sidebar = dynamic(() => import("./sidebar"), { ssr: false });
 
 export const modelInfo: Partial<
     Record<
@@ -149,7 +147,8 @@ interface Props {
     selectedModel: ModelKey;
     onModelSelect: (model: ModelKey) => void;
     onOpenSettings: () => void;
-    userId: string;
+    isSidebarOpen: boolean;
+    onSidebarOpenChange: (open: boolean) => void;
 }
 
 const ChatHeader = ({
@@ -159,10 +158,10 @@ const ChatHeader = ({
     selectedModel,
     onModelSelect,
     onOpenSettings,
-    userId
+    isSidebarOpen,
+    onSidebarOpenChange
 }: Props) => {
     const router = useRouter();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [open, setOpen] = useState(false);
 
     const handleModelChange = (model: ModelKey) => {
@@ -190,27 +189,23 @@ const ChatHeader = ({
         <header className="flex align-middle justify-center w-full bg-background text-foreground py-3 px-4 md:px-6 border-b">
             <div className="flex container items-center justify-between mx-auto">
                 <div className="flex items-center gap-3">
-                    <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                        <SheetTrigger asChild>
-                            <Button
-                                variant="default"
-                                size="icon"
-                                aria-label="Open menu"
-                            >
-                                <MenuIcon className="h-5 w-5" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                            side="left"
-                            className="w-[300px] sm:w-[400px] p-0"
-                        >
-                            <Sidebar userId={userId} />
-                        </SheetContent>
-                    </Sheet>
+                    <Button
+                        variant="default"
+                        size="icon"
+                        onClick={() => onSidebarOpenChange(!isSidebarOpen)}
+                        aria-label={
+                            isSidebarOpen ? "Close sidebar" : "Open sidebar"
+                        }
+                    >
+                        {isSidebarOpen ? (
+                            <PanelLeftIcon className="h-5 w-5" />
+                        ) : (
+                            <PanelRightIcon className="h-5 w-5" />
+                        )}
+                    </Button>
                     <Button
                         variant="outline"
                         size="icon"
-                        className="hidden md:flex"
                         aria-label="Open new chat"
                         onClick={() => router.push("/chat")}
                     >
