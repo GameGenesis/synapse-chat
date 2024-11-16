@@ -600,6 +600,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                             dispatch({ type: "SET_MODEL", payload: newModel })
                         }
                         onOpenSettings={() => setIsSettingsOpen(true)}
+                        userId={userId}
                     />
                     <div
                         ref={messagesContainerRef}

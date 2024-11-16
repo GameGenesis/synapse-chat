@@ -149,6 +149,7 @@ interface Props {
     selectedModel: ModelKey;
     onModelSelect: (model: ModelKey) => void;
     onOpenSettings: () => void;
+    userId: string;
 }
 
 const ChatHeader = ({
@@ -157,7 +158,8 @@ const ChatHeader = ({
     setIsArtifactsOpen,
     selectedModel,
     onModelSelect,
-    onOpenSettings
+    onOpenSettings,
+    userId
 }: Props) => {
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -202,7 +204,7 @@ const ChatHeader = ({
                             side="left"
                             className="w-[300px] sm:w-[400px] p-0"
                         >
-                            <Sidebar />
+                            <Sidebar userId={userId} />
                         </SheetContent>
                     </Sheet>
                     <Button
