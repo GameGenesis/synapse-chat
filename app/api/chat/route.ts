@@ -101,8 +101,6 @@ export async function POST(req: Request) {
         maxTokens: finalMaxTokens
     } = useAgents ? DEFAULT_AGENT_SETTINGS : { temperature, topP, maxTokens };
 
-    console.log("MODE:", model, ", MODEL:", modelToUse);
-
     const limitedMessages = (await limitMessages(
         [...messages],
         messageLimit

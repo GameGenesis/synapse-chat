@@ -55,6 +55,28 @@ const ChatFooter = ({
         }
     };
 
+    const handleGlobalKeyDown = (event: globalThis.KeyboardEvent) => {
+        const isCharacterKey =
+            event.key.length === 1 &&
+            !event.ctrlKey &&
+            !event.metaKey &&
+            !event.altKey;
+
+        if (isCharacterKey && document.activeElement !== textareaRef.current) {
+            textareaRef.current?.focus();
+        }
+    };
+
+    useEffect(() => {
+        // Focus the textarea by default when the component mounts
+        textareaRef.current?.focus();
+
+        window.addEventListener("keydown", handleGlobalKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleGlobalKeyDown);
+        };
+    }, []);
+
     const handleTextareaChange = (
         event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
