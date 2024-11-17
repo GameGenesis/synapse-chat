@@ -62,7 +62,16 @@ const ChatFooter = ({
             !event.metaKey &&
             !event.altKey;
 
-        if (isCharacterKey && document.activeElement !== textareaRef.current) {
+        // Check if the active element is any input-like element
+        const isInputElement =
+            document.activeElement instanceof HTMLInputElement ||
+            document.activeElement instanceof HTMLTextAreaElement;
+
+        if (
+            isCharacterKey &&
+            !isInputElement &&
+            document.activeElement !== textareaRef.current
+        ) {
             textareaRef.current?.focus();
         }
     };
