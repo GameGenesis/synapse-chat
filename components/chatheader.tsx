@@ -29,7 +29,9 @@ import {
     WrenchIcon,
     FileStackIcon,
     PanelLeftIcon,
-    PanelRightIcon
+    PanelRightIcon,
+    ShapesIcon,
+    GroupIcon
 } from "lucide-react";
 import { AutoIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
@@ -83,6 +85,20 @@ export const modelInfo: Partial<
         name: "GPT-4o mini",
         description: "Fast and efficient for most everyday tasks.",
         icon: ZapIcon,
+        provider: ModelProvider.OpenAI
+    },
+    o1preview: {
+        name: "o1-preview",
+        description:
+            "Reasoning model designed to solve hard problems across domains.",
+        icon: ShapesIcon,
+        provider: ModelProvider.OpenAI
+    },
+    o1mini: {
+        name: "o1-mini",
+        description:
+            "Faster and cheaper reasoning model particularly good at coding, math, and science.",
+        icon: GroupIcon,
         provider: ModelProvider.OpenAI
     },
     llama32_90b_vision: {

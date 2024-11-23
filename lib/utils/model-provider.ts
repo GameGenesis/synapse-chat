@@ -12,7 +12,7 @@ const groq = createOpenAI({
     apiKey: process.env.GROQ_API_KEY
 });
 
-export const embeddingModel = openai.embedding("text-embedding-3-small")
+export const embeddingModel = openai.embedding("text-embedding-3-small");
 
 export enum ModelProvider {
     OpenAI = "OpenAI",
@@ -36,6 +36,8 @@ export type ModelKey =
     | "gpt4turbo"
     | "gpt4"
     | "gpt35"
+    | "o1preview"
+    | "o1mini"
     | "claude35sonnet"
     | "claude3opus"
     | "claude35haiku"
@@ -94,6 +96,18 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "GPT-3.5 Turbo",
         provider: ModelProvider.OpenAI,
         maxTokens: 4096
+    },
+    o1preview: {
+        model: "o1-preview",
+        name: "o1-preview",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 32768
+    },
+    o1mini: {
+        model: "o1-mini",
+        name: "o1-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 65536
     },
     claude35sonnet: {
         model: "claude-3-5-sonnet-latest",
