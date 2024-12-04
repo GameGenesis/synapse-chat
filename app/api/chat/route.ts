@@ -130,15 +130,20 @@ export async function POST(req: Request) {
         extractMemory(lastUserMessage, userId);
     }
 
+    const role = (modelToUse == "o1mini" || modelToUse == "o1preview") ? "user" : "system";
+    const maxTokensKey = (modelToUse === "o1mini" || modelToUse === "o1preview") 
+    ? "maxCompletionTokens" 
+    : "maxTokens";
+
     const data = new StreamData();
     const result = await streamText({
         model: getModel(models[modelToUse]),
         temperature: finalTemperature,
         topP: finalTopP,
-        maxTokens: finalMaxTokens,
+        [maxTokensKey]: finalMaxTokens,
         messages: [
             {
-                role: "system",
+                role,
                 content: system,
                 experimental_providerMetadata: {
                     anthropic: { cacheControl: { type: "ephemeral" } }

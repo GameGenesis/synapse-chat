@@ -244,10 +244,12 @@ export const getModel = (modelConfig: ModelConfig) => {
     }
 };
 
-export const unsupportedToolUseModels = [
+export const unsupportedToolUseModels: Partial<ModelKey>[] = [
     "llama31_8b",
     "llama31_70b",
     "mixtral_8x7b",
-    "chatgpt4o"
+    "chatgpt4o",
+    "o1mini",
+    "o1preview"
 ];
 export const unsupportedArtifactUseModels = ["mixtral_8x7b"];
