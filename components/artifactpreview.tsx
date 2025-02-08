@@ -36,7 +36,7 @@ interface Props {
     artifact: Artifact;
     setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
     html: string;
-    iframeRef: React.RefObject<HTMLIFrameElement>;
+    iframeRef: React.RefObject<HTMLIFrameElement | null>;
 }
 
 const PreviewComponent = ({

@@ -4,13 +4,11 @@ import ChatModel from "@/models/chat";
 import { Metadata, ResolvingMetadata } from "next";
 
 type Props = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     const chatId = params.id;
 
     await dbConnect();
@@ -21,7 +19,8 @@ export async function generateMetadata(
     };
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const userId = "1";
     return <Chat userId={userId} chatId={params.id} />;
 }
