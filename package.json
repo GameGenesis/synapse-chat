@@ -18,6 +18,7 @@
     "@ai-sdk/anthropic": "^0.0.54",
     "@ai-sdk/azure": "^0.0.51",
     "@ai-sdk/openai": "^1.1.9",
+    "@ai-sdk/openai-compatible": "^0.1.8",
     "@heroicons/react": "^2.1.5",
     "@octokit/rest": "^21.0.2",
     "@radix-ui/react-accordion": "^1.2.1",

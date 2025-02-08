@@ -1,4 +1,5 @@
-import { openai, createOpenAI } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { anthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
 
@@ -7,13 +8,14 @@ import { azure } from "@ai-sdk/azure";
 //     headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" }
 // });
 
-const groq = createOpenAI({
+const groq = createOpenAICompatible({
+    name: "groq",
     baseURL: "https://api.groq.com/openai/v1",
     apiKey: process.env.GROQ_API_KEY
 });
 
 export const embeddingModel = openai.embedding("text-embedding-3-small");
-export const imageModel = openai.image('dall-e-3');
+export const imageModel = openai.image("dall-e-3");
 
 export enum ModelProvider {
     OpenAI = "OpenAI",
