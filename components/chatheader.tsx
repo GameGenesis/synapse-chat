@@ -222,7 +222,7 @@ const ChatHeader = ({
                         variant="outline"
                         size="icon"
                         aria-label="Open new chat"
-                        onClick={() => redirect("/chat")}
+                        onClick={() => redirect("/chat")} // or just redirect to "/"
                     >
                         <MessageSquarePlusIcon className="h-5 w-5" />
                     </Button>

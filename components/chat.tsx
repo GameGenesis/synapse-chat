@@ -35,9 +35,11 @@ import DefaultPromptsSkeleton from "./defaultpromptsskeleton";
 import { ArtifactsWindow } from "./artifactswindow";
 import saveChat from "@/lib/utils/save-chat";
 import markdownToHtml from "@/lib/utils/markdown-to-html";
-import { Message } from "ai";
+import { generateId, Message } from "ai";
 import { usePathname } from "next/navigation";
 import { SidebarContainer } from "./sidebar";
+import GitHubRepoSelector from "./githubreposelector";
+import toast from "react-hot-toast";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -117,6 +119,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     const [combinedMessages, setCombinedMessages] = useState<CombinedMessage[]>(
         []
     );
+
+    const [repoContext, setRepoContext] = useState<any>(null);
 
     const [regeneratingMessageId, setRegeneratingMessageId] = useState<
         string | null
@@ -575,6 +579,47 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         scrollToBottom();
     }, [combinedMessages, scrollToBottom]);
 
+    // Instead of this, when you connect to a repo, only the structure and README.md file is passed into the system prompt
+    // Then, when the user aks about anything in the repo, the assistant can call the get_repo_contents tool to grab the contents of a file from the repo
+    // The repo content is cached when connecting so the tool call is quick.
+    const handleRepoSelect = async (repoUrl: string) => {
+        try {
+            const response = await fetch("/api/github", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ repoUrl })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to load repository context");
+            }
+
+            const context = await response.json();
+            setRepoContext(context);
+            // Add repository context to the chat
+            append({
+                id: generateId(),
+                role: "user",
+                content:
+                    `Repository context loaded from ${repoUrl}. The assistant now have access to the repository structure and contents. The assistant can reference this information when answering questions about the codebase.\n\n` +
+                    `Repository Information:\n` +
+                    `Name: ${context.repoInfo.name}\n` +
+                    `Description: ${context.repoInfo.description}\n` +
+                    `Primary Language: ${context.repoInfo.language}\n` +
+                    `Stars: ${context.repoInfo.stars}\n` +
+                    `Forks: ${context.repoInfo.forks}\n\n` +
+                    `Repository Structure and Contents:\n\n` +
+                    `${context.formattedContent.slice(1000)}`
+            });
+            toast.success("Repository connected and analyzed successfully!");
+        } catch (error) {
+            console.error("Error loading repository context:", error);
+            toast.error("Failed to load repository context");
+        }
+    };
+
     return (
         <div className="flex h-full w-full">
             <SidebarContainer
@@ -613,6 +658,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                             isSidebarOpen={isSidebarOpen}
                             onSidebarOpenChange={setIsSidebarOpen}
                         />
+                        <GitHubRepoSelector onRepoSelect={handleRepoSelect} />
                         <div
                             ref={messagesContainerRef}
                             className="flex-grow w-full h-full overflow-y-auto justify-center transition-all duration-300"
