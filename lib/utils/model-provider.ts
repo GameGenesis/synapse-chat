@@ -39,8 +39,10 @@ export type ModelKey =
     | "gpt4turbo"
     | "gpt4"
     | "gpt35"
+    | "o1"
     | "o1preview"
     | "o1mini"
+    | "o3mini"
     | "claude35sonnet"
     | "claude3opus"
     | "claude35haiku"
@@ -100,6 +102,12 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         provider: ModelProvider.OpenAI,
         maxTokens: 4096
     },
+    o1: {
+        model: "o1",
+        name: "o1",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
     o1preview: {
         model: "o1-preview",
         name: "o1-preview",
@@ -111,6 +119,12 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "o1-mini",
         provider: ModelProvider.OpenAI,
         maxTokens: 65536
+    },
+    o3mini: {
+        model: "o3-mini",
+        name: "o3-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
     },
     claude35sonnet: {
         model: "claude-3-5-sonnet-latest",

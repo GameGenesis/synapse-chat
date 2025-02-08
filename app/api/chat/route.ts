@@ -1,4 +1,10 @@
-import { convertToCoreMessages, CoreMessage, smoothStream, StreamData, streamText } from "ai";
+import {
+    convertToCoreMessages,
+    CoreMessage,
+    smoothStream,
+    StreamData,
+    streamText
+} from "ai";
 import {
     getModel,
     ModelKey,
@@ -130,10 +136,14 @@ export async function POST(req: Request) {
         extractMemory(lastUserMessage, userId);
     }
 
-    const role = (modelToUse == "o1mini" || modelToUse == "o1preview") ? "user" : "system";
-    const maxTokensKey = (modelToUse === "o1mini" || modelToUse === "o1preview") 
-    ? "maxCompletionTokens" 
-    : "maxTokens";
+    const role = ["o1", "o1preview", "o1mini", "o3mini"].includes(modelToUse)
+        ? "user"
+        : "system";
+    const maxTokensKey = ["o1", "o1preview", "o1mini", "o3mini"].includes(
+        modelToUse
+    )
+        ? "maxCompletionTokens"
+        : "maxTokens";
 
     const data = new StreamData();
     const result = streamText({
@@ -156,6 +166,13 @@ export async function POST(req: Request) {
         maxSteps,
         experimental_continueSteps: true,
         experimental_transform: smoothStream(),
+        // Use this for o1 and o3-mini
+        // providerOptions: {
+        //     openai: { reasoningEffort: "low" }
+        // },
+        onError: async ({ error }) => {
+            console.error(error);
+        },
         onFinish: async (result) => {
             if (result.text) {
                 // Get cache metadata from providers
@@ -188,7 +205,7 @@ export async function POST(req: Request) {
                     totalTokens: result.usage.totalTokens,
                     cacheWriteTokens,
                     cacheReadTokens,
-                    finishReason: result.finishReason,
+                    finishReason: result.finishReason
                 });
             }
             data.close();

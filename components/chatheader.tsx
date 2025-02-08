@@ -101,6 +101,13 @@ export const modelInfo: Partial<
         icon: GroupIcon,
         provider: ModelProvider.OpenAI
     },
+    // o3mini: {
+    //     name: "o3-mini",
+    //     description:
+    //         "Most recent small OpenAI reasoning model, providing high intelligence at the same cost and latency targets of o1-mini.",
+    //     icon: GroupIcon,
+    //     provider: ModelProvider.OpenAI
+    // },
     llama32_90b_vision: {
         name: "Llama 3.2 90B Vision",
         description:

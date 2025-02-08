@@ -157,7 +157,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         },
         onError: (error) => {
             shouldSaveRef.current = true;
-            console.error("Chat error:", error);
+            console.error("Chat error:", error.message);
         },
         maxSteps,
         keepLastMessageOnError: true,
