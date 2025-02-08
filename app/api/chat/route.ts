@@ -136,7 +136,7 @@ export async function POST(req: Request) {
     : "maxTokens";
 
     const data = new StreamData();
-    const result = await streamText({
+    const result = streamText({
         model: getModel(models[modelToUse]),
         temperature: finalTemperature,
         topP: finalTopP,

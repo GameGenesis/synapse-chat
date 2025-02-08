@@ -63,7 +63,6 @@ export const supportedFileFormats = [
     ".pdf" // Only work with Claude 3.5 Sonnet
 ];
 export const usableFileFormats = [...supportedFileFormats, ".doc", ".docx", ".md"];
-export const maxToolRoundtrips = 5;
 export const maxSteps = 5;
 export const tools = [
     "get_current_time",

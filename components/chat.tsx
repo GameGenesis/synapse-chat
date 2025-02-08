@@ -27,7 +27,6 @@ import {
     DEFAULT_TEMPERATURE,
     DEFAULT_TOOL_CHOICE,
     DEFAULT_TOPP,
-    maxToolRoundtrips,
     maxSteps
 } from "@/app/api/chat/config";
 import ContinueButton from "./continuebutton";
@@ -108,7 +107,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
     const isStreamingArtifactRef = useRef(false);
     const lastProcessedMessageRef = useRef<string | null>(null);
-    const lastDataIndexRef = useRef<number | undefined>();
+    const lastDataIndexRef = useRef<number | undefined>(undefined);
     const shouldLoadChatRef = useRef(false);
     const shouldSaveRef = useRef(false);
     const combinedMessagesRef = useRef<CombinedMessage[]>([]);
@@ -156,7 +155,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             shouldSaveRef.current = true;
             console.error("Chat error:", error);
         },
-        maxToolRoundtrips,
         maxSteps,
         keepLastMessageOnError: true,
 
