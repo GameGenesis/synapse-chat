@@ -13,6 +13,7 @@ const groq = createOpenAI({
 });
 
 export const embeddingModel = openai.embedding("text-embedding-3-small");
+export const imageModel = openai.image('dall-e-3');
 
 export enum ModelProvider {
     OpenAI = "OpenAI",

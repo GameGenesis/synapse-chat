@@ -1,4 +1,4 @@
-import { convertToCoreMessages, CoreMessage, StreamData, streamText } from "ai";
+import { convertToCoreMessages, CoreMessage, smoothStream, StreamData, streamText } from "ai";
 import {
     getModel,
     ModelKey,
@@ -155,6 +155,7 @@ export async function POST(req: Request) {
         toolChoice: finalToolChoice,
         maxSteps,
         experimental_continueSteps: true,
+        experimental_transform: smoothStream(),
         onFinish: async (result) => {
             if (result.text) {
                 // Get cache metadata from providers
