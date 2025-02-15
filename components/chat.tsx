@@ -705,6 +705,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                                 shouldSaveRef.current = true;
                             }}
                             enablePasteToFile={state.enablePasteToFile}
+                            disabled={!!error}
                         />
                     </div>
                     <ArtifactsWindow

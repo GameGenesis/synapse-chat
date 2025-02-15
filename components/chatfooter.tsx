@@ -20,6 +20,7 @@ interface Props {
     isLoading: boolean;
     handleStop: () => void;
     enablePasteToFile: boolean;
+    disabled?: boolean;
 }
 
 const LARGE_TEXT_THRESHOLD = 2000;
@@ -30,7 +31,8 @@ const ChatFooter = ({
     handleSubmit,
     isLoading,
     handleStop,
-    enablePasteToFile
+    enablePasteToFile,
+    disabled = false
 }: Props) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isMultiline, setIsMultiline] = useState(false);
@@ -296,6 +298,7 @@ const ChatFooter = ({
                 <form
                     className="relative max-w-[650px] w-full"
                     onSubmit={(event) => {
+                        if (disabled) return;
                         handleSubmit(event, {
                             experimental_attachments: files,
                             allowEmptySubmit: true
@@ -355,9 +358,10 @@ const ChatFooter = ({
                         type={isLoading ? "button" : "submit"}
                         size="icon"
                         disabled={
-                            !isLoading &&
-                            input.length === 0 &&
-                            (!files || files.length === 0)
+                            disabled ||
+                            (!isLoading &&
+                                input.length === 0 &&
+                                (!files || files.length === 0))
                         }
                         className="absolute w-8 h-8 bottom-2 right-3 rounded-full items-center justify-center z-10"
                         onClick={handleStop}
