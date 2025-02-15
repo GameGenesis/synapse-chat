@@ -31,7 +31,9 @@ import {
     PanelLeftIcon,
     PanelRightIcon,
     ShapesIcon,
-    GroupIcon
+    GroupIcon,
+    FishIcon,
+    FishSymbolIcon
 } from "lucide-react";
 import { AutoIcon, SparkleIcon, ZapIcon } from "./icons";
 import { ModelKey, ModelProvider } from "@/lib/utils/model-provider";
@@ -108,6 +110,20 @@ export const modelInfo: Partial<
     //     icon: GroupIcon,
     //     provider: ModelProvider.OpenAI
     // },
+    deepseek_r1_distill_llama_70b: {
+        name: "DeepSeek R1 (Distill Llama 70B)",
+        description:
+            "Frontier thinking model by DeepSeek, distilled and hosted by Meta on Groq.",
+        icon: FishIcon,
+        provider: ModelProvider.Groq
+    },
+    deepseek_r1_distill_qwen_32b: {
+        name: "DeepSeek R1 (Distill Qwen 32B)",
+        description:
+            "Frontier thinking model by DeepSeek, distilled and hosted by Alibaba on Groq.",
+        icon: FishSymbolIcon,
+        provider: ModelProvider.Groq
+    },
     llama33_70b_specdec: {
         name: "Llama 3.3 70B Specdec",
         description:

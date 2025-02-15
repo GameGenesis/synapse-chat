@@ -295,6 +295,7 @@ export const getModel = (modelConfig: ModelConfig) => {
 };
 
 export const unsupportedToolUseModels: Partial<ModelKey>[] = [
+    "llama33_70b_specdec",
     "llama31_8b",
     "mixtral_8x7b",
     "chatgpt4o",
