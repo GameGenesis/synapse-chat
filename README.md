@@ -47,7 +47,7 @@ Make sure to replace any placeholders in the `.env.example` file with your actua
 ![Screenshot 2024-08-21 000849](https://github.com/user-attachments/assets/e7f5aeef-bd6d-40f2-b146-6cbf8837b1fb)
 
 ### Generate interactive web applications using AI inside the chat window with Artifacts
-![Screenshot 2024-08-21 000424](https://github.com/user-attachments/assets/5c640540-d771-498e-9189-88ff88bab1c5)
+![synapse-chat-paint](https://github.com/user-attachments/assets/0970023f-968d-442b-aba2-1d24708fa8f2)
 ![Screenshot 2024-08-21 000434](https://github.com/user-attachments/assets/a7dffe18-34af-4d66-bb6c-7e7beb9529d7)
 ![Screenshot 2024-11-02 195228](https://github.com/user-attachments/assets/7ba689e7-f920-4377-960b-5c036a49cd9a)
 
