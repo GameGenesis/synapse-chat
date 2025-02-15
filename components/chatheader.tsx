@@ -108,6 +108,20 @@ export const modelInfo: Partial<
     //     icon: GroupIcon,
     //     provider: ModelProvider.OpenAI
     // },
+    llama33_70b_specdec: {
+        name: "Llama 3.3 70B Specdec",
+        description:
+            "Llama model from Groq specifically designed with speed in mind (Speculative Decoding).",
+        icon: WrenchIcon,
+        provider: ModelProvider.Groq
+    },
+    llama33_70b_versatile: {
+        name: "Llama 3.3 70B Versatile",
+        description:
+            "Capable and versatile open source model from Meta using Groq.",
+        icon: BookOpenIcon,
+        provider: ModelProvider.Groq
+    },
     llama32_90b_vision: {
         name: "Llama 3.2 90B Vision",
         description:
@@ -115,25 +129,11 @@ export const modelInfo: Partial<
         icon: FileStackIcon,
         provider: ModelProvider.Groq
     },
-    llama31_70b: {
-        name: "Llama 3.1 70B",
-        description:
-            "Capable and versatile open source model from Meta using Groq.",
-        icon: BookOpenIcon,
-        provider: ModelProvider.Groq
-    },
     llama31_8b: {
         name: "Llama 3.1 8B",
         description:
             "Instant responses from Llama 3.1 8B using Groq LPU AI inference.",
         icon: GaugeIcon,
-        provider: ModelProvider.Groq
-    },
-    llama_3_70b_tool_use: {
-        name: "Llama 3 70B Tools",
-        description:
-            "Previous gen Llama model from Groq specifically designed for advanced tool use.",
-        icon: WrenchIcon,
         provider: ModelProvider.Groq
     },
     mixtral_8x7b: {

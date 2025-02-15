@@ -81,16 +81,15 @@ export type ModelKey =
     | "claude3opus"
     | "claude35haiku"
     | "azureGpt4o"
-    | "llama32_90b"
+    | "llama33_70b_specdec"
+    | "llama33_70b_versatile"
     | "llama32_90b_vision"
-    | "llama32_11b"
     | "llama32_11b_vision"
-    | "llama31_405b"
-    | "llama31_70b"
     | "llama31_8b"
-    | "llama_3_70b_tool_use"
     | "mixtral_8x7b"
     | "gemma2_9b_it"
+    | "deepseek_r1_distill_qwen_32b"
+    | "deepseek_r1_distill_llama_70b"
     | "gptLatest"
     | "claudeLatest"
     | "azureLatest"
@@ -183,21 +182,21 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "GPT-4o",
         provider: ModelProvider.Azure
     },
-    llama32_90b: {
-        model: "llama-3.2-90b-text-preview",
-        name: "Llama 3.2 90B (Groq)",
+    llama33_70b_specdec: {
+        model: "llama-3.3-70b-specdec",
+        name: "Llama 3.3 70B Specdec (Groq)",
         provider: ModelProvider.Groq,
         maxTokens: 8192
+    },
+    llama33_70b_versatile: {
+        model: "llama-3.3-70b-versatile",
+        name: "Llama 3.3 70B Versatile (Groq)",
+        provider: ModelProvider.Groq,
+        maxTokens: 32768
     },
     llama32_90b_vision: {
         model: "llama-3.2-90b-vision-preview",
         name: "Llama 3.2 90B Vision (Groq)",
-        provider: ModelProvider.Groq,
-        maxTokens: 8192
-    },
-    llama32_11b: {
-        model: "llama-3.2-11b-text-preview",
-        name: "Llama 3.2 11B (Groq)",
         provider: ModelProvider.Groq,
         maxTokens: 8192
     },
@@ -207,29 +206,11 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         provider: ModelProvider.Groq,
         maxTokens: 8192
     },
-    llama31_405b: {
-        model: "llama-3.1-405b-reasoning",
-        name: "Llama 3.1 405B (Groq)",
-        provider: ModelProvider.Groq,
-        maxTokens: 32768
-    }, // not available for free yet
-    llama31_70b: {
-        model: "llama-3.1-70b-versatile",
-        name: "Llama 3.1 70B (Groq)",
-        provider: ModelProvider.Groq,
-        maxTokens: 8000
-    },
     llama31_8b: {
         model: "llama-3.1-8b-instant",
         name: "Llama 3.1 8B (Groq)",
         provider: ModelProvider.Groq,
         maxTokens: 8000
-    },
-    llama_3_70b_tool_use: {
-        model: "llama3-groq-70b-8192-tool-use-preview",
-        name: "Llama 3.1 70B Tools (Groq)",
-        provider: ModelProvider.Groq,
-        maxTokens: 8192
     },
     mixtral_8x7b: {
         model: "mixtral-8x7b-32768",
@@ -242,6 +223,18 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "Gemma2 9B (Groq)",
         provider: ModelProvider.Groq,
         maxTokens: 8192
+    },
+    deepseek_r1_distill_qwen_32b: {
+        model: "deepseek-r1-distill-qwen-32b",
+        name: "Deepseek R1 Distill Qwen 32B (Groq)",
+        provider: ModelProvider.Groq,
+        maxTokens: 131072
+    },
+    deepseek_r1_distill_llama_70b: {
+        model: "deepseek-r1-distill-llama-70b",
+        name: "Deepseek R1 Distill Llama 70B (Groq)",
+        provider: ModelProvider.Groq,
+        maxTokens: 131072
     },
 
     // Latest Models
@@ -303,7 +296,6 @@ export const getModel = (modelConfig: ModelConfig) => {
 
 export const unsupportedToolUseModels: Partial<ModelKey>[] = [
     "llama31_8b",
-    "llama31_70b",
     "mixtral_8x7b",
     "chatgpt4o",
     "o1mini",
