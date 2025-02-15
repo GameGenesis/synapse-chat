@@ -76,3 +76,51 @@ Make sure to replace any placeholders in the `.env.example` file with your actua
 ![image](https://github.com/user-attachments/assets/a706f5e8-42c8-48f1-87ca-43cdcbb315f4)
 ![image](https://github.com/user-attachments/assets/b124cd4f-1f2e-4b56-acf9-dd9f576676ae)
 
+## Supported Models
+
+### OpenAI
+| Model Name       | Model Key   | Max Tokens |
+|-------------------|-------------|------------|
+| ChatGPT 4o       | `chatgpt4o` | 16,384     |
+| GPT-4o           | `gpt4o`     | 16,384     |
+| GPT-4o mini      | `gpt4omini` | 16,384     |
+| GPT-4 Turbo      | `gpt4turbo` | 4,096      |
+| GPT-4            | `gpt4`      | 8,192      |
+| GPT-3.5 Turbo    | `gpt35`     | 4,096      |
+| o1               | `o1`        | 100,000    |
+| o1-preview       | `o1preview` | 32,768     |
+| o1-mini          | `o1mini`    | 65,536     |
+| o3-mini          | `o3mini`    | 100,000    |
+
+### Anthropic
+| Model Name           | Model Key         | Max Tokens |
+|-----------------------|-------------------|------------|
+| Claude 3.5 Sonnet    | `claude35sonnet` | 8,192      |
+| Claude 3 Opus        | `claude3opus`    | 4,196      |
+| Claude 3.5 Haiku     | `claude35haiku`  | 8,192      |
+
+### Azure
+| Model Name   | Model Key      | Max Tokens |
+|--------------|----------------|------------|
+| GPT-4o       | `azureGpt4o`   | 16,384     |
+
+### Groq
+| Model Name                           | Model Key                      | Max Tokens |
+|--------------------------------------|--------------------------------|------------|
+| Llama 3.3 70B Specdec                | `llama33_70b_specdec`         | 8,192      |
+| Llama 3.3 70B Versatile              | `llama33_70b_versatile`       | 32,768     |
+| Llama 3.2 90B Vision Preview         | `llama32_90b_vision`          | 8,192      |
+| Llama 3.2 11B Vision Preview         | `llama32_11b_vision`          | 8,192      |
+| Llama 3.1 8B                         | `llama31_8b`                  | 8,000      |
+| Mixtral 8x7B                         | `mixtral_8x7b`                | 32,768     |
+| Gemma2 9B                            | `gemma2_9b_it`                | 8,192      |
+| Deepseek R1 Distill Qwen 32B         | `deepseek_r1_distill_qwen_32b`| 131,072    |
+| Deepseek R1 Distill Llama 70B        | `deepseek_r1_distill_llama_70b`| 131,072   |
+
+### Custom Synapse Chat Models
+| Model Name   | Model Key    | Max Tokens |
+|--------------|--------------|------------|
+| MathGPT      | `mathgpt`    | 16,384     |
+| Auto         | `auto`       | -          |
+| Agents       | `agents`     | -          |
+| Reasoning    | `reasoning`  | -          |
