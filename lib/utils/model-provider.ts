@@ -259,7 +259,7 @@ export const models: { [key in ModelKey]: ModelConfig } = {
 
     // Fine-tuned Models
     mathgpt: {
-        model: "ft:gpt-4o-mini-2024-07-18:kajoo-ai:math:9zEV9oj4",
+        model: process.env.MATHGPT_MODEL || "gpt-4o-mini",
         name: "MathGPT",
         provider: ModelProvider.OpenAI,
         maxTokens: 16384
