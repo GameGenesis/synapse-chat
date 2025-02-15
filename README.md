@@ -57,10 +57,10 @@ Make sure to replace any placeholders in the `.env.example` file with your actua
 ### Search for images
 ![Screenshot 2024-08-21 001135](https://github.com/user-attachments/assets/b0dd4b51-58ea-40fb-bbf9-075e8bbcdb4a)
 
-### Generate slideshows from the research and images Synapse Chat has helped you compile
+### Generate slideshows from the research and images compiled or generated in the chat
 ![Screenshot 2024-08-21 001301](https://github.com/user-attachments/assets/00fa3254-283e-4b95-acdc-bfc3ff5d4cdf)
 
-### Generate charts and graph to make your data interactive
+### Generate charts and graphs to make your data interactive
 ![Screenshot 2024-11-02 195337](https://github.com/user-attachments/assets/0c70f3ed-6850-4103-a486-a2ffee360e91)
 
 ### Generate Images using DALLE-3 Integration
