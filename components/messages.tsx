@@ -497,6 +497,10 @@ export const AssistantMessage = ({
                                                     {message.cacheReadTokens ||
                                                         0}
                                                 </span>
+                                                <span>
+                                                    Reasoning:{" "}
+                                                    {message.reasoning || "N/A"}
+                                                </span>
                                             </div>
                                         </TooltipContent>
                                     </Tooltip>

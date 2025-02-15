@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { anthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
+import { extractReasoningMiddleware, LanguageModelV1Middleware, wrapLanguageModel } from "ai";
 
 // Syntax to create with custom headers:
 // const anthropic = createAnthropic({
@@ -17,11 +18,44 @@ const groq = createOpenAICompatible({
 export const embeddingModel = openai.embedding("text-embedding-3-small");
 export const imageModel = openai.image("dall-e-3");
 
+export const thinkingMiddleware: LanguageModelV1Middleware = {
+    transformParams: async ({ type, params }) => {
+        return {
+            ...params,
+            prompt: params.prompt?.map((message, index) => {
+                if (index === params.prompt.length - 1 && params.prompt[params.prompt.length - 1].role === "user") {
+                    const content = params.prompt[params.prompt.length - 1].content
+                    return {
+                        ...params.prompt[params.prompt.length - 1],
+                        content: Array.isArray(content) ? content.map(part => {
+                            if ('text' in part) {
+                                console.log(`${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags`)
+                                return {
+                                    ...part,
+                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags`
+                                };
+                            }
+                            return part;
+                        }) : content,
+                    } as any
+                }
+                return message
+            }),
+        };
+    }
+};
+
+const reasoning = wrapLanguageModel({
+    model: openai("gpt-4o-mini"),
+    middleware: [thinkingMiddleware, extractReasoningMiddleware({ tagName: "thinking" })]
+});
+
 export enum ModelProvider {
     OpenAI = "OpenAI",
     Anthropic = "Anthropic",
     Azure = "Azure",
     Groq = "Groq",
+    Custom = "Custom",
     Other = "Other"
 }
 
@@ -61,6 +95,7 @@ export type ModelKey =
     | "claudeLatest"
     | "azureLatest"
     | "mathgpt"
+    | "reasoning"
     | "auto"
     | "agents";
 
@@ -229,7 +264,7 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 16384
     },
 
-    // Custom models
+    // Fine-tuned Models
     mathgpt: {
         model: "ft:gpt-4o-mini-2024-07-18:kajoo-ai:math:9zEV9oj4",
         name: "MathGPT",
@@ -237,9 +272,12 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 16384
     },
 
+    // Custom Models
+    reasoning: {model: "reasoning", name: "Reasoning", provider: ModelProvider.Custom},
+
     // Other
     auto: { model: "auto", name: "Auto", provider: ModelProvider.Other },
-    agents: { model: "agents", name: "Agents", provider: ModelProvider.Other }
+    agents: { model: "agents", name: "Agents", provider: ModelProvider.Other },
 };
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
@@ -254,6 +292,8 @@ export const getModel = (modelConfig: ModelConfig) => {
             return azure(modelConfig.model);
         case ModelProvider.Groq:
             return groq(modelConfig.model);
+        case ModelProvider.Custom:
+            return reasoning; // TODO: update this for future custom models
         default:
             throw new Error(
                 `Unsupported model provider: ${modelConfig.provider}`

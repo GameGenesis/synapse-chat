@@ -145,6 +145,7 @@ export async function POST(req: Request) {
         ? "maxCompletionTokens"
         : "maxTokens";
 
+    let accumulatedReasoning = "";
     const data = new StreamData();
     const result = streamText({
         model: getModel(models[modelToUse]),
@@ -170,6 +171,12 @@ export async function POST(req: Request) {
         // providerOptions: {
         //     openai: { reasoningEffort: "low" }
         // },
+        onChunk: async ({ chunk }) => {
+            if (chunk.type === "reasoning") {
+                accumulatedReasoning += chunk.textDelta;
+                data.append({ reasoning: accumulatedReasoning });
+            }
+        },
         onError: async ({ error }) => {
             console.error(error);
         },
@@ -205,7 +212,8 @@ export async function POST(req: Request) {
                     totalTokens: result.usage.totalTokens,
                     cacheWriteTokens,
                     cacheReadTokens,
-                    finishReason: result.finishReason
+                    finishReason: result.finishReason,
+                    reasoning: result.reasoning ?? ""
                 });
             }
             data.close();

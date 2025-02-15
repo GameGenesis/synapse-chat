@@ -390,7 +390,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                 totalTokens,
                 cacheWriteTokens,
                 cacheReadTokens,
-                finishReason
+                finishReason,
+                reasoning
             } =
                 data && data.length > 0
                     ? (data[data?.length - 1] as Data)
@@ -400,7 +401,8 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                           totalTokens: undefined,
                           cacheWriteTokens: undefined,
                           cacheReadTokens: undefined,
-                          finishReason: undefined
+                          finishReason: undefined,
+                          reasoning: undefined
                       };
 
             setShowContinueButton(
@@ -430,6 +432,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                         completionTokens,
                         totalTokens,
                         finishReason,
+                        reasoning,
                         states: [
                             ...newCombinedMessages[regeneratedIndex].states,
                             {
@@ -462,6 +465,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                         completionTokens,
                         totalTokens,
                         finishReason,
+                        reasoning,
                         states: [
                             ...newCombinedMessages[
                                 existingMessageIndex
@@ -490,6 +494,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                         cacheWriteTokens,
                         cacheReadTokens,
                         finishReason,
+                        reasoning,
                         states: [
                             {
                                 content: cleanedContent || "",

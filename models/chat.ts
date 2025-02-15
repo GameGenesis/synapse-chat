@@ -22,6 +22,7 @@ const messageSchema: Schema = new Schema({
     cacheWriteTokens: { type: Number },
     cacheReadTokens: { type: Number },
     finishReason: { type: String },
+    reasoning: { type: String },
     states: { type: [stateSchema] }
 });
 

@@ -149,6 +149,12 @@ export const modelInfo: Partial<
         icon: CalculatorIcon,
         provider: ModelProvider.Other
     },
+    reasoning: {
+        name: "Reasoning",
+        description: "Custom Reasoning Model.",
+        icon: ShapesIcon,
+        provider: ModelProvider.Other
+    },
     auto: {
         name: "Auto",
         description: "Automatically selects the best model for your task.",

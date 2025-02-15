@@ -25,6 +25,7 @@ export interface Data {
     cacheReadTokens?: number;
     finishReason?: FinishReason;
     chatId?: string;
+    reasoning?: string;
 }
 
 export type Role =
@@ -59,6 +60,7 @@ export type CombinedMessage = {
     cacheWriteTokens?: number;
     cacheReadTokens?: number;
     finishReason?: FinishReason;
+    reasoning?: string;
     states: {
         content: string;
         artifact?: Artifact;
