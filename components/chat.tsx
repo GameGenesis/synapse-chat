@@ -40,6 +40,7 @@ import { usePathname } from "next/navigation";
 import { SidebarContainer } from "./sidebar";
 import GitHubRepoSelector from "./githubreposelector";
 import toast from "react-hot-toast";
+import { ChatErrorMessage } from "./chaterrormessage";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -681,10 +682,9 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                                     />
                                 )}
                                 {error && (
-                                    <AssistantMessage
-                                        message="Encountered an Error"
-                                        onRegenerate={reload}
-                                        isLatestResponse
+                                    <ChatErrorMessage
+                                        message={error.message}
+                                        onRetry={reload}
                                     />
                                 )}
                                 <div ref={messagesEndRef} />
