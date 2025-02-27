@@ -94,7 +94,8 @@ Make sure to replace any placeholders in the `.env.example` file with your actua
 
 ### Anthropic
 | Model Name           | Model Key         | Max Tokens |
-|-----------------------|-------------------|------------|
+|----------------------|------------------|------------|
+| Claude 3.7 Sonnet    | `claude37sonnet` | 8,192      |
 | Claude 3.5 Sonnet    | `claude35sonnet` | 8,192      |
 | Claude 3 Opus        | `claude3opus`    | 4,196      |
 | Claude 3.5 Haiku     | `claude35haiku`  | 8,192      |
