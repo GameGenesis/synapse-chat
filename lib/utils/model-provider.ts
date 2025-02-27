@@ -77,6 +77,7 @@ export type ModelKey =
     | "o1preview"
     | "o1mini"
     | "o3mini"
+    | "claude37sonnet"
     | "claude35sonnet"
     | "claude3opus"
     | "claude35haiku"
@@ -159,6 +160,12 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         name: "o3-mini",
         provider: ModelProvider.OpenAI,
         maxTokens: 100000
+    },
+    claude37sonnet: {
+        model: "claude-3-7-sonnet-latest",
+        name: "Claude 3.7 Sonnet",
+        provider: ModelProvider.Anthropic,
+        maxTokens: 8192
     },
     claude35sonnet: {
         model: "claude-3-5-sonnet-latest",
@@ -245,8 +252,8 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 16384
     },
     claudeLatest: {
-        model: "claude-3-5-sonnet-latest",
-        name: "Claude 3.5 Sonnet",
+        model: "claude-3-7-sonnet-latest",
+        name: "Claude 3.7 Sonnet",
         provider: ModelProvider.Anthropic,
         maxTokens: 8192
     },

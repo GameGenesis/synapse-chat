@@ -51,11 +51,17 @@ export const modelInfo: Partial<
         }
     >
 > = {
-    claude35sonnet: {
-        name: "Claude 3.5 Sonnet",
+    claude37sonnet: {
+        name: "Claude 3.7 Sonnet",
         description:
             "Anthropic's latest and most intelligent model, great for various applications.",
         icon: SparklesIcon,
+        provider: ModelProvider.Anthropic
+    },
+    claude35sonnet: {
+        name: "Claude 3.5 Sonnet",
+        description: "Anthropic's previous most intelligent model.",
+        icon: SparkleIcon,
         provider: ModelProvider.Anthropic
     },
     claude3opus: {
