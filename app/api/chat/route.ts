@@ -136,10 +136,11 @@ export async function POST(req: Request) {
         extractMemory(lastUserMessage, userId);
     }
 
-    const role = ["o1", "o1preview", "o1mini", "o3mini"].includes(modelToUse)
+    const thinkingModels = ["o1", "o1pro", "o3", "o3mini", "o3pro", "o4mini"]
+    const role = thinkingModels.includes(modelToUse)
         ? "user"
         : "system";
-    const maxTokensKey = ["o1", "o1preview", "o1mini", "o3mini"].includes(
+    const maxTokensKey = thinkingModels.includes(
         modelToUse
     )
         ? "maxCompletionTokens"
@@ -151,7 +152,7 @@ export async function POST(req: Request) {
 
             const result = streamText({
                 model: getModel(models[modelToUse]),
-                temperature: finalTemperature,
+                temperature: thinkingModels.includes(modelToUse) ? 1 : finalTemperature,
                 topP: finalTopP,
                 [maxTokensKey]: finalMaxTokens,
                 messages: [

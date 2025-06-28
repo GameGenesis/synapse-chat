@@ -51,27 +51,28 @@ export const modelInfo: Partial<
         }
     >
 > = {
-    claude37sonnet: {
-        name: "Claude 3.7 Sonnet",
+    claude4sonnet: {
+        name: "Claude Sonnet 4",
         description:
             "Anthropic's latest and most intelligent model, great for various applications.",
         icon: SparklesIcon,
         provider: ModelProvider.Anthropic
     },
-    claude35sonnet: {
-        name: "Claude 3.5 Sonnet",
+    claude37sonnet: {
+        name: "Claude Sonnet 3.7",
         description: "Anthropic's previous most intelligent model.",
         icon: SparkleIcon,
         provider: ModelProvider.Anthropic
     },
-    claude3opus: {
-        name: "Claude 3 Opus",
-        description: "Powerful Anthropic model for highly complex tasks.",
+    claude4opus: {
+        name: "Claude Opus 4",
+        description:
+            "Anthropic's powerful and most capable model for highly complex tasks.",
         icon: LightbulbIcon,
         provider: ModelProvider.Anthropic
     },
     claude35haiku: {
-        name: "Claude 3.5 Haiku",
+        name: "Claude Haiku 3.5",
         description: "Fastest Anthropic model for near-instant responses.",
         icon: ZapIcon,
         provider: ModelProvider.Anthropic
@@ -95,27 +96,20 @@ export const modelInfo: Partial<
         icon: ZapIcon,
         provider: ModelProvider.OpenAI
     },
-    o1preview: {
-        name: "o1-preview",
+    gpt41: {
+        name: "GPT-4.1",
         description:
-            "Reasoning model designed to solve hard problems across domains.",
-        icon: ShapesIcon,
+            "Most recent small OpenAI reasoning model, providing high intelligence at the same cost and latency targets of o1-mini.",
+        icon: GroupIcon,
         provider: ModelProvider.OpenAI
     },
-    o1mini: {
-        name: "o1-mini",
+    o4mini: {
+        name: "o4-mini",
         description:
             "Faster and cheaper reasoning model particularly good at coding, math, and science.",
         icon: GroupIcon,
         provider: ModelProvider.OpenAI
     },
-    // o3mini: {
-    //     name: "o3-mini",
-    //     description:
-    //         "Most recent small OpenAI reasoning model, providing high intelligence at the same cost and latency targets of o1-mini.",
-    //     icon: GroupIcon,
-    //     provider: ModelProvider.OpenAI
-    // },
     deepseek_r1_distill_llama_70b: {
         name: "DeepSeek R1 (Distill Llama 70B)",
         description:

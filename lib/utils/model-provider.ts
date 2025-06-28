@@ -67,16 +67,23 @@ export interface ModelConfig {
 }
 
 export type ModelKey =
+    | "gpt41"
+    | "gpt41mini"
+    | "gpt41nano"
+    | "o4mini"
+    | "o3"
+    | "o3pro"
+    | "o3mini"
+    | "o1"
+    | "o1pro"
     | "chatgpt4o"
     | "gpt4o"
     | "gpt4omini"
     | "gpt4turbo"
     | "gpt4"
     | "gpt35"
-    | "o1"
-    | "o1preview"
-    | "o1mini"
-    | "o3mini"
+    | "claude4opus"
+    | "claude4sonnet"
     | "claude37sonnet"
     | "claude35sonnet"
     | "claude3opus"
@@ -101,6 +108,60 @@ export type ModelKey =
 
 // Used to specify a model other than the DEFAULT_MODEL_CONFIG for certain usage
 export const models: { [key in ModelKey]: ModelConfig } = {
+    gpt41: {
+        model: "gpt-4.1",
+        name: "GPT-4.1",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 32768
+    },
+    gpt41mini: {
+        model: "gpt-4.1-mini",
+        name: "GPT-4.1-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 32768
+    },
+    gpt41nano: {
+        model: "gpt-4.1-nano",
+        name: "GPT-4.1-nano",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 32768
+    },
+    o4mini: {
+        model: "o4-mini",
+        name: "o4-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
+    o3: {
+        model: "o3",
+        name: "o3",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
+    o3pro: {
+        model: "o3-pro",
+        name: "o3-pro",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
+    o3mini: {
+        model: "o3-mini",
+        name: "o3-mini",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
+    o1: {
+        model: "o1",
+        name: "o1",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
+    o1pro: {
+        model: "o1-pro",
+        name: "o1-pro",
+        provider: ModelProvider.OpenAI,
+        maxTokens: 100000
+    },
     chatgpt4o: {
         model: "chatgpt-4o-latest",
         name: "ChatGPT 4o",
@@ -137,50 +198,38 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         provider: ModelProvider.OpenAI,
         maxTokens: 4096
     },
-    o1: {
-        model: "o1",
-        name: "o1",
-        provider: ModelProvider.OpenAI,
-        maxTokens: 100000
+    claude4opus: {
+        model: "claude-opus-4-0",
+        name: "Claude Opus 4",
+        provider: ModelProvider.Anthropic,
+        maxTokens: 32000
     },
-    o1preview: {
-        model: "o1-preview",
-        name: "o1-preview",
-        provider: ModelProvider.OpenAI,
-        maxTokens: 32768
-    },
-    o1mini: {
-        model: "o1-mini",
-        name: "o1-mini",
-        provider: ModelProvider.OpenAI,
-        maxTokens: 65536
-    },
-    o3mini: {
-        model: "o3-mini",
-        name: "o3-mini",
-        provider: ModelProvider.OpenAI,
-        maxTokens: 100000
+    claude4sonnet: {
+        model: "claude-sonnet-4-0",
+        name: "Claude Sonnet 4",
+        provider: ModelProvider.Anthropic,
+        maxTokens: 64000
     },
     claude37sonnet: {
         model: "claude-3-7-sonnet-latest",
-        name: "Claude 3.7 Sonnet",
+        name: "Claude Sonnet 3.7",
         provider: ModelProvider.Anthropic,
-        maxTokens: 8192
+        maxTokens: 64000
     },
     claude35sonnet: {
         model: "claude-3-5-sonnet-latest",
-        name: "Claude 3.5 Sonnet",
+        name: "Claude Sonnet 3.5",
         provider: ModelProvider.Anthropic,
         maxTokens: 8192
     },
     claude3opus: {
         model: "claude-3-opus-latest",
-        name: "Claude 3 Opus",
+        name: "Claude Opus 3",
         provider: ModelProvider.Anthropic
     },
     claude35haiku: {
         model: "claude-3-5-haiku-latest",
-        name: "Claude 3.5 Haiku",
+        name: "Claude Haiku 3.5",
         provider: ModelProvider.Anthropic,
         maxTokens: 8192
     },
@@ -252,10 +301,10 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         maxTokens: 16384
     },
     claudeLatest: {
-        model: "claude-3-7-sonnet-latest",
-        name: "Claude 3.7 Sonnet",
+        model: "claude-sonnet-4-0",
+        name: "Claude Sonnet 4",
         provider: ModelProvider.Anthropic,
-        maxTokens: 8192
+        maxTokens: 64000
     },
     azureLatest: {
         model: "gpt-4o",
@@ -306,7 +355,5 @@ export const unsupportedToolUseModels: Partial<ModelKey>[] = [
     "llama31_8b",
     "mixtral_8x7b",
     "chatgpt4o",
-    "o1mini",
-    "o1preview"
 ];
 export const unsupportedArtifactUseModels = ["mixtral_8x7b"];
