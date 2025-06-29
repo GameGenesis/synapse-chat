@@ -367,6 +367,7 @@ export const getModel = (modelConfig: ModelConfig) => {
                 });
             }
             baseModel = groq(modelConfig.model);
+            break;
         case ModelProvider.Custom:
             return reasoning;
         default:
