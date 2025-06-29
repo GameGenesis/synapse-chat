@@ -29,10 +29,10 @@ export const thinkingMiddleware: LanguageModelV1Middleware = {
                         ...params.prompt[params.prompt.length - 1],
                         content: Array.isArray(content) ? content.map(part => {
                             if ('text' in part) {
-                                console.log(`${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags`)
+                                console.log(`${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags. After your thinking, provide your final answer.`)
                                 return {
                                     ...part,
-                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags`
+                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags. After your thinking, provide your final answer.`
                                 };
                             }
                             return part;
@@ -334,6 +334,9 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
 export const getModel = (modelConfig: ModelConfig) => {
     switch (modelConfig.provider) {
         case ModelProvider.OpenAI:
+            if (isReasoningModel(modelConfig.model as ModelKey)) {
+                return openai(modelConfig.model, { structuredOutputs: false });
+            }
             return openai(modelConfig.model);
         case ModelProvider.Anthropic:
             return anthropic(modelConfig.model, { cacheControl: true });
@@ -355,5 +358,28 @@ export const unsupportedToolUseModels: Partial<ModelKey>[] = [
     "llama31_8b",
     "mixtral_8x7b",
     "chatgpt4o",
+    "o1",
+    "o1pro", 
+    "o3",
+    "o3mini",
+    "o3pro",
+    "o4mini",
 ];
 export const unsupportedArtifactUseModels = ["mixtral_8x7b"];
+
+// Models that support reasoning/thinking output
+export const reasoningModels: Partial<ModelKey>[] = [
+    "o1",
+    "o1pro", 
+    "o3",
+    "o3mini",
+    "o3pro",
+    "o4mini",
+    "reasoning",
+    "deepseek_r1_distill_qwen_32b",
+    "deepseek_r1_distill_llama_70b"
+];
+
+export const isReasoningModel = (modelKey: ModelKey): boolean => {
+    return reasoningModels.includes(modelKey);
+};
