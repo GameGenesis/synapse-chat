@@ -9,11 +9,6 @@ import {
     wrapLanguageModel
 } from "ai";
 
-// Syntax to create with custom headers:
-// const anthropic = createAnthropic({
-//     headers: { "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15" }
-// });
-
 const groq = createOpenAICompatible({
     name: "groq",
     baseURL: "https://api.groq.com/openai/v1",
@@ -54,11 +49,6 @@ export const thinkingMiddleware: LanguageModelV1Middleware = {
         };
     }
 };
-
-// const reasoning = wrapLanguageModel({
-//     model: openai("gpt-4o-mini"),
-//     middleware: [thinkingMiddleware, extractReasoningMiddleware({ tagName: "assistantThinking" })]
-// });
 
 const reasoning = wrapLanguageModel({
     model: anthropic("claude-sonnet-4-0", { cacheControl: true }),
@@ -370,11 +360,13 @@ export const getModel = (modelConfig: ModelConfig) => {
             baseModel = azure(modelConfig.model);
             break;
         case ModelProvider.Groq:
-            baseModel = wrapLanguageModel({
-                model: groq(modelConfig.model),
-                middleware: [extractReasoningMiddleware({ tagName: "think" })]
-            });
-            break;
+            if (modelConfig.model.toLowerCase().includes("deepseek")) {
+                return wrapLanguageModel({
+                    model: groq(modelConfig.model),
+                    middleware: extractReasoningMiddleware({ tagName: "think" })
+                });
+            }
+            baseModel = groq(modelConfig.model);
         case ModelProvider.Custom:
             return reasoning;
         default:
@@ -385,9 +377,7 @@ export const getModel = (modelConfig: ModelConfig) => {
 
     return wrapLanguageModel({
         model: baseModel,
-        middleware: [
-            extractReasoningMiddleware({ tagName: "assistantThinking" })
-        ]
+        middleware: extractReasoningMiddleware({ tagName: "assistantThinking" })
     });
 };
 
