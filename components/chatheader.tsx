@@ -98,8 +98,7 @@ export const modelInfo: Partial<
     },
     gpt41: {
         name: "GPT-4.1",
-        description:
-            "Most recent small OpenAI reasoning model, providing high intelligence at the same cost and latency targets of o1-mini.",
+        description: "OpenAI's latest flagship model.",
         icon: GroupIcon,
         provider: ModelProvider.OpenAI
     },

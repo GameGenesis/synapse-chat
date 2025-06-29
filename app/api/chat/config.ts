@@ -19,7 +19,7 @@ export const DEFAULT_AGENT_SETTINGS: Partial<Settings> = {
     toolChoice: "auto"
 };
 
-export const MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS = 5000;
+export const MAX_DEFAULT_INSTRUCTION_LENGTH_CHARS = 10000;
 
 export const USER_NAME = "User";
 export const ASSISTANT_NAME = "Poe";
