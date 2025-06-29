@@ -49,7 +49,7 @@ export const createAgentsTool = (previousAssistantMessage: string) =>
                 );
 
                 return {
-                    status: "Success: The agents have completed their tasks. Here are their responses.",
+                    status: "Success: Tasks completed successfully!",
                     messages
                 };
             } catch (error) {

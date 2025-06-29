@@ -57,6 +57,10 @@ const WikipediaSummaryCard = dynamic(
     () => import("@/components/tools").then((mod) => mod.WikipediaSummaryCard),
     { ssr: false }
 );
+const AgentsCard = dynamic(
+    () => import("@/components/tools").then((mod) => mod.AgentsCard),
+    { ssr: false }
+);
 const AttachmentPreview = dynamic(() => import("./attachmentpreview"), {
     ssr: false
 });
@@ -456,6 +460,30 @@ export const AssistantMessage = ({
         );
     };
 
+    const renderAgentsCard = () => {
+        if (typeof message === "string" || !message.toolInvocations)
+            return null;
+
+        const agentsInvocation = message.toolInvocations.find(
+            (tool) => tool.toolName === "call_agents"
+        );
+
+        if (
+            !agentsInvocation ||
+            agentsInvocation.state !== "result" ||
+            !agentsInvocation.result
+        )
+            return null;
+
+        const { status, messages } = agentsInvocation.result;
+
+        if (!messages || !Array.isArray(messages)) {
+            return null;
+        }
+
+        return <AgentsCard messages={messages} status={status} />;
+    };
+
     return (
         <>
             <div className="flex items-start gap-4">
@@ -544,6 +572,7 @@ export const AssistantMessage = ({
                         {renderImages()}
                         {renderSources()}
                         {renderReadURLCard()}
+                        {renderAgentsCard()}
                         {typeof message !== "string" &&
                             renderTranscriptPreview(message)}
                     </div>
