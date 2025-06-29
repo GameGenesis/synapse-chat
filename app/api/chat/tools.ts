@@ -10,6 +10,7 @@ import { YoutubeTranscript } from "youtube-transcript";
 import { formatTime } from "@/lib/utils/format";
 import { createAgentNetwork } from "@/lib/agents";
 import executeJavaScript from "@/lib/tools/eval";
+import { artifactExtractionMiddleware } from "./artifact-middleware";
 
 const openai = new OpenAI();
 
@@ -149,6 +150,22 @@ export const tools = {
             result: executeJavaScript(javascript)
         })
     }),
+    // extract_artifacts: tool({
+    //     description:
+    //         "Extract artifacts from AI response text that contains assistantArtifact tags. This tool processes the text and separates artifacts from regular content.",
+    //     parameters: z.object({
+    //         content: z.string().describe("The text content that may contain artifact tags.")
+    //     }),
+    //     execute: async ({ content }) => {
+    //         const { extractArtifacts } = await import("@/lib/utils/artifact-extraction");
+    //         const { cleanedContent, artifacts } = extractArtifacts(content);
+    //         return {
+    //             cleanedContent,
+    //             artifacts,
+    //             hasArtifacts: artifacts.length > 0
+    //         };
+    //     }
+    // }),
     // evaluate_math_expression: tool({
     //     description:
     //         "A tool for evaluating mathematical expressions. " +
@@ -195,3 +212,6 @@ export const tools = {
         // jina.functions.pick("readUrl")
     )
 };
+
+// Export the artifact extraction middleware
+export { artifactExtractionMiddleware };

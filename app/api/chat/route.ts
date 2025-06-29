@@ -3,7 +3,8 @@ import {
     CoreMessage,
     createDataStreamResponse,
     smoothStream,
-    streamText
+    streamText,
+    wrapLanguageModel
 } from "ai";
 import {
     getModel,
@@ -12,7 +13,7 @@ import {
     unsupportedArtifactUseModels,
     unsupportedToolUseModels
 } from "@/lib/utils/model-provider";
-import { createAgentsTool, tools } from "./tools";
+import { createAgentsTool, tools, artifactExtractionMiddleware } from "./tools";
 import buildPrompt from "./prompt-builder";
 import {
     agentsPrompt,
@@ -150,8 +151,20 @@ export async function POST(req: Request) {
         execute: async (dataStream) => {
             let accumulatedReasoning = "";
 
+            const baseModel = getModel(models[modelToUse]);
+            
+            const shouldUseMiddleware = enableArtifacts && 
+                !unsupportedArtifactUseModels.includes(modelToUse)
+            
+            const model = shouldUseMiddleware
+                ? wrapLanguageModel({
+                    model: baseModel,
+                    middleware: artifactExtractionMiddleware
+                })
+                : baseModel;
+
             const result = streamText({
-                model: getModel(models[modelToUse]),
+                model,
                 temperature: thinkingModels.includes(modelToUse) ? 1 : finalTemperature,
                 topP: finalTopP,
                 [maxTokensKey]: finalMaxTokens,
