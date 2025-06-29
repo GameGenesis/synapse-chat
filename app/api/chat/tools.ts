@@ -98,16 +98,22 @@ export const tools = {
                 .describe("The size of the image")
                 .default("1024x1024")
         }),
-        execute: async ({ prompt, size }) => ({
-            url: (
-                await openai.images.generate({
-                    model: "dall-e-3",
-                    prompt,
-                    n: 1,
-                    size
-                })
-            ).data[0].url
-        })
+        execute: async ({ prompt, size }) => {
+            const response = await openai.images.generate({
+                model: "dall-e-3",
+                prompt,
+                n: 1,
+                size
+            });
+            
+            if (!response.data || response.data.length === 0) {
+                throw new Error("No image generated");
+            }
+            
+            return {
+                url: response.data[0].url
+            };
+        }
     }),
     get_youtube_video_transcript: tool({
         description:
