@@ -8,9 +8,10 @@ import React, {
     useReducer,
     useLayoutEffect
 } from "react";
-import { Messages, AssistantMessage } from "./messages";
-import { useChat } from "ai/react";
+import { Messages } from "./messages";
+import { useChat } from "@ai-sdk/react";
 import { Action, Artifact, CombinedMessage, Data, Settings } from "@/lib/types";
+import { ModelKey } from "@/lib/utils/model-provider";
 import ChatHeader from "./chatheader";
 import ChatFooter from "./chatfooter";
 import SettingsMenu from "./settings";
@@ -41,6 +42,7 @@ import { SidebarContainer } from "./sidebar";
 import GitHubRepoSelector from "./githubreposelector";
 import toast from "react-hot-toast";
 import { ChatErrorMessage } from "./chaterrormessage";
+import { extractArtifacts } from "@/app/api/chat/artifact-middleware";
 
 const DefaultPrompts = dynamic(() => import("./defaultprompts"), {
     loading: () => <DefaultPromptsSkeleton />,
@@ -249,52 +251,30 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
     }, [state, userId, chatId]);
 
     const processMessage = useCallback(
-        (content: string, index: number) => {
+        (content: string, model?: ModelKey) => {
             if (!state.enableArtifacts || !content.includes("<assistant")) {
                 return {
                     cleanedContent: markdownToHtml(content),
                     artifact: undefined,
-                    model: combinedMessages[index]?.model || state.model
+                    model: model || state.model
                 };
             }
 
-            let cleanedContent = content;
+            const { cleanedContent, artifacts } = extractArtifacts(content);
+
             let artifact: Artifact | null = null;
+            if (artifacts.length > 0) {
+                const extractedArtifact = artifacts[0];
+                artifact = {
+                    identifier: extractedArtifact.identifier,
+                    type: extractedArtifact.type,
+                    language: extractedArtifact.language,
+                    title: extractedArtifact.title,
+                    content: extractedArtifact.content
+                };
 
-            const artifactStartRegex = /<assistantArtifact([^>]*)>/;
-            const artifactEndRegex = /<\/assistantArtifact>/;
-            const startMatch = cleanedContent.match(artifactStartRegex);
-            const endMatch = cleanedContent.match(artifactEndRegex);
-
-            if (startMatch && startMatch.index !== undefined) {
-                const attributes = startMatch[1];
-                console.log("ATTRIBUTES:", attributes);
-                const identifier = getAttributeValue(attributes, "identifier");
-
-                if (endMatch && endMatch.index !== undefined) {
+                if (extractedArtifact.isComplete) {
                     // Complete artifact
-                    artifact = {
-                        identifier,
-                        type: getAttributeValue(attributes, "type"),
-                        language: getAttributeValue(attributes, "language"),
-                        title: getAttributeValue(attributes, "title"),
-                        content: cleanedContent
-                            .substring(
-                                startMatch.index + startMatch[0].length,
-                                endMatch.index
-                            )
-                            .trim()
-                            .replace(/^```[\w-]*\n|\n```$/g, "")
-                            .trim()
-                    };
-
-                    cleanedContent = `${cleanedContent.substring(
-                        0,
-                        startMatch.index
-                    )}[ARTIFACT:${identifier}]${cleanedContent.substring(
-                        endMatch.index + endMatch[0].length
-                    )}`;
-
                     if (isStreamingArtifactRef.current) {
                         isStreamingArtifactRef.current = false;
                         shouldSaveRef.current = true;
@@ -305,34 +285,18 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
                         setActiveTab("preview");
                     }
                 } else {
-                    // Incomplete artifact (streaming)
-                    artifact = {
-                        identifier,
-                        type: getAttributeValue(attributes, "type"),
-                        language: getAttributeValue(attributes, "language"),
-                        title: getAttributeValue(attributes, "title"),
-                        content: cleanedContent
-                            .substring(startMatch.index + startMatch[0].length)
-                            .trim()
-                            .replace(/^```[\w-]*\n|\n```$/g, "")
-                            .trim()
-                    };
-
-                    cleanedContent = `${cleanedContent.substring(
-                        0,
-                        startMatch.index
-                    )}[ARTIFACT:${identifier}]`;
-
+                    // Incomplete artifact (streaming) - this handles the live streaming
                     if (!isStreamingArtifactRef.current) {
+                        // First time we detect an artifact - initialize streaming
                         isStreamingArtifactRef.current = true;
                         setIsArtifactsOpen(true);
                         setActiveTab("code");
-                        setCurrentArtifactIndex(artifacts.length);
-                        setArtifacts((prevArtifacts) => [
-                            ...prevArtifacts,
-                            artifact as Artifact
-                        ]);
+                        setArtifacts((prevArtifacts) => {
+                            setCurrentArtifactIndex(prevArtifacts.length);
+                            return [...prevArtifacts, artifact as Artifact];
+                        });
                     } else {
+                        // Update the streaming artifact with new content
                         setArtifacts((prevArtifacts) => [
                             ...prevArtifacts.slice(0, -1),
                             artifact as Artifact
@@ -344,10 +308,10 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             return {
                 cleanedContent: markdownToHtml(cleanedContent),
                 artifact,
-                model: combinedMessages[index]?.model || state.model
+                model: model || state.model
             };
         },
-        [artifacts.length, combinedMessages, state.enableArtifacts, state.model]
+        [state.enableArtifacts, state.model]
     );
 
     useEffect(() => {
@@ -359,7 +323,7 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
 
             const { cleanedContent, artifact, model } = processMessage(
                 latestMessage.content,
-                latestMessageIndex
+                combinedMessages[latestMessageIndex]?.model
             );
 
             const {
@@ -528,11 +492,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
         shouldSaveRef.current = true;
         reload();
     }, [combinedMessages, reload]);
-
-    const getAttributeValue = (attributes: string, attr: string) => {
-        const match = attributes.match(new RegExp(`${attr}="([^"]*)"`));
-        return match ? match[1] : "";
-    };
 
     const openArtifact = (identifier: string) => {
         setIsArtifactsOpen(true);
