@@ -116,13 +116,6 @@ export const modelInfo: Partial<
         icon: FishIcon,
         provider: ModelProvider.Groq
     },
-    deepseek_r1_distill_qwen_32b: {
-        name: "DeepSeek R1 (Distill Qwen 32B)",
-        description:
-            "Frontier thinking model by DeepSeek, distilled and hosted by Alibaba on Groq.",
-        icon: FishSymbolIcon,
-        provider: ModelProvider.Groq
-    },
     llama33_70b_specdec: {
         name: "Llama 3.3 70B Specdec",
         description:

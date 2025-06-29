@@ -2,7 +2,12 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { anthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
-import { defaultSettingsMiddleware, extractReasoningMiddleware, LanguageModelV1Middleware, wrapLanguageModel } from "ai";
+import {
+    defaultSettingsMiddleware,
+    extractReasoningMiddleware,
+    LanguageModelV1Middleware,
+    wrapLanguageModel
+} from "ai";
 
 // Syntax to create with custom headers:
 // const anthropic = createAnthropic({
@@ -23,23 +28,29 @@ export const thinkingMiddleware: LanguageModelV1Middleware = {
         return {
             ...params,
             prompt: params.prompt?.map((message, index) => {
-                if (index === params.prompt.length - 1 && params.prompt[params.prompt.length - 1].role === "user") {
-                    const content = params.prompt[params.prompt.length - 1].content
+                if (
+                    index === params.prompt.length - 1 &&
+                    params.prompt[params.prompt.length - 1].role === "user"
+                ) {
+                    const content =
+                        params.prompt[params.prompt.length - 1].content;
                     return {
                         ...params.prompt[params.prompt.length - 1],
-                        content: Array.isArray(content) ? content.map(part => {
-                            if ('text' in part) {
-                                return {
-                                    ...part,
-                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <assistantThinking> tags. After your thinking, provide your final answer outside the <assistantThinking> tags. The final answer must stand alone.`
-                                };
-                            }
-                            return part;
-                        }) : content,
-                    } as any
+                        content: Array.isArray(content)
+                            ? content.map((part) => {
+                                  if ("text" in part) {
+                                      return {
+                                          ...part,
+                                          text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <assistantThinking> tags. After your thinking, provide your final answer outside the <assistantThinking> tags. The final answer must stand alone.`
+                                      };
+                                  }
+                                  return part;
+                              })
+                            : content
+                    } as any;
                 }
-                return message
-            }),
+                return message;
+            })
         };
     }
 };
@@ -55,12 +66,12 @@ const reasoning = wrapLanguageModel({
         settings: {
             providerMetadata: {
                 anthropic: {
-                    thinking: { type: "enabled", budgetTokens: 12000 },
-                },
-            },
-        },
+                    thinking: { type: "enabled", budgetTokens: 12000 }
+                }
+            }
+        }
     })
-})
+});
 
 export enum ModelProvider {
     OpenAI = "OpenAI",
@@ -108,7 +119,6 @@ export type ModelKey =
     | "llama31_8b"
     | "mixtral_8x7b"
     | "gemma2_9b_it"
-    | "deepseek_r1_distill_qwen_32b"
     | "deepseek_r1_distill_llama_70b"
     | "gptLatest"
     | "claudeLatest"
@@ -292,12 +302,6 @@ export const models: { [key in ModelKey]: ModelConfig } = {
         provider: ModelProvider.Groq,
         maxTokens: 8192
     },
-    deepseek_r1_distill_qwen_32b: {
-        model: "deepseek-r1-distill-qwen-32b",
-        name: "Deepseek R1 Distill Qwen 32B (Groq)",
-        provider: ModelProvider.Groq,
-        maxTokens: 131072
-    },
     deepseek_r1_distill_llama_70b: {
         model: "deepseek-r1-distill-llama-70b",
         name: "Deepseek R1 Distill Llama 70B (Groq)",
@@ -334,11 +338,15 @@ export const models: { [key in ModelKey]: ModelConfig } = {
     },
 
     // Custom Models
-    reasoning: {model: "reasoning", name: "Reasoning", provider: ModelProvider.Custom},
+    reasoning: {
+        model: "reasoning",
+        name: "Reasoning",
+        provider: ModelProvider.Custom
+    },
 
     // Other
     auto: { model: "auto", name: "Auto", provider: ModelProvider.Other },
-    agents: { model: "agents", name: "Agents", provider: ModelProvider.Other },
+    agents: { model: "agents", name: "Agents", provider: ModelProvider.Other }
 };
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
@@ -348,7 +356,9 @@ export const getModel = (modelConfig: ModelConfig) => {
     switch (modelConfig.provider) {
         case ModelProvider.OpenAI:
             if (isReasoningModel(modelConfig.model as ModelKey)) {
-                baseModel = openai(modelConfig.model, { structuredOutputs: false });
+                baseModel = openai(modelConfig.model, {
+                    structuredOutputs: false
+                });
             } else {
                 baseModel = openai(modelConfig.model);
             }
@@ -360,7 +370,10 @@ export const getModel = (modelConfig: ModelConfig) => {
             baseModel = azure(modelConfig.model);
             break;
         case ModelProvider.Groq:
-            baseModel = groq(modelConfig.model);
+            baseModel = wrapLanguageModel({
+                model: groq(modelConfig.model),
+                middleware: [extractReasoningMiddleware({ tagName: "think" })]
+            });
             break;
         case ModelProvider.Custom:
             return reasoning;
@@ -372,7 +385,9 @@ export const getModel = (modelConfig: ModelConfig) => {
 
     return wrapLanguageModel({
         model: baseModel,
-        middleware: [extractReasoningMiddleware({ tagName: "assistantThinking" })]
+        middleware: [
+            extractReasoningMiddleware({ tagName: "assistantThinking" })
+        ]
     });
 };
 
@@ -382,24 +397,23 @@ export const unsupportedToolUseModels: Partial<ModelKey>[] = [
     "mixtral_8x7b",
     "chatgpt4o",
     "o1",
-    "o1pro", 
+    "o1pro",
     "o3",
     "o3mini",
     "o3pro",
-    "o4mini",
+    "o4mini"
 ];
 export const unsupportedArtifactUseModels = ["mixtral_8x7b"];
 
 // Models that support reasoning/thinking output
 export const reasoningModels: Partial<ModelKey>[] = [
     "o1",
-    "o1pro", 
+    "o1pro",
     "o3",
     "o3mini",
     "o3pro",
     "o4mini",
     "reasoning",
-    "deepseek_r1_distill_qwen_32b",
     "deepseek_r1_distill_llama_70b"
 ];
 
