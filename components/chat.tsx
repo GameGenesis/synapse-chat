@@ -261,29 +261,6 @@ export function Chat({ userId, chatId }: { userId: string; chatId: string }) {
             let cleanedContent = content;
             let artifact: Artifact | null = null;
 
-            // Remove thinking tags
-            const thinkingTagStartRegex = /<assistantThinking[^>]*>/;
-            const thinkingTagEndRegex = /<\/assistantThinking>/;
-            const thinkingTagStartMatch = content.match(thinkingTagStartRegex);
-            const thinkingTagEndMatch = content.match(thinkingTagEndRegex);
-
-            if (
-                thinkingTagStartMatch &&
-                thinkingTagEndMatch &&
-                thinkingTagEndMatch.index
-            ) {
-                cleanedContent = `${content.substring(
-                    0,
-                    thinkingTagStartMatch.index
-                )}${content.substring(
-                    thinkingTagEndMatch.index + thinkingTagEndMatch[0].length
-                )}`.trim();
-            } else if (thinkingTagStartMatch) {
-                cleanedContent = content
-                    .substring(0, thinkingTagStartMatch.index)
-                    .trim();
-            }
-
             const artifactStartRegex = /<assistantArtifact([^>]*)>/;
             const artifactEndRegex = /<\/assistantArtifact>/;
             const startMatch = cleanedContent.match(artifactStartRegex);

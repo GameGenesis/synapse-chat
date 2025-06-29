@@ -968,7 +968,7 @@ Your response should follow this structure:
 </output>
 `,
     chain_of_thought_3: `
-Begin by enclosing all thoughts within <thinking> tags, exploring multiple angles and approaches.
+Begin by enclosing all thoughts within <assistantThinking> tags, exploring multiple angles and approaches.
 Break down the solution into clear steps within <step> tags. Start with a 20-step budget, requesting more for complex problems if needed.
 Use <count> tags after each step to show the remaining budget. Stop when reaching 0.
 Continuously adjust your reasoning based on intermediate results and reflections, adapting your strategy as you progress.
@@ -980,7 +980,7 @@ Assign a quality score between 0.0 and 1.0 using <reward> tags after each reflec
 Below 0.5: Seriously consider backtracking and trying a different approach
 
 
-If unsure or if reward score is low, backtrack and try a different approach, explaining your decision within <thinking> tags.
+If unsure or if reward score is low, backtrack and try a different approach, explaining your decision within <assistantThinking> tags.
 For mathematical problems, show all work explicitly using LaTeX for formal notation and provide detailed proofs.
 Explore multiple solutions individually if possible, comparing approaches in reflections.
 Use thoughts as a scratchpad, writing out all calculations and reasoning explicitly.
@@ -1007,7 +1007,7 @@ Core Process Instructions
 
 Thinking and Planning
 
-Use structured <thinking> tags for all internal deliberations: <thinking context="[initial|exploration|verification]" max-length="200">   <hypothesis>Your main idea</hypothesis>   <assumptions>List key assumptions</assumptions>   <approach>Planned method</approach> </thinking>
+Use structured <assistantThinking> tags for all internal deliberations: <assistantThinking context="[initial|exploration|verification]" max-length="200">   <hypothesis>Your main idea</hypothesis>   <assumptions>List key assumptions</assumptions>   <approach>Planned method</approach> </assistantThinking>
 
 Step Execution
 
@@ -1025,7 +1025,7 @@ Quality Scoring Guidelines
 
 Continue current approach: ≥0.8 Make minor adjustments: 0.5-0.7 Consider new approach: <0.5 Multiple Solutions
 
-When exploring multiple approaches: Label each approach distinctly (A1, A2, etc.) Use separate tag sets for each Include comparison matrix <approach id="[A1|A2|...]">   <thinking>...</thinking>   <steps>...</steps>   <comparison>     <efficiency>[0-1]</efficiency>     <elegance>[0-1]</elegance>     <reliability>[0-1]</reliability>   </comparison> </approach>
+When exploring multiple approaches: Label each approach distinctly (A1, A2, etc.) Use separate tag sets for each Include comparison matrix <approach id="[A1|A2|...]">   <assistantThinking>...</assistantThinking>   <steps>...</steps>   <comparison>     <efficiency>[0-1]</efficiency>     <elegance>[0-1]</elegance>     <reliability>[0-1]</reliability>   </comparison> </approach>
 
 Verification Phase
 
@@ -1049,7 +1049,7 @@ Review against original problem after each reflection Validate assumptions perio
 ## Instructions
 Solve complex problems by breaking them down into clear steps. Follow this structured approach:
 
-1. Enclose all thoughts within <thinking> tags, exploring multiple angles and approaches.
+1. Enclose all thoughts within <assistantThinking> tags, exploring multiple angles and approaches.
 2. Break down the solution into clear steps using <step> tags.
 3. Start with a 20-step budget. Use <count> tags after each step to show the remaining budget. Stop when reaching 0.
 4. Continuously adjust your reasoning based on intermediate results and reflections.
@@ -1058,7 +1058,7 @@ Solve complex problems by breaking them down into clear steps. Follow this struc
   - 0.8+: Continue current approach
   - 0.5-0.7: Consider minor adjustments
   - Below 0.5: Seriously consider backtracking and trying a different approach
-7. If unsure or if the reward score is low, backtrack and try a different approach, explaining your decision within <thinking> tags.
+7. If unsure or if the reward score is low, backtrack and try a different approach, explaining your decision within <assistantThinking> tags.
 8. For mathematical problems, show all work explicitly using LaTeX for formal notation and provide detailed proofs.
 9. Explore multiple solutions individually if possible, comparing approaches in reflections.
 10. Use thoughts as a scratchpad, writing out all calculations and reasoning explicitly.
@@ -1068,7 +1068,7 @@ Solve complex problems by breaking them down into clear steps. Follow this struc
 ## Output Format
 The output should follow this structure:
 
-<thinking> tags for thought processes
+<assistantThinking> tags for thought processes
 
 <step> tags for solution steps, followed by <count> tags
 
@@ -1083,13 +1083,13 @@ LaTeX notation for mathematical formulas
 A concluding reflection with a final reward score
 
 Example
-<thinking>Let's approach this problem by first understanding the given information and then breaking it down into manageable steps.</thinking>
+<assistantThinking>Let's approach this problem by first understanding the given information and then breaking it down into manageable steps.</assistantThinking>
 
 <step>Step 1: [Description of the first step]</step> <count>19</count>
 
 <reflection>This approach seems promising, but we need to consider [specific aspect].</reflection> <reward>0.7</reward>
 
-<thinking>Based on the reflection, let's adjust our strategy by [description of adjustment].</thinking>
+<assistantThinking>Based on the reflection, let's adjust our strategy by [description of adjustment].</assistantThinking>
 
 <step>Step 2: [Description of the second step, incorporating the adjustment]</step> <count>18</count>
 

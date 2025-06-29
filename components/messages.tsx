@@ -27,6 +27,7 @@ import { Message } from "ai";
 import dynamic from "next/dynamic";
 import { models } from "@/lib/utils/model-provider";
 import ReadUrlCard from "./tools/readurl";
+import { ReasoningDisplay } from "./reasoningdisplay";
 
 const ImageGallery = dynamic(
     () => import("@/components/tools").then((mod) => mod.ImageGallery),
@@ -146,6 +147,11 @@ export const AssistantMessage = ({
     const [showAllSources, setShowAllSources] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
+
+    const reasoning = useMemo(() => {
+        if (typeof message === "string") return null;
+        return message.reasoning || null;
+    }, [message]);
 
     const processedContent = useMemo(() => {
         if (typeof message === "string") return message;
@@ -497,10 +503,6 @@ export const AssistantMessage = ({
                                                     {message.cacheReadTokens ||
                                                         0}
                                                 </span>
-                                                <span>
-                                                    Reasoning:{" "}
-                                                    {message.reasoning || "N/A"}
-                                                </span>
                                             </div>
                                         </TooltipContent>
                                     </Tooltip>
@@ -528,6 +530,9 @@ export const AssistantMessage = ({
                             />
                         </div>
                     </div>
+
+                    {reasoning && <ReasoningDisplay reasoning={reasoning} />}
+
                     <div className="text-muted-foreground text-wrap w-full">
                         {processedContent}
                     </div>

@@ -4,7 +4,6 @@ import OpenAI from "openai";
 
 import { createAISDKTools } from "@agentic/ai-sdk";
 import { BingClient } from "@agentic/bing";
-import { JinaClient } from "@agentic/jina";
 import { WeatherClient } from "@agentic/weather";
 import { WikipediaClient } from "@agentic/wikipedia";
 import { YoutubeTranscript } from "youtube-transcript";
@@ -17,7 +16,7 @@ const openai = new OpenAI();
 const weather = new WeatherClient();
 const bing = new BingClient();
 const wikipedia = new WikipediaClient();
-const jina = new JinaClient();
+// const jina = new JinaClient();
 // const searxng = new SearxngClient();
 // const wolframAlpha = new WolframAlphaClient();
 
@@ -188,10 +187,11 @@ export const tools = {
     //         }
     //     }
     // }),
+    // web_search_preview: openai.tools.webSearchPreview(),
     ...createAISDKTools(
         weather,
         wikipedia,
         bing,
-        jina.functions.pick("readUrl")
+        // jina.functions.pick("readUrl")
     )
 };

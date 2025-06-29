@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { anthropic } from "@ai-sdk/anthropic";
 import { azure } from "@ai-sdk/azure";
-import { extractReasoningMiddleware, LanguageModelV1Middleware, wrapLanguageModel } from "ai";
+import { defaultSettingsMiddleware, extractReasoningMiddleware, LanguageModelV1Middleware, wrapLanguageModel } from "ai";
 
 // Syntax to create with custom headers:
 // const anthropic = createAnthropic({
@@ -29,10 +29,9 @@ export const thinkingMiddleware: LanguageModelV1Middleware = {
                         ...params.prompt[params.prompt.length - 1],
                         content: Array.isArray(content) ? content.map(part => {
                             if ('text' in part) {
-                                console.log(`${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags. After your thinking, provide your final answer.`)
                                 return {
                                     ...part,
-                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <thinking> tags. After your thinking, provide your final answer.`
+                                    text: `${part.text}\nMake sure to think step by step and wrap all your reasoning with <assistantThinking> tags. After your thinking, provide your final answer outside the <assistantThinking> tags. The final answer must stand alone.`
                                 };
                             }
                             return part;
@@ -45,10 +44,23 @@ export const thinkingMiddleware: LanguageModelV1Middleware = {
     }
 };
 
+// const reasoning = wrapLanguageModel({
+//     model: openai("gpt-4o-mini"),
+//     middleware: [thinkingMiddleware, extractReasoningMiddleware({ tagName: "assistantThinking" })]
+// });
+
 const reasoning = wrapLanguageModel({
-    model: openai("gpt-4o-mini"),
-    middleware: [thinkingMiddleware, extractReasoningMiddleware({ tagName: "thinking" })]
-});
+    model: anthropic("claude-sonnet-4-0", { cacheControl: true }),
+    middleware: defaultSettingsMiddleware({
+        settings: {
+            providerMetadata: {
+                anthropic: {
+                    thinking: { type: "enabled", budgetTokens: 12000 },
+                },
+            },
+        },
+    })
+})
 
 export enum ModelProvider {
     OpenAI = "OpenAI",
@@ -332,25 +344,36 @@ export const models: { [key in ModelKey]: ModelConfig } = {
 export const DEFAULT_MODEL_CONFIG: ModelConfig = models.gptLatest;
 
 export const getModel = (modelConfig: ModelConfig) => {
+    let baseModel;
     switch (modelConfig.provider) {
         case ModelProvider.OpenAI:
             if (isReasoningModel(modelConfig.model as ModelKey)) {
-                return openai(modelConfig.model, { structuredOutputs: false });
+                baseModel = openai(modelConfig.model, { structuredOutputs: false });
+            } else {
+                baseModel = openai(modelConfig.model);
             }
-            return openai(modelConfig.model);
+            break;
         case ModelProvider.Anthropic:
-            return anthropic(modelConfig.model, { cacheControl: true });
+            baseModel = anthropic(modelConfig.model, { cacheControl: true });
+            break;
         case ModelProvider.Azure:
-            return azure(modelConfig.model);
+            baseModel = azure(modelConfig.model);
+            break;
         case ModelProvider.Groq:
-            return groq(modelConfig.model);
+            baseModel = groq(modelConfig.model);
+            break;
         case ModelProvider.Custom:
-            return reasoning; // TODO: update this for future custom models
+            return reasoning;
         default:
             throw new Error(
                 `Unsupported model provider: ${modelConfig.provider}`
             );
     }
+
+    return wrapLanguageModel({
+        model: baseModel,
+        middleware: [extractReasoningMiddleware({ tagName: "assistantThinking" })]
+    });
 };
 
 export const unsupportedToolUseModels: Partial<ModelKey>[] = [
